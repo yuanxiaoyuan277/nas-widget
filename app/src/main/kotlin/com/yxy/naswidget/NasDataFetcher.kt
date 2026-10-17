@@ -27,17 +27,21 @@ object NasDataFetcher {
         }
     }
 
-    /** 从飞牛 appcgi API 拉取 Docker 容器列表（含运行中+停止） */
+    /**
+     * 从飞牛 appcgi 拉取 Docker 容器列表（含运行中+停止）。
+     * 飞牛 OAuth access_token 走原生 HTTP 代理端点 /ogh/ac/w，用 Authorization: Bearer 认证，无需 HMAC 签名。
+     * 响应为 JSON 数组：[{result:"succ", rsp:[{Names:["/x"], State:"running", Status:"Up ..."}]}]
+     */
     fun fetchDocker(nasBase: String, accessToken: String): Result<List<DockerContainer>> {
         return try {
-            val url = URL(nasBase.trimEnd('/') + "/ogh/ac/h/appcgi.dockermgr.containerList")
+            val url = URL(nasBase.trimEnd('/') + "/ogh/ac/w")
             val conn = url.openConnection() as HttpURLConnection
             conn.connectTimeout = 8000
             conn.readTimeout = 8000
             conn.requestMethod = "POST"
             conn.setRequestProperty("Content-Type", "application/json")
             conn.setRequestProperty("Accept", "application/json")
-            conn.setRequestProperty("Trim-MC-token", accessToken)
+            conn.setRequestProperty("Authorization", "Bearer $accessToken")
             conn.doOutput = true
 
             val body = JSONObject().apply {
@@ -54,17 +58,20 @@ object NasDataFetcher {
 
             if (code != 200) return Result.failure(Exception("HTTP $code: $resp"))
 
-            val root = JSONObject(resp)
-            // 飞牛返回 {result:"succ", data:[...]} 或直接 data 数组
-            val arr = root.optJSONArray("data")
-                ?: root.optJSONObject("data")?.optJSONArray("containers")
+            // 响应可能是数组 [{...rsp:[...]}] 或对象 {rsp:[...]} 或 {data:[...]}
+            val rootArr = runCatching { JSONArray(resp) }.getOrNull()
+            val rootObj = rootArr?.optJSONObject(0) ?: runCatching { JSONObject(resp) }.getOrNull()
+
+            val arr = rootObj?.optJSONArray("rsp")
+                ?: rootObj?.optJSONArray("data")
+                ?: rootObj?.optJSONObject("data")?.optJSONArray("containers")
             val list = mutableListOf<DockerContainer>()
             if (arr != null) {
                 for (i in 0 until arr.length()) {
                     val c = arr.optJSONObject(i) ?: continue
                     val names = c.optJSONArray("Names")
                     val rawName = if (names != null && names.length() > 0)
-                        names.optString(0) else c.optString("Name", "")
+                        names.optString(0) else c.optString("Name", c.optString("name", ""))
                     val name = rawName.removePrefix("/")
                     val state = c.optString("State", c.optString("state", ""))
                     val status = c.optString("Status", c.optString("status", ""))
@@ -73,7 +80,8 @@ object NasDataFetcher {
                     }
                 }
             }
-            if (list.isEmpty() && !root.optString("result", "").equals("succ", true)) {
+            val result = rootObj?.optString("result", "")
+            if (list.isEmpty() && !result.equals("succ", true)) {
                 return Result.failure(Exception("响应异常: $resp"))
             }
             Result.success(list)
