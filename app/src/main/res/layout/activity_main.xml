@@ -293,6 +293,58 @@
                 android:text="刷新容器列表" />
         </LinearLayout>
 
+        <!-- wb2api 积分卡片 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:orientation="vertical"
+            android:background="@drawable/app_card"
+            android:padding="16dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="wb2api 积分"
+                android:textColor="@color/app_text_secondary"
+                android:textSize="13sp" />
+
+            <CheckBox
+                android:id="@+id/cb_wb2api"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:text="在小组件显示积分"
+                android:textColor="@color/app_text_primary"
+                android:textSize="14sp" />
+
+            <EditText
+                android:id="@+id/et_wb2api_base"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:hint="http://192.168.2.3:7863"
+                android:inputType="textUri"
+                android:padding="10dp"
+                android:textColor="@color/app_text_primary"
+                android:textColorHint="@color/app_text_hint"
+                android:textSize="14sp"
+                android:background="@drawable/edit_bg" />
+
+            <EditText
+                android:id="@+id/et_wb2api_key"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:hint="api_key"
+                android:inputType="text"
+                android:padding="10dp"
+                android:textColor="@color/app_text_primary"
+                android:textColorHint="@color/app_text_hint"
+                android:textSize="14sp"
+                android:background="@drawable/edit_bg" />
+        </LinearLayout>
+
         <!-- 保存按钮 -->
         <Button
             android:id="@+id/btn_save"
