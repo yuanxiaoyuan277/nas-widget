@@ -12,4 +12,5 @@
     <color name="app_card_border">#66FFFFFF</color>
     <color name="app_card_highlight">#66FFFFFF</color>
     <color name="app_input_bg">#1AFFFFFF</color>
+    <color name="progress_track">#33FFFFFF</color>
 </resources>
