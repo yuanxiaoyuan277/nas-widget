@@ -46,10 +46,10 @@ object OAuthClient {
         val expiresIn: Long
     )
 
-    /** 用授权码换 token */
+    /** 用授权码换 token（第三方 PKCE 换 token 接口） */
     fun exchangeCode(nasBase: String, code: String, codeVerifier: String): Result<TokenResult> {
         return try {
-            val url = URL(nasBase.trimEnd('/') + "/oauthapi/authorize")
+            val url = URL(nasBase.trimEnd('/') + "/oauthapi/third-part/token")
             val conn = url.openConnection() as HttpURLConnection
             conn.connectTimeout = 10000
             conn.readTimeout = 10000
@@ -59,11 +59,10 @@ object OAuthClient {
             conn.doOutput = true
 
             val body = JSONObject().apply {
-                put("client_id", CLIENT_ID)
-                put("redirect_uri", REDIRECT_URI)
-                put("response_type", "code")
-                put("token", code)
+                put("code", code)
                 put("code_verifier", codeVerifier)
+                put("device_name", "nas-widget")
+                put("device_model", "android")
             }
             conn.outputStream.use { it.write(body.toString().toByteArray()) }
 
@@ -75,9 +74,11 @@ object OAuthClient {
             if (code_ != 200) return Result.failure(Exception("HTTP $code_: $resp"))
 
             val root = JSONObject(resp)
-            val accessToken = root.optString("accessToken").ifEmpty { root.optString("access_token") }
-            val refreshToken = root.optString("refreshToken").ifEmpty { root.optString("refresh_token") }
-            val expiresIn = root.optLong("expiresIn", root.optLong("expires_in", 0L))
+            // 飞牛返回可能是 {code,msg,data:{...}} 或直接 {...}
+            val data = root.optJSONObject("data") ?: root
+            val accessToken = data.optString("accessToken").ifEmpty { data.optString("access_token") }
+            val refreshToken = data.optString("refreshToken").ifEmpty { data.optString("refresh_token") }
+            val expiresIn = data.optLong("expiresIn", data.optLong("expires_in", 0L))
             if (accessToken.isEmpty()) return Result.failure(Exception("响应无 accessToken: $resp"))
 
             Result.success(TokenResult(accessToken, refreshToken.ifEmpty { null }, expiresIn))
