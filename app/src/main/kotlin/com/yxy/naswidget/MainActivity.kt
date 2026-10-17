@@ -9,7 +9,9 @@ import android.widget.Button
 import android.widget.CheckBox
 import android.widget.EditText
 import android.widget.Spinner
+import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import java.io.File
 
 class MainActivity : AppCompatActivity() {
 
@@ -24,6 +26,9 @@ class MainActivity : AppCompatActivity() {
     private lateinit var cbDisk2: CheckBox
     private lateinit var cbTemp: CheckBox
     private lateinit var cbUptime: CheckBox
+    private lateinit var tvVersion: TextView
+    private lateinit var tvUpdateStatus: TextView
+    private lateinit var btnCheckUpdate: Button
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -37,18 +42,23 @@ class MainActivity : AppCompatActivity() {
         cbDisk2 = findViewById(R.id.cb_disk2)
         cbTemp = findViewById(R.id.cb_temp)
         cbUptime = findViewById(R.id.cb_uptime)
+        tvVersion = findViewById(R.id.tv_version)
+        tvUpdateStatus = findViewById(R.id.tv_update_status)
+        btnCheckUpdate = findViewById(R.id.btn_check_update)
 
         widgetId = intent.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, AppWidgetManager.INVALID_APPWIDGET_ID)
         if (widgetId != AppWidgetManager.INVALID_APPWIDGET_ID) {
             setResult(RESULT_CANCELED)
         }
 
-        // 刷新间隔下拉
         val labels = refreshOptions.map { it.second }
         spRefresh.adapter = ArrayAdapter(this, android.R.layout.simple_spinner_dropdown_item, labels)
 
         loadPrefs()
 
+        tvVersion.text = "v${UpdateChecker.localVersion(this)}"
+
+        btnCheckUpdate.setOnClickListener { checkUpdate() }
         findViewById<Button>(R.id.btn_save).setOnClickListener { save() }
     }
 
@@ -77,7 +87,6 @@ class MainActivity : AppCompatActivity() {
         Prefs.setShowTemp(this, cbTemp.isChecked)
         Prefs.setShowUptime(this, cbUptime.isChecked)
 
-        // 立即更新 + 重设定时
         val am = AppWidgetManager.getInstance(this)
         val ids = am.getAppWidgetIds(ComponentName(this, NasWidgetProvider::class.java))
         if (ids.isNotEmpty()) {
@@ -90,5 +99,44 @@ class MainActivity : AppCompatActivity() {
             setResult(RESULT_OK, result)
         }
         finish()
+    }
+
+    private fun checkUpdate() {
+        btnCheckUpdate.isEnabled = false
+        tvUpdateStatus.text = "检查更新中…"
+        Thread {
+            val result = UpdateChecker.checkLatest()
+            runOnUiThread {
+                btnCheckUpdate.isEnabled = true
+                result.onSuccess { info ->
+                    val local = UpdateChecker.localVersion(this)
+                    if (UpdateChecker.isNewer(info.version, local)) {
+                        tvUpdateStatus.text = "发现新版本 v${info.version}，开始下载…"
+                        downloadAndInstall(info)
+                    } else {
+                        tvUpdateStatus.text = "已是最新版本 v$local"
+                    }
+                }.onFailure { e ->
+                    tvUpdateStatus.text = "检查失败：${e.message}"
+                }
+            }
+        }.start()
+    }
+
+    private fun downloadAndInstall(info: UpdateChecker.UpdateInfo) {
+        Thread {
+            val dest = File(cacheDir, "nas-widget-update.apk")
+            val result = UpdateChecker.download(info.url, dest) { p ->
+                runOnUiThread { tvUpdateStatus.text = "下载中 $p%" }
+            }
+            runOnUiThread {
+                result.onSuccess {
+                    tvUpdateStatus.text = "下载完成，准备安装…"
+                    UpdateChecker.install(this, it)
+                }.onFailure { e ->
+                    tvUpdateStatus.text = "下载失败：${e.message}"
+                }
+            }
+        }.start()
     }
 }

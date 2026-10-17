@@ -5,6 +5,9 @@ on:
     branches: [ main, master ]
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -35,6 +38,19 @@ jobs:
         run: gradle assembleDebug --no-daemon
         env:
           ANDROID_SDK_ROOT: /usr/local/lib/android/sdk
+
+      - name: Extract version
+        run: |
+          VER=$(grep 'versionName' app/build.gradle.kts | head -1 | sed -E 's/.*"([^"]+)".*/\1/')
+          echo "VERSION=$VER" >> "$GITHUB_ENV"
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ env.VERSION }}
+          name: "NAS Widget v${{ env.VERSION }}"
+          files: app/build/outputs/apk/debug/*.apk
+          generate_release_notes: true
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
