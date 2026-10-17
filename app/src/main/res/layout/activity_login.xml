@@ -2,7 +2,7 @@
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#FF0D1117"
+    android:background="@drawable/bg_gradient"
     android:fillViewport="true">
 
     <LinearLayout
@@ -18,7 +18,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="40dp"
             android:text="NAS 监控"
-            android:textColor="#FFFFFFFF"
+            android:textColor="@color/app_text_primary"
             android:textSize="28sp"
             android:textStyle="bold" />
 
@@ -27,7 +27,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
             android:text="登录飞牛账号，开始监控你的 NAS"
-            android:textColor="#66FFFFFF"
+            android:textColor="@color/app_text_hint"
             android:textSize="13sp" />
 
         <!-- 登录卡片 -->
@@ -36,14 +36,14 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="28dp"
             android:orientation="vertical"
-            android:background="@drawable/glass_card"
+            android:background="@drawable/app_card"
             android:padding="20dp">
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="飞牛访问地址"
-                android:textColor="#B3FFFFFF"
+                android:textColor="@color/app_text_secondary"
                 android:textSize="13sp" />
 
             <EditText
@@ -54,8 +54,8 @@
                 android:hint="如 http://192.168.2.3:1223 或 https://nas.你的域名"
                 android:inputType="textUri"
                 android:padding="12dp"
-                android:textColor="#FFFFFFFF"
-                android:textColorHint="#55FFFFFF"
+                android:textColor="@color/app_text_primary"
+                android:textColorHint="@color/app_text_hint"
                 android:textSize="14sp"
                 android:background="@drawable/edit_bg" />
 
@@ -72,7 +72,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="14dp"
                 android:text="点登录后跳转手机浏览器，输账号密码授权，完成后自动跳回 App"
-                android:textColor="#55FFFFFF"
+                android:textColor="@color/app_text_hint"
                 android:textSize="11sp"
                 android:gravity="center" />
         </LinearLayout>
