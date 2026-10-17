@@ -406,8 +406,8 @@ class MainActivity : AppCompatActivity() {
                 result.onSuccess { info ->
                     val local = UpdateChecker.localVersion(this)
                     if (UpdateChecker.isNewer(info.version, local)) {
-                        tvUpdateStatus.text = "发现新版本 v${info.version}，开始下载…"
-                        downloadAndInstall(info)
+                        tvUpdateStatus.text = ""
+                        showUpdateDialog(info)
                     } else {
                         tvUpdateStatus.text = "已是最新版本 v$local"
                     }
@@ -416,6 +416,19 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         }.start()
+    }
+
+    /** 弹框：显示新版本号 + 更新内容，用户选择是否更新 */
+    private fun showUpdateDialog(info: UpdateChecker.UpdateInfo) {
+        val notes = info.notes.trim().ifEmpty { "（无更新说明）" }
+        val message = "新版本 v${info.version}\n\n$notes"
+        androidx.appcompat.app.AlertDialog.Builder(this)
+            .setTitle("发现新版本")
+            .setMessage(message)
+            .setPositiveButton("立即更新") { _, _ -> downloadAndInstall(info) }
+            .setNegativeButton("暂不更新", null)
+            .setCancelable(true)
+            .show()
     }
 
     private fun downloadAndInstall(info: UpdateChecker.UpdateInfo) {
