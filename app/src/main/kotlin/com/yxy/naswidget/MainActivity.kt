@@ -14,6 +14,7 @@ import android.widget.EditText
 import android.widget.FrameLayout
 import android.widget.LinearLayout
 import android.widget.ProgressBar
+import android.widget.ScrollView
 import android.widget.Spinner
 import android.widget.TextView
 import android.widget.Toast
@@ -30,6 +31,7 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var etUrl: EditText
     private lateinit var spRefresh: Spinner
+    private lateinit var scrollRoot: ScrollView
     private lateinit var cbCpu: CheckBox
     private lateinit var cbMem: CheckBox
     private lateinit var cbDisk1: CheckBox
@@ -66,6 +68,7 @@ class MainActivity : AppCompatActivity() {
 
         etUrl = findViewById(R.id.et_url)
         spRefresh = findViewById(R.id.sp_refresh)
+        scrollRoot = findViewById(R.id.scroll_root)
         cbCpu = findViewById(R.id.cb_cpu)
         cbMem = findViewById(R.id.cb_mem)
         cbDisk1 = findViewById(R.id.cb_disk1)
@@ -101,6 +104,11 @@ class MainActivity : AppCompatActivity() {
         btnToggleTheme.setOnClickListener { toggleTheme() }
         updateThemeButton()
         findViewById<Button>(R.id.btn_save).setOnClickListener { save() }
+
+        // 输入框获得焦点时自动滚动，避免被键盘遮挡
+        setupAutoScroll(etUrl)
+        setupAutoScroll(etWb2apiBase)
+        setupAutoScroll(etWb2apiKey)
 
         // 小组件预览
         layoutInflater.inflate(R.layout.nas_widget_preview, previewContainer, true)
@@ -170,6 +178,23 @@ class MainActivity : AppCompatActivity() {
 
     private fun updateThemeButton() {
         btnToggleTheme.text = if (Prefs.isDarkTheme(this)) "深色" else "浅色"
+    }
+
+    /** 输入框获得焦点时滚动 ScrollView，让输入框露出来（避免键盘遮挡） */
+    private fun setupAutoScroll(editText: EditText) {
+        editText.setOnFocusChangeListener { _, hasFocus ->
+            if (hasFocus) {
+                scrollRoot.postDelayed({
+                    var y = 0
+                    var v: View? = editText
+                    while (v != null && v !== scrollRoot) {
+                        y += v.top
+                        v = v.parent as? View
+                    }
+                    scrollRoot.smoothScrollTo(0, maxOf(0, y - scrollRoot.height / 3))
+                }, 200)
+            }
+        }
     }
 
     private fun loadPrefs() {
