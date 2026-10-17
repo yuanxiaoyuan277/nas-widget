@@ -95,7 +95,7 @@ class MainActivity : AppCompatActivity() {
         findViewById<Button>(R.id.btn_save).setOnClickListener { save() }
 
         // 小组件预览
-        layoutInflater.inflate(R.layout.nas_widget, previewContainer, true)
+        layoutInflater.inflate(R.layout.nas_widget_preview, previewContainer, true)
 
         // Docker 配置
         cbDocker.isChecked = Prefs.showDocker(this)
@@ -286,7 +286,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun makeDockerItem(name: String, running: Boolean, state: String, isError: Boolean = false): View {
-        val item = layoutInflater.inflate(R.layout.item_docker, dockerListContainer, false)
+        val item = layoutInflater.inflate(R.layout.item_docker_preview, dockerListContainer, false)
         item.findViewById<TextView>(R.id.tv_dot).text = if (running) "●" else "○"
         val dotColor = when {
             running -> 0xFF4CAF50.toInt()
@@ -300,7 +300,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun makeDockerItem(c: DockerContainer): View {
-        val item = layoutInflater.inflate(R.layout.item_docker, dockerListContainer, false)
+        val item = layoutInflater.inflate(R.layout.item_docker_preview, dockerListContainer, false)
         item.findViewById<TextView>(R.id.tv_dot).text = if (c.running) "●" else "○"
         val dotColor = when {
             c.running -> 0xFF4CAF50.toInt()
