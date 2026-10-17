@@ -19,6 +19,7 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
+import androidx.core.content.ContextCompat
 import java.io.File
 
 class MainActivity : AppCompatActivity() {
@@ -346,7 +347,7 @@ class MainActivity : AppCompatActivity() {
             val cb = CheckBox(this).apply {
                 text = "${c.name}（${c.detailText}）"
                 isChecked = selected.contains(c.name)
-                setTextColor(0xFFFFFFFF.toInt())
+                setTextColor(ContextCompat.getColor(this@MainActivity, R.color.app_text_primary))
                 textSize = 13f
             }
             dockerListContainer.addView(cb)
