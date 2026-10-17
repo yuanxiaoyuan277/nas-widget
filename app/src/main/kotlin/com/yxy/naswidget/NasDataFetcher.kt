@@ -28,41 +28,45 @@ object NasDataFetcher {
         }
     }
 
+    /** POST /ogh/ac/w 通用 appcgi 请求，返回 (httpCode, body) */
+    private fun postAppcgi(nasBase: String, accessToken: String, req: String, extra: (JSONObject) -> Unit): Pair<Int, String> {
+        val conn = URL(nasBase.trimEnd('/') + "/ogh/ac/w").openConnection() as HttpURLConnection
+        conn.connectTimeout = 8000
+        conn.readTimeout = 8000
+        conn.requestMethod = "POST"
+        conn.setRequestProperty("Content-Type", "application/json")
+        conn.setRequestProperty("Accept", "application/json")
+        conn.setRequestProperty("Authorization", "Bearer $accessToken")
+        conn.doOutput = true
+        val body = JSONObject().apply {
+            put("req", req)
+            put("reqid", java.util.UUID.randomUUID().toString().replace("-", "").substring(0, 16))
+            extra(this)
+        }
+        conn.outputStream.use { it.write(body.toString().toByteArray()) }
+        val code = conn.responseCode
+        val resp = conn.inputStream?.bufferedReader()?.use { it.readText() }
+            ?: conn.errorStream?.bufferedReader()?.use { it.readText() } ?: ""
+        conn.disconnect()
+        return code to resp
+    }
+
+    /** 解析 appcgi 响应：数组取 [0]，否则当对象 */
+    private fun parseRootObj(resp: String): JSONObject? {
+        val rootArr = runCatching { JSONArray(resp) }.getOrNull()
+        return rootArr?.optJSONObject(0) ?: runCatching { JSONObject(resp) }.getOrNull()
+    }
+
     /**
-     * 从飞牛 appcgi 拉取 Docker 容器列表（含运行中+停止）。
-     * 飞牛 OAuth access_token 走原生 HTTP 代理端点 /ogh/ac/w，用 Authorization: Bearer 认证，无需 HMAC 签名。
-     * 响应为 JSON 数组：[{result:"succ", rsp:[{Names:["/x"], State:"running", Status:"Up ..."}]}]
+     * 从飞牛 appcgi 拉取 Docker 容器列表（含运行中+停止 + 各 running 容器内存占用）。
+     * 飞牛 OAuth access_token 走 /ogh/ac/w + Authorization: Bearer，无需 HMAC 签名。
      */
     fun fetchDocker(nasBase: String, accessToken: String): Result<List<DockerContainer>> {
         return try {
-            val url = URL(nasBase.trimEnd('/') + "/ogh/ac/w")
-            val conn = url.openConnection() as HttpURLConnection
-            conn.connectTimeout = 8000
-            conn.readTimeout = 8000
-            conn.requestMethod = "POST"
-            conn.setRequestProperty("Content-Type", "application/json")
-            conn.setRequestProperty("Accept", "application/json")
-            conn.setRequestProperty("Authorization", "Bearer $accessToken")
-            conn.doOutput = true
-
-            val body = JSONObject().apply {
-                put("req", "appcgi.dockermgr.containerList")
-                put("reqid", java.util.UUID.randomUUID().toString().replace("-", "").substring(0, 16))
-                put("all", true)
-            }
-            conn.outputStream.use { it.write(body.toString().toByteArray()) }
-
-            val code = conn.responseCode
-            val resp = conn.inputStream?.bufferedReader()?.use { it.readText() }
-                ?: conn.errorStream?.bufferedReader()?.use { it.readText() } ?: ""
-            conn.disconnect()
-
+            val (code, resp) = postAppcgi(nasBase, accessToken, "appcgi.dockermgr.containerList") { it.put("all", true) }
             if (code != 200) return Result.failure(Exception("HTTP $code: $resp"))
 
-            // 响应可能是数组 [{...rsp:[...]}] 或对象 {rsp:[...]} 或 {data:[...]}
-            val rootArr = runCatching { JSONArray(resp) }.getOrNull()
-            val rootObj = rootArr?.optJSONObject(0) ?: runCatching { JSONObject(resp) }.getOrNull()
-
+            val rootObj = parseRootObj(resp)
             val arr = rootObj?.optJSONArray("rsp")
                 ?: rootObj?.optJSONArray("data")
                 ?: rootObj?.optJSONObject("data")?.optJSONArray("containers")
@@ -76,8 +80,9 @@ object NasDataFetcher {
                     val name = rawName.removePrefix("/")
                     val state = c.optString("State", c.optString("state", ""))
                     val status = c.optString("Status", c.optString("status", ""))
+                    val id = c.optString("Id", c.optString("id", ""))
                     if (name.isNotEmpty()) {
-                        list.add(DockerContainer(name, state, status))
+                        list.add(DockerContainer(id, name, state, status, null))
                     }
                 }
             }
@@ -85,9 +90,40 @@ object NasDataFetcher {
             if (list.isEmpty() && !result.equals("succ", true)) {
                 return Result.failure(Exception("响应异常: $resp"))
             }
-            Result.success(list)
+            Result.success(fetchMemUsage(nasBase, accessToken, list))
         } catch (e: Exception) {
             Result.failure(e)
+        }
+    }
+
+    /** 并发拉取各 running 容器的内存占用（containerStats.usedMem） */
+    private fun fetchMemUsage(nasBase: String, accessToken: String, containers: List<DockerContainer>): List<DockerContainer> {
+        val running = containers.filter { it.running && it.id.isNotEmpty() }
+        if (running.isEmpty()) return containers
+        val pool = java.util.concurrent.Executors.newFixedThreadPool(Math.min(8, running.size))
+        try {
+            val futures = running.map { c ->
+                pool.submit(java.util.concurrent.Callable { c.id to fetchContainerStats(nasBase, accessToken, c.id) })
+            }
+            val memMap = futures.map { it.get() }.toMap()
+            return containers.map { c -> if (c.running) c.copy(memBytes = memMap[c.id]) else c }
+        } finally {
+            pool.shutdown()
+        }
+    }
+
+    /** 单容器 stats，返回 usedMem 字节；失败返回 null */
+    private fun fetchContainerStats(nasBase: String, accessToken: String, containerId: String): Long? {
+        return try {
+            val (code, resp) = postAppcgi(nasBase, accessToken, "appcgi.dockermgr.containerStats") {
+                it.put("containerId", containerId)
+            }
+            if (code != 200) return null
+            val rootObj = parseRootObj(resp)
+            if (rootObj?.optString("result", "") != "succ") return null
+            rootObj.optJSONObject("rsp")?.optLong("usedMem")
+        } catch (e: Exception) {
+            null
         }
     }
 }
