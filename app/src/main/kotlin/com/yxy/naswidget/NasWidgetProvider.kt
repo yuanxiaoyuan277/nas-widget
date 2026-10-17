@@ -28,8 +28,9 @@ class NasWidgetProvider : AppWidgetProvider() {
             Thread {
                 val result = NasDataFetcher.fetch(url)
                 val docker = if (Prefs.showDocker(context)) {
-                    val token = Prefs.accessToken(context)
-                    if (token.isNotEmpty()) NasDataFetcher.fetchDocker(Prefs.nasBase(context), token) else null
+                    OAuthClient.getValidAccessToken(context).getOrNull()?.let {
+                        NasDataFetcher.fetchDocker(Prefs.nasBase(context), it)
+                    }
                 } else null
                 for (id in appWidgetIds) {
                     val views = buildViews(context, result, docker)
