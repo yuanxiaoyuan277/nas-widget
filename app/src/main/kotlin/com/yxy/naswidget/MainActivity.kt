@@ -255,16 +255,21 @@ class MainActivity : AppCompatActivity() {
                 container.addView(makeDockerItem("无容器", false, ""))
             } else {
                 for (c in filtered) {
-                    container.addView(makeDockerItem(c.name, c.running, if (c.running) "运行" else "停止"))
+                    container.addView(makeDockerItem(c.name, c.running, c.stateText, c.state.equals("error", true)))
                 }
             }
         }
     }
 
-    private fun makeDockerItem(name: String, running: Boolean, state: String): View {
+    private fun makeDockerItem(name: String, running: Boolean, state: String, isError: Boolean = false): View {
         val item = layoutInflater.inflate(R.layout.item_docker, dockerListContainer, false)
         item.findViewById<TextView>(R.id.tv_dot).text = if (running) "●" else "○"
-        item.findViewById<TextView>(R.id.tv_dot).setTextColor(if (running) 0xFF4CAF50.toInt() else 0xFF888888.toInt())
+        val dotColor = when {
+            running -> 0xFF4CAF50.toInt()
+            isError -> 0xFFF44336.toInt()
+            else -> 0xFF888888.toInt()
+        }
+        item.findViewById<TextView>(R.id.tv_dot).setTextColor(dotColor)
         item.findViewById<TextView>(R.id.tv_name).text = name
         item.findViewById<TextView>(R.id.tv_state).text = state
         return item
@@ -298,7 +303,7 @@ class MainActivity : AppCompatActivity() {
         val selected = Prefs.dockerContainers(this)
         for (c in dockerContainers.sortedBy { it.name }) {
             val cb = CheckBox(this).apply {
-                text = "${c.name}（${if (c.running) "运行" else "停止"}）"
+                text = "${c.name}（${c.stateText}）"
                 isChecked = selected.contains(c.name)
                 setTextColor(0xFFFFFFFF.toInt())
                 textSize = 13f
@@ -343,8 +348,10 @@ class MainActivity : AppCompatActivity() {
         if (widgetId != AppWidgetManager.INVALID_APPWIDGET_ID) {
             val result = Intent().putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, widgetId)
             setResult(RESULT_OK, result)
+            finish()
+        } else {
+            Toast.makeText(this, "已保存，小组件已更新", Toast.LENGTH_SHORT).show()
         }
-        finish()
     }
 
     private fun checkUpdate() {
