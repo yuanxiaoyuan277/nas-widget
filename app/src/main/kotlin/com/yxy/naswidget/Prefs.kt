@@ -24,9 +24,14 @@ object Prefs {
     private const val KEY_REFRESH_TOKEN = "refresh_token"
     private const val KEY_TOKEN_EXPIRES = "token_expires_at"
     private const val KEY_THEME = "theme"
+    private const val KEY_SHOW_WB2API = "show_wb2api"
+    private const val KEY_WB2API_BASE = "wb2api_base"
+    private const val KEY_WB2API_KEY = "wb2api_key"
 
     const val DEFAULT_URL = "http://192.168.2.3:19254/nas"
     const val DEFAULT_NAS_BASE = "http://192.168.2.3:1223"
+    const val DEFAULT_WB2API_BASE = "http://192.168.2.3:7863"
+    const val DEFAULT_WB2API_KEY = "yxyhhr.."
 
     private fun sp(ctx: Context): SharedPreferences =
         ctx.getSharedPreferences(NAME, Context.MODE_PRIVATE)
@@ -122,4 +127,12 @@ object Prefs {
     fun theme(ctx: Context): String = sp(ctx).getString(KEY_THEME, "dark") ?: "dark"
     fun setTheme(ctx: Context, v: String) = sp(ctx).edit().putString(KEY_THEME, v).apply()
     fun isDarkTheme(ctx: Context): Boolean = theme(ctx) != "light"
+
+    // === wb2api 积分 ===
+    fun showWb2api(ctx: Context) = sp(ctx).getBoolean(KEY_SHOW_WB2API, false)
+    fun setShowWb2api(ctx: Context, v: Boolean) = sp(ctx).edit().putBoolean(KEY_SHOW_WB2API, v).apply()
+    fun wb2apiBase(ctx: Context) = sp(ctx).getString(KEY_WB2API_BASE, DEFAULT_WB2API_BASE) ?: DEFAULT_WB2API_BASE
+    fun setWb2apiBase(ctx: Context, v: String) = sp(ctx).edit().putString(KEY_WB2API_BASE, v).apply()
+    fun wb2apiKey(ctx: Context) = sp(ctx).getString(KEY_WB2API_KEY, DEFAULT_WB2API_KEY) ?: DEFAULT_WB2API_KEY
+    fun setWb2apiKey(ctx: Context, v: String) = sp(ctx).edit().putString(KEY_WB2API_KEY, v).apply()
 }
