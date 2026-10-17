@@ -9,6 +9,7 @@ import android.widget.EditText
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
+import androidx.core.view.WindowCompat
 
 class LoginActivity : AppCompatActivity() {
 
@@ -17,6 +18,7 @@ class LoginActivity : AppCompatActivity() {
     private var handled = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        WindowCompat.setDecorFitsSystemWindows(window, true)
         AppCompatDelegate.setDefaultNightMode(
             if (Prefs.isDarkTheme(this)) AppCompatDelegate.MODE_NIGHT_YES
             else AppCompatDelegate.MODE_NIGHT_NO
