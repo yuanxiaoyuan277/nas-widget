@@ -15,6 +15,8 @@ object Prefs {
     private const val KEY_TEMP = "show_temp"
     private const val KEY_UPTIME = "show_uptime"
     private const val KEY_GLASS_DARK = "glass_dark"
+    private const val KEY_SHOW_DOCKER = "show_docker"
+    private const val KEY_DOCKER_CONTAINERS = "docker_containers"
     private const val KEY_NAS_BASE = "nas_base"
     private const val KEY_DEVICE_ID = "device_id"
     private const val KEY_PENDING_VERIFIER = "pending_verifier"
@@ -54,6 +56,17 @@ object Prefs {
 
     fun glassDark(ctx: Context) = sp(ctx).getBoolean(KEY_GLASS_DARK, true)
     fun setGlassDark(ctx: Context, v: Boolean) = sp(ctx).edit().putBoolean(KEY_GLASS_DARK, v).apply()
+
+    // === Docker 显示配置 ===
+    fun showDocker(ctx: Context) = sp(ctx).getBoolean(KEY_SHOW_DOCKER, false)
+    fun setShowDocker(ctx: Context, v: Boolean) = sp(ctx).edit().putBoolean(KEY_SHOW_DOCKER, v).apply()
+
+    fun dockerContainers(ctx: Context): Set<String> =
+        sp(ctx).getString(KEY_DOCKER_CONTAINERS, "")?.split(",")
+            ?.map { it.trim() }?.filter { it.isNotEmpty() }?.toSet() ?: emptySet()
+
+    fun setDockerContainers(ctx: Context, names: Set<String>) =
+        sp(ctx).edit().putString(KEY_DOCKER_CONTAINERS, names.joinToString(",")).apply()
 
     // === 飞牛 NAS Web 地址（登录用） ===
     fun nasBase(ctx: Context) = sp(ctx).getString(KEY_NAS_BASE, DEFAULT_NAS_BASE) ?: DEFAULT_NAS_BASE

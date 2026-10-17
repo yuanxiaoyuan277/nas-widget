@@ -64,6 +64,29 @@
             android:textColor="#B3FFFFFF"
             android:textSize="12sp" />
 
+        <!-- 小组件预览 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:orientation="vertical"
+            android:background="@drawable/glass_card"
+            android:padding="16dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="小组件预览（实时）"
+                android:textColor="#B3FFFFFF"
+                android:textSize="13sp" />
+
+            <FrameLayout
+                android:id="@+id/preview_container"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp" />
+        </LinearLayout>
+
         <!-- NAS 地址卡片 -->
         <LinearLayout
             android:layout_width="match_parent"
@@ -238,6 +261,46 @@
                     android:textColor="#FFFFFFFF"
                     android:textSize="14sp" />
             </LinearLayout>
+        </LinearLayout>
+
+        <!-- Docker 容器卡片 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:orientation="vertical"
+            android:background="@drawable/glass_card"
+            android:padding="16dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Docker 容器（登录飞牛后可选显示）"
+                android:textColor="#B3FFFFFF"
+                android:textSize="13sp" />
+
+            <CheckBox
+                android:id="@+id/cb_docker"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:text="在小组件显示 Docker 容器"
+                android:textColor="#FFFFFFFF"
+                android:textSize="14sp" />
+
+            <LinearLayout
+                android:id="@+id/docker_list_container"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:orientation="vertical" />
+
+            <Button
+                android:id="@+id/btn_refresh_docker"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="刷新容器列表" />
         </LinearLayout>
 
         <!-- 保存按钮 -->

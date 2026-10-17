@@ -5,6 +5,11 @@ import org.json.JSONObject
 /** NAS 监控数据模型（对应 monitor_proxy 的 /nas 返回） */
 data class DiskStat(val name: String, val used: Long, val total: Long, val usePercent: Double)
 
+/** Docker 容器（来自飞牛 appcgi.dockermgr.containerList） */
+data class DockerContainer(val name: String, val state: String, val status: String) {
+    val running: Boolean get() = state.equals("running", ignoreCase = true)
+}
+
 data class NasStats(
     val cpuPercent: Double,
     val cores: Int,

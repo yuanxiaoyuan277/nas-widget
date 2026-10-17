@@ -27,14 +27,22 @@ class NasWidgetProvider : AppWidgetProvider() {
             val url = Prefs.url(context)
             Thread {
                 val result = NasDataFetcher.fetch(url)
+                val docker = if (Prefs.showDocker(context)) {
+                    val token = Prefs.accessToken(context)
+                    if (token.isNotEmpty()) NasDataFetcher.fetchDocker(Prefs.nasBase(context), token) else null
+                } else null
                 for (id in appWidgetIds) {
-                    val views = buildViews(context, result)
+                    val views = buildViews(context, result, docker)
                     appWidgetManager.updateAppWidget(id, views)
                 }
             }.start()
         }
 
-        private fun buildViews(context: Context, result: Result<NasStats>): RemoteViews {
+        private fun buildViews(
+            context: Context,
+            result: Result<NasStats>,
+            docker: Result<List<DockerContainer>>?
+        ): RemoteViews {
             val views = RemoteViews(context.packageName, R.layout.nas_widget)
             val showCpu = Prefs.showCpu(context)
             val showMem = Prefs.showMem(context)
@@ -42,6 +50,7 @@ class NasWidgetProvider : AppWidgetProvider() {
             val showDisk2 = Prefs.showDisk2(context)
             val showTemp = Prefs.showTemp(context)
             val showUptime = Prefs.showUptime(context)
+            val showDocker = Prefs.showDocker(context)
 
             // 默认隐藏，按配置显示
             views.setViewVisibility(R.id.row_cpu, if (showCpu) View.VISIBLE else View.GONE)
@@ -94,6 +103,49 @@ class NasWidgetProvider : AppWidgetProvider() {
                 if (showMem) views.setTextViewText(R.id.tv_mem, "--%")
                 if (showDisk1) views.setTextViewText(R.id.tv_disk1, "--%")
                 if (showDisk2) views.setTextViewText(R.id.tv_disk2, "--%")
+            }
+
+            // Docker 容器
+            views.removeAllViews(R.id.container_docker)
+            if (showDocker) {
+                val selected = Prefs.dockerContainers(context)
+                if (docker == null) {
+                    val item = RemoteViews(context.packageName, R.layout.item_docker)
+                    item.setTextViewText(R.id.tv_name, "未登录飞牛")
+                    item.setTextViewText(R.id.tv_state, "")
+                    item.setTextViewText(R.id.tv_dot, "○")
+                    item.setTextColor(R.id.tv_dot, 0xFF888888.toInt())
+                    views.addView(R.id.container_docker, item)
+                } else {
+                    docker.onSuccess { containers ->
+                        val filtered = if (selected.isEmpty()) containers
+                            else containers.filter { it.name in selected }
+                        if (filtered.isEmpty()) {
+                            val item = RemoteViews(context.packageName, R.layout.item_docker)
+                            item.setTextViewText(R.id.tv_name, "无容器")
+                            item.setTextViewText(R.id.tv_state, "")
+                            item.setTextViewText(R.id.tv_dot, "○")
+                            item.setTextColor(R.id.tv_dot, 0xFF888888.toInt())
+                            views.addView(R.id.container_docker, item)
+                        } else {
+                            for (c in filtered) {
+                                val item = RemoteViews(context.packageName, R.layout.item_docker)
+                                item.setTextViewText(R.id.tv_name, c.name)
+                                item.setTextViewText(R.id.tv_state, if (c.running) "运行" else "停止")
+                                item.setTextViewText(R.id.tv_dot, if (c.running) "●" else "○")
+                                item.setTextColor(R.id.tv_dot, if (c.running) 0xFF4CAF50.toInt() else 0xFF888888.toInt())
+                                views.addView(R.id.container_docker, item)
+                            }
+                        }
+                    }.onFailure {
+                        val item = RemoteViews(context.packageName, R.layout.item_docker)
+                        item.setTextViewText(R.id.tv_name, "Docker 获取失败")
+                        item.setTextViewText(R.id.tv_state, "")
+                        item.setTextViewText(R.id.tv_dot, "○")
+                        item.setTextColor(R.id.tv_dot, 0xFF888888.toInt())
+                        views.addView(R.id.container_docker, item)
+                    }
+                }
             }
 
             return views

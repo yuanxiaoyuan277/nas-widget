@@ -240,4 +240,12 @@
             android:textSize="11sp" />
     </LinearLayout>
 
+    <!-- Docker 容器 -->
+    <LinearLayout
+        android:id="@+id/container_docker"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:orientation="vertical" />
+
 </LinearLayout>

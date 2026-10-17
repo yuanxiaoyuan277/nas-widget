@@ -4,12 +4,19 @@ import android.appwidget.AppWidgetManager
 import android.content.ComponentName
 import android.content.Intent
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
+import android.view.View
 import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.CheckBox
 import android.widget.EditText
+import android.widget.FrameLayout
+import android.widget.LinearLayout
+import android.widget.ProgressBar
 import android.widget.Spinner
 import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import java.io.File
 
@@ -31,6 +38,15 @@ class MainActivity : AppCompatActivity() {
     private lateinit var btnCheckUpdate: Button
     private lateinit var tvLoginStatus: TextView
     private lateinit var btnLogin: Button
+    private lateinit var previewContainer: FrameLayout
+    private lateinit var cbDocker: CheckBox
+    private lateinit var dockerListContainer: LinearLayout
+    private lateinit var btnRefreshDocker: Button
+
+    private val handler = Handler(Looper.getMainLooper())
+    private var dockerContainers: List<DockerContainer> = emptyList()
+    private val dockerCheckboxes = mutableListOf<CheckBox>()
+    private var previewBusy = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -49,6 +65,10 @@ class MainActivity : AppCompatActivity() {
         btnCheckUpdate = findViewById(R.id.btn_check_update)
         tvLoginStatus = findViewById(R.id.tv_login_status)
         btnLogin = findViewById(R.id.btn_login)
+        previewContainer = findViewById(R.id.preview_container)
+        cbDocker = findViewById(R.id.cb_docker)
+        dockerListContainer = findViewById(R.id.docker_list_container)
+        btnRefreshDocker = findViewById(R.id.btn_refresh_docker)
 
         widgetId = intent.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, AppWidgetManager.INVALID_APPWIDGET_ID)
         if (widgetId != AppWidgetManager.INVALID_APPWIDGET_ID) {
@@ -64,7 +84,15 @@ class MainActivity : AppCompatActivity() {
         }
         findViewById<Button>(R.id.btn_save).setOnClickListener { save() }
 
-        // 强制登录门：未登录直接跳登录页
+        // 小组件预览
+        layoutInflater.inflate(R.layout.nas_widget, previewContainer, true)
+
+        // Docker 配置
+        cbDocker.isChecked = Prefs.showDocker(this)
+        cbDocker.setOnCheckedChangeListener { _, _ -> refreshDockerVisibility() }
+        btnRefreshDocker.setOnClickListener { loadDockerContainers() }
+
+        // 强制登录门
         if (!Prefs.isLoggedIn(this)) {
             startActivityForResult(Intent(this, LoginActivity::class.java), REQ_LOGIN)
             return
@@ -73,6 +101,15 @@ class MainActivity : AppCompatActivity() {
         loadPrefs()
         tvVersion.text = "v${UpdateChecker.localVersion(this)}"
         updateLoginStatus()
+        refreshDockerVisibility()
+        startPreviewRefresh()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        if (Prefs.isLoggedIn(this)) {
+            updateLoginStatus()
+        }
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -82,10 +119,16 @@ class MainActivity : AppCompatActivity() {
                 loadPrefs()
                 tvVersion.text = "v${UpdateChecker.localVersion(this)}"
                 updateLoginStatus()
+                startPreviewRefresh()
             } else {
                 finish()
             }
         }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        handler.removeCallbacksAndMessages(null)
     }
 
     companion object {
@@ -109,6 +152,167 @@ class MainActivity : AppCompatActivity() {
         cbDisk2.isChecked = Prefs.showDisk2(this)
         cbTemp.isChecked = Prefs.showTemp(this)
         cbUptime.isChecked = Prefs.showUptime(this)
+        cbDocker.isChecked = Prefs.showDocker(this)
+        if (Prefs.isLoggedIn(this)) {
+            loadDockerContainers()
+        }
+    }
+
+    // === 小组件预览 ===
+    private fun startPreviewRefresh() {
+        handler.removeCallbacksAndMessages(null)
+        handler.post(object : Runnable {
+            override fun run() {
+                refreshPreview()
+                handler.postDelayed(this, 5000)
+            }
+        })
+    }
+
+    private fun refreshPreview() {
+        if (previewBusy) return
+        previewBusy = true
+        val url = Prefs.url(this)
+        Thread {
+            val result = NasDataFetcher.fetch(url)
+            val docker = if (Prefs.showDocker(this)) {
+                val token = Prefs.accessToken(this)
+                if (token.isNotEmpty()) NasDataFetcher.fetchDocker(Prefs.nasBase(this), token) else null
+            } else null
+            runOnUiThread {
+                updatePreviewViews(result, docker)
+                previewBusy = false
+            }
+        }.start()
+    }
+
+    private fun updatePreviewViews(result: Result<NasStats>, docker: Result<List<DockerContainer>>?) {
+        val root = previewContainer.getChildAt(0) as? View ?: return
+        val showCpu = Prefs.showCpu(this)
+        val showMem = Prefs.showMem(this)
+        val showDisk1 = Prefs.showDisk1(this)
+        val showDisk2 = Prefs.showDisk2(this)
+        val showTemp = Prefs.showTemp(this)
+        val showUptime = Prefs.showUptime(this)
+        val showDocker = Prefs.showDocker(this)
+
+        root.findViewById<View>(R.id.row_cpu).visibility = if (showCpu) View.VISIBLE else View.GONE
+        root.findViewById<View>(R.id.row_mem).visibility = if (showMem) View.VISIBLE else View.GONE
+        root.findViewById<View>(R.id.row_disk1).visibility = if (showDisk1) View.VISIBLE else View.GONE
+        root.findViewById<View>(R.id.row_disk2).visibility = if (showDisk2) View.VISIBLE else View.GONE
+        root.findViewById<View>(R.id.row_temp).visibility = if (showTemp) View.VISIBLE else View.GONE
+        root.findViewById<View>(R.id.row_uptime).visibility = if (showUptime) View.VISIBLE else View.GONE
+
+        result.onSuccess { s ->
+            val t = java.text.SimpleDateFormat("HH:mm", java.util.Locale.getDefault())
+                .format(java.util.Date(s.fetchTime))
+            root.findViewById<TextView>(R.id.tv_time).text = t
+
+            if (showCpu) {
+                root.findViewById<ProgressBar>(R.id.pb_cpu).progress = s.cpuPercent.toInt().coerceIn(0, 100)
+                root.findViewById<TextView>(R.id.tv_cpu).text = String.format("%.0f%%", s.cpuPercent)
+            }
+            if (showMem) {
+                root.findViewById<ProgressBar>(R.id.pb_mem).progress = s.memPercent.toInt().coerceIn(0, 100)
+                root.findViewById<TextView>(R.id.tv_mem).text =
+                    String.format("%.0f%% · %s", s.memPercent, Fmt.bytes(s.memUsed))
+            }
+            if (showDisk1 && s.disks.isNotEmpty()) {
+                val d = s.disks[0]
+                root.findViewById<TextView>(R.id.tv_disk1_label).text = d.name
+                root.findViewById<ProgressBar>(R.id.pb_disk1).progress = d.usePercent.toInt().coerceIn(0, 100)
+                root.findViewById<TextView>(R.id.tv_disk1).text = String.format("%.0f%%", d.usePercent)
+            }
+            if (showDisk2 && s.disks.size > 1) {
+                val d = s.disks[1]
+                root.findViewById<TextView>(R.id.tv_disk2_label).text = d.name
+                root.findViewById<ProgressBar>(R.id.pb_disk2).progress = d.usePercent.toInt().coerceIn(0, 100)
+                root.findViewById<TextView>(R.id.tv_disk2).text = String.format("%.0f%%", d.usePercent)
+            }
+            if (showTemp) {
+                root.findViewById<TextView>(R.id.tv_temp_cpu).text =
+                    s.tempCpu?.let { String.format("CPU %.0f°", it) } ?: "CPU --°"
+                root.findViewById<TextView>(R.id.tv_temp_nvme).text =
+                    s.tempNvme?.let { String.format("NVMe %.0f°", it) } ?: "NVMe --°"
+            }
+            if (showUptime) {
+                root.findViewById<TextView>(R.id.tv_uptime).text = Fmt.uptime(s.uptimeSec)
+            }
+        }.onFailure {
+            root.findViewById<TextView>(R.id.tv_time).text = "连接失败"
+        }
+
+        // Docker 容器预览
+        val container = root.findViewById<LinearLayout>(R.id.container_docker)
+        container.removeAllViews()
+        if (showDocker) {
+            val selected = Prefs.dockerContainers(this)
+            val list = docker?.getOrNull() ?: emptyList()
+            val filtered = if (selected.isEmpty()) list else list.filter { it.name in selected }
+            if (docker == null) {
+                container.addView(makeDockerItem("未登录飞牛", false, ""))
+            } else if (filtered.isEmpty()) {
+                container.addView(makeDockerItem("无容器", false, ""))
+            } else {
+                for (c in filtered) {
+                    container.addView(makeDockerItem(c.name, c.running, if (c.running) "运行" else "停止"))
+                }
+            }
+        }
+    }
+
+    private fun makeDockerItem(name: String, running: Boolean, state: String): View {
+        val item = layoutInflater.inflate(R.layout.item_docker, dockerListContainer, false)
+        item.findViewById<TextView>(R.id.tv_dot).text = if (running) "●" else "○"
+        item.findViewById<TextView>(R.id.tv_dot).setTextColor(if (running) 0xFF4CAF50.toInt() else 0xFF888888.toInt())
+        item.findViewById<TextView>(R.id.tv_name).text = name
+        item.findViewById<TextView>(R.id.tv_state).text = state
+        return item
+    }
+
+    // === Docker 配置 ===
+    private fun loadDockerContainers() {
+        val token = Prefs.accessToken(this)
+        if (token.isEmpty()) {
+            Toast.makeText(this, "请先登录飞牛账号", Toast.LENGTH_SHORT).show()
+            return
+        }
+        btnRefreshDocker.isEnabled = false
+        Thread {
+            val result = NasDataFetcher.fetchDocker(Prefs.nasBase(this), token)
+            runOnUiThread {
+                btnRefreshDocker.isEnabled = true
+                result.onSuccess { list ->
+                    dockerContainers = list
+                    buildDockerCheckboxes()
+                }.onFailure { e ->
+                    Toast.makeText(this, "获取容器失败：${e.message}", Toast.LENGTH_LONG).show()
+                }
+            }
+        }.start()
+    }
+
+    private fun buildDockerCheckboxes() {
+        dockerListContainer.removeAllViews()
+        dockerCheckboxes.clear()
+        val selected = Prefs.dockerContainers(this)
+        for (c in dockerContainers.sortedBy { it.name }) {
+            val cb = CheckBox(this).apply {
+                text = "${c.name}（${if (c.running) "运行" else "停止"}）"
+                isChecked = selected.contains(c.name)
+                setTextColor(0xFFFFFFFF.toInt())
+                textSize = 13f
+            }
+            dockerListContainer.addView(cb)
+            dockerCheckboxes.add(cb)
+        }
+        refreshDockerVisibility()
+    }
+
+    private fun refreshDockerVisibility() {
+        val visible = cbDocker.isChecked
+        dockerListContainer.visibility = if (visible) View.VISIBLE else View.GONE
+        btnRefreshDocker.visibility = if (visible) View.VISIBLE else View.GONE
     }
 
     private fun save() {
@@ -122,6 +326,12 @@ class MainActivity : AppCompatActivity() {
         Prefs.setShowDisk2(this, cbDisk2.isChecked)
         Prefs.setShowTemp(this, cbTemp.isChecked)
         Prefs.setShowUptime(this, cbUptime.isChecked)
+
+        // Docker 配置
+        Prefs.setShowDocker(this, cbDocker.isChecked)
+        val selected = dockerCheckboxes.filter { it.isChecked }
+            .map { it.text.toString().substringBefore("（") }.toSet()
+        Prefs.setDockerContainers(this, selected)
 
         val am = AppWidgetManager.getInstance(this)
         val ids = am.getAppWidgetIds(ComponentName(this, NasWidgetProvider::class.java))
