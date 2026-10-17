@@ -5,9 +5,56 @@
     android:orientation="vertical"
     android:background="#FF0D1117">
 
+    <!-- 顶部：域名输入区 -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="18dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="登录飞牛账号"
+            android:textColor="#FFFFFFFF"
+            android:textSize="22sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:text="先填飞牛访问地址（内网 IP 或公网域名），再在飞牛官方页面输账号密码"
+            android:textColor="#66FFFFFF"
+            android:textSize="12sp" />
+
+        <EditText
+            android:id="@+id/et_host"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:hint="如 http://192.168.2.3:1223 或 https://nas.你的域名"
+            android:inputType="textUri"
+            android:padding="10dp"
+            android:textColor="#FFFFFFFF"
+            android:textColorHint="#55FFFFFF"
+            android:textSize="14sp"
+            android:background="@drawable/edit_bg" />
+
+        <Button
+            android:id="@+id/btn_go"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:text="前往登录" />
+    </LinearLayout>
+
+    <!-- WebView 登录区 -->
     <WebView
         android:id="@+id/webview"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:visibility="gone" />
 
 </LinearLayout>

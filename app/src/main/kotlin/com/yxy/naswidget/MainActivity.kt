@@ -58,21 +58,33 @@ class MainActivity : AppCompatActivity() {
         val labels = refreshOptions.map { it.second }
         spRefresh.adapter = ArrayAdapter(this, android.R.layout.simple_spinner_dropdown_item, labels)
 
-        loadPrefs()
-        tvVersion.text = "v${UpdateChecker.localVersion(this)}"
-        updateLoginStatus()
-
         btnCheckUpdate.setOnClickListener { checkUpdate() }
         btnLogin.setOnClickListener {
             startActivityForResult(Intent(this, LoginActivity::class.java), REQ_LOGIN)
         }
         findViewById<Button>(R.id.btn_save).setOnClickListener { save() }
+
+        // 强制登录门：未登录直接跳登录页
+        if (!Prefs.isLoggedIn(this)) {
+            startActivityForResult(Intent(this, LoginActivity::class.java), REQ_LOGIN)
+            return
+        }
+
+        loadPrefs()
+        tvVersion.text = "v${UpdateChecker.localVersion(this)}"
+        updateLoginStatus()
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == REQ_LOGIN && resultCode == RESULT_OK) {
-            updateLoginStatus()
+        if (requestCode == REQ_LOGIN) {
+            if (resultCode == RESULT_OK) {
+                loadPrefs()
+                tvVersion.text = "v${UpdateChecker.localVersion(this)}"
+                updateLoginStatus()
+            } else {
+                finish()
+            }
         }
     }
 

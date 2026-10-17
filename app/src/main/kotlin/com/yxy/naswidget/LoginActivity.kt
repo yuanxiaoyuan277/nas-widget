@@ -2,15 +2,20 @@ package com.yxy.naswidget
 
 import android.app.Activity
 import android.os.Bundle
+import android.view.View
 import android.webkit.WebResourceError
 import android.webkit.WebResourceRequest
 import android.webkit.WebView
 import android.webkit.WebViewClient
+import android.widget.Button
+import android.widget.EditText
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 
 class LoginActivity : AppCompatActivity() {
 
+    private lateinit var etHost: EditText
+    private lateinit var btnGo: Button
     private lateinit var webView: WebView
     private var codeVerifier = ""
     private var state = ""
@@ -20,15 +25,28 @@ class LoginActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_login)
 
+        etHost = findViewById(R.id.et_host)
+        btnGo = findViewById(R.id.btn_go)
         webView = findViewById(R.id.webview)
+
+        etHost.setText(Prefs.nasBase(this))
+
+        btnGo.setOnClickListener {
+            val host = Prefs.normalizeNasBase(etHost.text.toString())
+            Prefs.setNasBase(this, host)
+            startLogin(host)
+        }
+    }
+
+    private fun startLogin(nasBase: String) {
+        btnGo.isEnabled = false
+        webView.visibility = View.VISIBLE
         webView.settings.javaScriptEnabled = true
         webView.settings.domStorageEnabled = true
 
         val (verifier, challenge) = OAuthClient.generatePkce()
         codeVerifier = verifier
         state = randomState()
-
-        val nasBase = Prefs.nasBase(this)
         val authUrl = OAuthClient.buildAuthUrl(nasBase, challenge, state)
 
         webView.webViewClient = object : WebViewClient() {
@@ -47,13 +65,12 @@ class LoginActivity : AppCompatActivity() {
                 if (request.isForMainFrame) {
                     Toast.makeText(
                         this@LoginActivity,
-                        "无法连接飞牛，请确认已连家里 WiFi 或地址可达",
+                        "无法连接飞牛，请检查地址是否正确",
                         Toast.LENGTH_LONG
                     ).show()
                 }
             }
         }
-
         webView.loadUrl(authUrl)
     }
 

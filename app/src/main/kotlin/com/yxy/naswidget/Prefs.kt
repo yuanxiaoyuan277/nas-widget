@@ -57,6 +57,16 @@ object Prefs {
     fun nasBase(ctx: Context) = sp(ctx).getString(KEY_NAS_BASE, DEFAULT_NAS_BASE) ?: DEFAULT_NAS_BASE
     fun setNasBase(ctx: Context, v: String) = sp(ctx).edit().putString(KEY_NAS_BASE, v).apply()
 
+    /** 规范化飞牛地址：补 scheme、去尾部斜杠 */
+    fun normalizeNasBase(input: String): String {
+        var s = input.trim()
+        if (s.isEmpty()) return DEFAULT_NAS_BASE
+        if (!s.startsWith("http://") && !s.startsWith("https://")) {
+            s = "http://$s"
+        }
+        return s.trimEnd('/')
+    }
+
     // === 登录 token ===
     fun accessToken(ctx: Context) = sp(ctx).getString(KEY_ACCESS_TOKEN, "") ?: ""
     fun refreshToken(ctx: Context) = sp(ctx).getString(KEY_REFRESH_TOKEN, "") ?: ""
