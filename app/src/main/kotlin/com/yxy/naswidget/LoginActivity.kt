@@ -1,6 +1,7 @@
 package com.yxy.naswidget
 
 import android.app.Activity
+import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -54,6 +55,13 @@ class LoginActivity : AppCompatActivity() {
         val authUrl = OAuthClient.buildAuthUrl(nasBase, challenge, state, deviceId)
 
         webView.webViewClient = object : WebViewClient() {
+            override fun shouldOverrideUrlLoading(view: WebView, request: WebResourceRequest): Boolean =
+                handleUrl(request.url.toString())
+
+            @Suppress("DEPRECATION")
+            override fun shouldOverrideUrlLoading(view: WebView, url: String): Boolean =
+                handleUrl(url)
+
             override fun onPageFinished(view: WebView, url: String) {
                 super.onPageFinished(view, url)
                 if (!exchanged) scheduleExtract()
@@ -76,13 +84,33 @@ class LoginActivity : AppCompatActivity() {
         webView.loadUrl(authUrl)
     }
 
-    /** 授权成功后，飞牛页面会显示授权码（<code> 元素），这里定时轮询提取 */
+    /** 拦截飞牛授权后的跳转（redirect_uri?code=xxx），或返回 false 放行 */
+    private fun handleUrl(url: String): Boolean {
+        val code = extractCodeFromUrl(url)
+        if (code != null && !exchanged) {
+            exchanged = true
+            exchangeAndFinish(code)
+            return true
+        }
+        return false
+    }
+
+    private fun extractCodeFromUrl(url: String): String? {
+        return try {
+            val code = Uri.parse(url).getQueryParameter("code")
+            if (!code.isNullOrEmpty() && code.length in 4..256) code else null
+        } catch (_: Exception) {
+            null
+        }
+    }
+
+    /** 授权成功后飞牛页面会显示授权码（<code> 元素），定时轮询提取 */
     private fun scheduleExtract() {
         handler.postDelayed({
             if (exchanged || isFinishing) return@postDelayed
             extractCount++
-            if (extractCount > 120) {  // 最多轮询约 2 分钟
-                Toast.makeText(this, "授权超时，请重试", Toast.LENGTH_LONG).show()
+            if (extractCount > 90) {
+                diagnose()
                 return@postDelayed
             }
             extractCode { code ->
@@ -98,10 +126,19 @@ class LoginActivity : AppCompatActivity() {
     }
 
     private fun extractCode(callback: (String) -> Unit) {
-        val js = "(function(){var cs=document.querySelectorAll('code');for(var i=0;i<cs.length;i++){var t=cs[i].textContent.trim();if(t.length>=10)return t;}return '';})()"
+        val js = "(function(){var cs=document.querySelectorAll('code');for(var i=0;i<cs.length;i++){var t=(cs[i].textContent||'').trim();if(t.length>=4&&t.length<=256)return t;}return '';})()"
         webView.evaluateJavascript(js) { value ->
             val code = value?.trim()?.removeSurrounding("\"")?.trim() ?: ""
             callback(code)
+        }
+    }
+
+    /** 提取失败时，抓当前 URL + 页面文本，帮助定位 */
+    private fun diagnose() {
+        val js = "(function(){var b=document.body?document.body.innerText.replace(/\\s+/g,' ').trim():'';return location.href+' ### '+b.substring(0,120);})()"
+        webView.evaluateJavascript(js) { value ->
+            val info = value?.trim()?.removeSurrounding("\"")?.trim() ?: ""
+            Toast.makeText(this, "诊断：$info", Toast.LENGTH_LONG).show()
         }
     }
 

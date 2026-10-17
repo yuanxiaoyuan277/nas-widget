@@ -11,7 +11,7 @@ import org.json.JSONObject
 object OAuthClient {
 
     const val CLIENT_ID = "YJNMPJUGA9"
-    const val SCOPE = "trim.user.all trim.file.read trim.file.write trim.download.all trim.appcenter.all trim.photo.all trim.system.all trim.log.all trim.storage.all trim.docker.all"
+    const val SCOPE = "trim.user.all trim.file.read trim.file.write trim.download.all trim.appcenter.all trim.photo.all trim.baidu_netdisk.all trim.system.all trim.log.all trim.storage.all trim.docker.all"
 
     /** 生成 PKCE：返回 (code_verifier, code_challenge) */
     fun generatePkce(): Pair<String, String> {
