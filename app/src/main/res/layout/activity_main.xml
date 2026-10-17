@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#FF12161D"
+    android:fillViewport="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="20dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="NAS 小组件配置"
+            android:textColor="#FFFFFFFF"
+            android:textSize="20sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:text="NAS 监控接口地址"
+            android:textColor="#B3FFFFFF"
+            android:textSize="14sp" />
+
+        <EditText
+            android:id="@+id/et_url"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:hint="http://192.168.2.3:19254/nas"
+            android:inputType="textUri"
+            android:padding="12dp"
+            android:textColor="#FFFFFFFF"
+            android:textColorHint="#66FFFFFF"
+            android:textSize="14sp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="刷新间隔"
+            android:textColor="#B3FFFFFF"
+            android:textSize="14sp" />
+
+        <Spinner
+            android:id="@+id/sp_refresh"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="显示的项目"
+            android:textColor="#B3FFFFFF"
+            android:textSize="14sp" />
+
+        <CheckBox
+            android:id="@+id/cb_cpu"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="CPU 占用"
+            android:textColor="#FFFFFFFF"
+            android:textSize="15sp" />
+
+        <CheckBox
+            android:id="@+id/cb_mem"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="内存占用"
+            android:textColor="#FFFFFFFF"
+            android:textSize="15sp" />
+
+        <CheckBox
+            android:id="@+id/cb_disk1"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="磁盘 NVMe"
+            android:textColor="#FFFFFFFF"
+            android:textSize="15sp" />
+
+        <CheckBox
+            android:id="@+id/cb_disk2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="磁盘 黑盘"
+            android:textColor="#FFFFFFFF"
+            android:textSize="15sp" />
+
+        <CheckBox
+            android:id="@+id/cb_temp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="温度"
+            android:textColor="#FFFFFFFF"
+            android:textSize="15sp" />
+
+        <CheckBox
+            android:id="@+id/cb_uptime"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="运行时长"
+            android:textColor="#FFFFFFFF"
+            android:textSize="15sp" />
+
+        <Button
+            android:id="@+id/btn_save"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:text="保存并更新"
+            android:textSize="16sp" />
+
+    </LinearLayout>
+</ScrollView>

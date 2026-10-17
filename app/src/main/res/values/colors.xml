@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- 液态玻璃配色：半透明玻璃底 + 高光 -->
+    <color name="glass_bg">#33FFFFFF</color>
+    <color name="glass_bg_dark">#262F3A</color>
+    <color name="glass_border">#80FFFFFF</color>
+    <color name="glass_highlight">#B3FFFFFF</color>
+    <color name="text_primary">#FFFFFFFF</color>
+    <color name="text_secondary">#B3FFFFFF</color>
+    <color name="text_dark">#FF1C2430</color>
+    <color name="text_secondary_dark">#B31C2430</color>
+    <color name="cpu_color">#FF5E9EFF</color>
+    <color name="mem_color">#FF58D68D</color>
+    <color name="disk_color">#FFFFB74D</color>
+    <color name="temp_color">#FFFF7A8A</color>
+    <color name="uptime_color">#FFB39DDB</color>
+    <color name="progress_track">#33FFFFFF</color>
+</resources>

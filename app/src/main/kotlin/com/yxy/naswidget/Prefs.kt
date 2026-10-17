@@ -1,0 +1,50 @@
+package com.yxy.naswidget
+
+import android.content.Context
+import android.content.SharedPreferences
+
+/** 配置存储（全局一份，所有 widget 实例共享） */
+object Prefs {
+    private const val NAME = "nas_widget_prefs"
+    private const val KEY_URL = "nas_url"
+    private const val KEY_REFRESH = "refresh_sec"
+    private const val KEY_CPU = "show_cpu"
+    private const val KEY_MEM = "show_mem"
+    private const val KEY_DISK1 = "show_disk1"
+    private const val KEY_DISK2 = "show_disk2"
+    private const val KEY_TEMP = "show_temp"
+    private const val KEY_UPTIME = "show_uptime"
+    private const val KEY_GLASS_DARK = "glass_dark"
+
+    const val DEFAULT_URL = "http://192.168.2.3:19254/nas"
+
+    private fun sp(ctx: Context): SharedPreferences =
+        ctx.getSharedPreferences(NAME, Context.MODE_PRIVATE)
+
+    fun url(ctx: Context) = sp(ctx).getString(KEY_URL, DEFAULT_URL) ?: DEFAULT_URL
+    fun setUrl(ctx: Context, v: String) = sp(ctx).edit().putString(KEY_URL, v).apply()
+
+    fun refreshSec(ctx: Context) = sp(ctx).getInt(KEY_REFRESH, 30)
+    fun setRefresh(ctx: Context, v: Int) = sp(ctx).edit().putInt(KEY_REFRESH, v).apply()
+
+    fun showCpu(ctx: Context) = sp(ctx).getBoolean(KEY_CPU, true)
+    fun setShowCpu(ctx: Context, v: Boolean) = sp(ctx).edit().putBoolean(KEY_CPU, v).apply()
+
+    fun showMem(ctx: Context) = sp(ctx).getBoolean(KEY_MEM, true)
+    fun setShowMem(ctx: Context, v: Boolean) = sp(ctx).edit().putBoolean(KEY_MEM, v).apply()
+
+    fun showDisk1(ctx: Context) = sp(ctx).getBoolean(KEY_DISK1, true)
+    fun setShowDisk1(ctx: Context, v: Boolean) = sp(ctx).edit().putBoolean(KEY_DISK1, v).apply()
+
+    fun showDisk2(ctx: Context) = sp(ctx).getBoolean(KEY_DISK2, true)
+    fun setShowDisk2(ctx: Context, v: Boolean) = sp(ctx).edit().putBoolean(KEY_DISK2, v).apply()
+
+    fun showTemp(ctx: Context) = sp(ctx).getBoolean(KEY_TEMP, true)
+    fun setShowTemp(ctx: Context, v: Boolean) = sp(ctx).edit().putBoolean(KEY_TEMP, v).apply()
+
+    fun showUptime(ctx: Context) = sp(ctx).getBoolean(KEY_UPTIME, true)
+    fun setShowUptime(ctx: Context, v: Boolean) = sp(ctx).edit().putBoolean(KEY_UPTIME, v).apply()
+
+    fun glassDark(ctx: Context) = sp(ctx).getBoolean(KEY_GLASS_DARK, true)
+    fun setGlassDark(ctx: Context, v: Boolean) = sp(ctx).edit().putBoolean(KEY_GLASS_DARK, v).apply()
+}

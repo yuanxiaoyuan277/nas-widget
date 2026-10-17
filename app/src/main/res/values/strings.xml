@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">NAS 监控</string>
+    <string name="widget_desc">实时显示 NAS 的 CPU、内存、磁盘、温度</string>
+    <string name="config_title">小组件配置</string>
+    <string name="nas_url_label">NAS 监控接口地址</string>
+    <string name="nas_url_hint">http://192.168.2.3:19254/nas</string>
+    <string name="refresh_label">刷新间隔</string>
+    <string name="items_label">显示的项目</string>
+    <string name="save">保存</string>
+</resources>
