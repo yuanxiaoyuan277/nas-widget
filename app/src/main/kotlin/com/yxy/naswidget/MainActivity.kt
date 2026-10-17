@@ -18,6 +18,7 @@ import android.widget.Spinner
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatDelegate
 import java.io.File
 
 class MainActivity : AppCompatActivity() {
@@ -38,6 +39,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var btnCheckUpdate: Button
     private lateinit var tvLoginStatus: TextView
     private lateinit var btnLogin: Button
+    private lateinit var btnToggleTheme: Button
     private lateinit var previewContainer: FrameLayout
     private lateinit var cbDocker: CheckBox
     private lateinit var dockerListContainer: LinearLayout
@@ -49,6 +51,10 @@ class MainActivity : AppCompatActivity() {
     private var previewBusy = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        AppCompatDelegate.setDefaultNightMode(
+            if (Prefs.isDarkTheme(this)) AppCompatDelegate.MODE_NIGHT_YES
+            else AppCompatDelegate.MODE_NIGHT_NO
+        )
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
@@ -65,6 +71,7 @@ class MainActivity : AppCompatActivity() {
         btnCheckUpdate = findViewById(R.id.btn_check_update)
         tvLoginStatus = findViewById(R.id.tv_login_status)
         btnLogin = findViewById(R.id.btn_login)
+        btnToggleTheme = findViewById(R.id.btn_toggle_theme)
         previewContainer = findViewById(R.id.preview_container)
         cbDocker = findViewById(R.id.cb_docker)
         dockerListContainer = findViewById(R.id.docker_list_container)
@@ -82,6 +89,8 @@ class MainActivity : AppCompatActivity() {
         btnLogin.setOnClickListener {
             startActivityForResult(Intent(this, LoginActivity::class.java), REQ_LOGIN)
         }
+        btnToggleTheme.setOnClickListener { toggleTheme() }
+        updateThemeButton()
         findViewById<Button>(R.id.btn_save).setOnClickListener { save() }
 
         // 小组件预览
@@ -139,6 +148,19 @@ class MainActivity : AppCompatActivity() {
         val logged = Prefs.isLoggedIn(this)
         tvLoginStatus.text = if (logged) "已登录飞牛账号" else "未登录"
         btnLogin.text = if (logged) "重新登录" else "登录飞牛账号"
+    }
+
+    private fun toggleTheme() {
+        val newTheme = if (Prefs.isDarkTheme(this)) "light" else "dark"
+        Prefs.setTheme(this, newTheme)
+        AppCompatDelegate.setDefaultNightMode(
+            if (newTheme == "dark") AppCompatDelegate.MODE_NIGHT_YES
+            else AppCompatDelegate.MODE_NIGHT_NO
+        )
+    }
+
+    private fun updateThemeButton() {
+        btnToggleTheme.text = if (Prefs.isDarkTheme(this)) "深色" else "浅色"
     }
 
     private fun loadPrefs() {
@@ -256,7 +278,7 @@ class MainActivity : AppCompatActivity() {
                 container.addView(makeDockerItem("无容器", false, ""))
             } else {
                 for (c in filtered) {
-                    container.addView(makeDockerItem(c.name, c.running, c.stateText, c.state.equals("error", true)))
+                    container.addView(makeDockerItem(c))
                 }
             }
         }
@@ -273,6 +295,20 @@ class MainActivity : AppCompatActivity() {
         item.findViewById<TextView>(R.id.tv_dot).setTextColor(dotColor)
         item.findViewById<TextView>(R.id.tv_name).text = name
         item.findViewById<TextView>(R.id.tv_state).text = state
+        return item
+    }
+
+    private fun makeDockerItem(c: DockerContainer): View {
+        val item = layoutInflater.inflate(R.layout.item_docker, dockerListContainer, false)
+        item.findViewById<TextView>(R.id.tv_dot).text = if (c.running) "●" else "○"
+        val dotColor = when {
+            c.running -> 0xFF4CAF50.toInt()
+            c.state.equals("error", true) -> 0xFFF44336.toInt()
+            else -> 0xFF888888.toInt()
+        }
+        item.findViewById<TextView>(R.id.tv_dot).setTextColor(dotColor)
+        item.findViewById<TextView>(R.id.tv_name).text = c.name
+        item.findViewById<TextView>(R.id.tv_state).text = c.detailText
         return item
     }
 
@@ -308,7 +344,7 @@ class MainActivity : AppCompatActivity() {
         val selected = Prefs.dockerContainers(this)
         for (c in dockerContainers.sortedBy { it.name }) {
             val cb = CheckBox(this).apply {
-                text = "${c.name}（${c.stateText}）"
+                text = "${c.name}（${c.detailText}）"
                 isChecked = selected.contains(c.name)
                 setTextColor(0xFFFFFFFF.toInt())
                 textSize = 13f
