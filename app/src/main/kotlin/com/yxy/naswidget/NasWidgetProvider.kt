@@ -32,8 +32,11 @@ class NasWidgetProvider : AppWidgetProvider() {
                         NasDataFetcher.fetchDocker(Prefs.nasBase(context), it)
                     }
                 } else null
+                val wb2api = if (Prefs.showWb2api(context)) {
+                    NasDataFetcher.fetchWb2apiCredits(Prefs.wb2apiBase(context), Prefs.wb2apiKey(context))
+                } else null
                 for (id in appWidgetIds) {
-                    val views = buildViews(context, result, docker)
+                    val views = buildViews(context, result, docker, wb2api)
                     appWidgetManager.updateAppWidget(id, views)
                 }
             }.start()
@@ -42,7 +45,8 @@ class NasWidgetProvider : AppWidgetProvider() {
         private fun buildViews(
             context: Context,
             result: Result<NasStats>,
-            docker: Result<List<DockerContainer>>?
+            docker: Result<List<DockerContainer>>?,
+            wb2api: Result<Wb2apiStats>?
         ): RemoteViews {
             val views = RemoteViews(context.packageName, R.layout.nas_widget)
             val showCpu = Prefs.showCpu(context)
@@ -52,6 +56,7 @@ class NasWidgetProvider : AppWidgetProvider() {
             val showTemp = Prefs.showTemp(context)
             val showUptime = Prefs.showUptime(context)
             val showDocker = Prefs.showDocker(context)
+            val showWb2api = Prefs.showWb2api(context)
 
             // 默认隐藏，按配置显示
             views.setViewVisibility(R.id.row_cpu, if (showCpu) View.VISIBLE else View.GONE)
@@ -60,6 +65,7 @@ class NasWidgetProvider : AppWidgetProvider() {
             views.setViewVisibility(R.id.row_disk2, if (showDisk2) View.VISIBLE else View.GONE)
             views.setViewVisibility(R.id.row_temp, if (showTemp) View.VISIBLE else View.GONE)
             views.setViewVisibility(R.id.row_uptime, if (showUptime) View.VISIBLE else View.GONE)
+            views.setViewVisibility(R.id.row_wb2api, if (showWb2api) View.VISIBLE else View.GONE)
 
             result.onSuccess { s ->
                 val t = java.text.SimpleDateFormat("HH:mm", java.util.Locale.getDefault())
@@ -104,6 +110,15 @@ class NasWidgetProvider : AppWidgetProvider() {
                 if (showMem) views.setTextViewText(R.id.tv_mem, "--%")
                 if (showDisk1) views.setTextViewText(R.id.tv_disk1, "--%")
                 if (showDisk2) views.setTextViewText(R.id.tv_disk2, "--%")
+            }
+
+            // wb2api 积分
+            if (showWb2api) {
+                wb2api?.onSuccess { s ->
+                    views.setTextViewText(R.id.tv_wb2api, "${s.totalCredits} · ${s.healthyCount}/${s.accountCount}健康")
+                }?.onFailure {
+                    views.setTextViewText(R.id.tv_wb2api, "获取失败")
+                }
             }
 
             // Docker 容器
