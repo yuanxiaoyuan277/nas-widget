@@ -8,6 +8,22 @@ data class DiskStat(val name: String, val used: Long, val total: Long, val usePe
 /** Docker 容器（来自飞牛 appcgi.dockermgr.containerList） */
 data class DockerContainer(val name: String, val state: String, val status: String) {
     val running: Boolean get() = state.equals("running", ignoreCase = true)
+
+    /** 精确状态标签（飞牛 State 字段可能为 running/exited/stopped/error/created/paused/restarting 等） */
+    val stateLabel: String get() = when (state.lowercase()) {
+        "running" -> "运行"
+        "exited", "stopped", "dead" -> "已停止"
+        "error" -> "异常"
+        "created" -> "已创建"
+        "paused" -> "已暂停"
+        "restarting" -> "重启中"
+        "" -> "未知"
+        else -> state
+    }
+
+    /** 状态 + 详情（如 "运行 · Up 2 days"、"异常 · 137"） */
+    val stateText: String get() =
+        if (status.isNotEmpty() && !running) "$stateLabel · $status" else stateLabel
 }
 
 data class NasStats(
