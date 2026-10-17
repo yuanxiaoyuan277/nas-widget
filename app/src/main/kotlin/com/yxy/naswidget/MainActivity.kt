@@ -54,12 +54,31 @@ class MainActivity : AppCompatActivity() {
         val labels = refreshOptions.map { it.second }
         spRefresh.adapter = ArrayAdapter(this, android.R.layout.simple_spinner_dropdown_item, labels)
 
-        loadPrefs()
+        if (Prefs.isLoggedIn(this)) {
+            loadPrefs()
+        } else {
+            startActivityForResult(Intent(this, LoginActivity::class.java), REQ_LOGIN)
+        }
 
         tvVersion.text = "v${UpdateChecker.localVersion(this)}"
 
         btnCheckUpdate.setOnClickListener { checkUpdate() }
         findViewById<Button>(R.id.btn_save).setOnClickListener { save() }
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == REQ_LOGIN) {
+            if (resultCode == RESULT_OK) {
+                loadPrefs()
+            } else {
+                finish()
+            }
+        }
+    }
+
+    companion object {
+        private const val REQ_LOGIN = 1001
     }
 
     private fun loadPrefs() {

@@ -15,8 +15,13 @@ object Prefs {
     private const val KEY_TEMP = "show_temp"
     private const val KEY_UPTIME = "show_uptime"
     private const val KEY_GLASS_DARK = "glass_dark"
+    private const val KEY_NAS_BASE = "nas_base"
+    private const val KEY_ACCESS_TOKEN = "access_token"
+    private const val KEY_REFRESH_TOKEN = "refresh_token"
+    private const val KEY_TOKEN_EXPIRES = "token_expires_at"
 
     const val DEFAULT_URL = "http://192.168.2.3:19254/nas"
+    const val DEFAULT_NAS_BASE = "http://192.168.2.3:1223"
 
     private fun sp(ctx: Context): SharedPreferences =
         ctx.getSharedPreferences(NAME, Context.MODE_PRIVATE)
@@ -47,4 +52,27 @@ object Prefs {
 
     fun glassDark(ctx: Context) = sp(ctx).getBoolean(KEY_GLASS_DARK, true)
     fun setGlassDark(ctx: Context, v: Boolean) = sp(ctx).edit().putBoolean(KEY_GLASS_DARK, v).apply()
+
+    // === 飞牛 NAS Web 地址（登录用） ===
+    fun nasBase(ctx: Context) = sp(ctx).getString(KEY_NAS_BASE, DEFAULT_NAS_BASE) ?: DEFAULT_NAS_BASE
+    fun setNasBase(ctx: Context, v: String) = sp(ctx).edit().putString(KEY_NAS_BASE, v).apply()
+
+    // === 登录 token ===
+    fun accessToken(ctx: Context) = sp(ctx).getString(KEY_ACCESS_TOKEN, "") ?: ""
+    fun refreshToken(ctx: Context) = sp(ctx).getString(KEY_REFRESH_TOKEN, "") ?: ""
+    fun tokenExpiresAt(ctx: Context) = sp(ctx).getLong(KEY_TOKEN_EXPIRES, 0L)
+
+    fun saveToken(ctx: Context, access: String, refresh: String?, expiresIn: Long) {
+        val expiresAt = if (expiresIn > 0) System.currentTimeMillis() / 1000 + expiresIn else 0L
+        sp(ctx).edit()
+            .putString(KEY_ACCESS_TOKEN, access)
+            .putString(KEY_REFRESH_TOKEN, refresh ?: "")
+            .putLong(KEY_TOKEN_EXPIRES, expiresAt)
+            .apply()
+    }
+
+    fun isLoggedIn(ctx: Context): Boolean = accessToken(ctx).isNotEmpty()
+
+    fun clearToken(ctx: Context) = sp(ctx).edit()
+        .remove(KEY_ACCESS_TOKEN).remove(KEY_REFRESH_TOKEN).remove(KEY_TOKEN_EXPIRES).apply()
 }
