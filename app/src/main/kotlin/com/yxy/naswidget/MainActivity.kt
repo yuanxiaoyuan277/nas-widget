@@ -45,6 +45,9 @@ class MainActivity : AppCompatActivity() {
     private lateinit var cbDocker: CheckBox
     private lateinit var dockerListContainer: LinearLayout
     private lateinit var btnRefreshDocker: Button
+    private lateinit var cbWb2api: CheckBox
+    private lateinit var etWb2apiBase: EditText
+    private lateinit var etWb2apiKey: EditText
 
     private val handler = Handler(Looper.getMainLooper())
     private var dockerContainers: List<DockerContainer> = emptyList()
@@ -77,6 +80,9 @@ class MainActivity : AppCompatActivity() {
         cbDocker = findViewById(R.id.cb_docker)
         dockerListContainer = findViewById(R.id.docker_list_container)
         btnRefreshDocker = findViewById(R.id.btn_refresh_docker)
+        cbWb2api = findViewById(R.id.cb_wb2api)
+        etWb2apiBase = findViewById(R.id.et_wb2api_base)
+        etWb2apiKey = findViewById(R.id.et_wb2api_key)
 
         widgetId = intent.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, AppWidgetManager.INVALID_APPWIDGET_ID)
         if (widgetId != AppWidgetManager.INVALID_APPWIDGET_ID) {
@@ -176,6 +182,9 @@ class MainActivity : AppCompatActivity() {
         cbTemp.isChecked = Prefs.showTemp(this)
         cbUptime.isChecked = Prefs.showUptime(this)
         cbDocker.isChecked = Prefs.showDocker(this)
+        cbWb2api.isChecked = Prefs.showWb2api(this)
+        etWb2apiBase.setText(Prefs.wb2apiBase(this))
+        etWb2apiKey.setText(Prefs.wb2apiKey(this))
         if (Prefs.isLoggedIn(this)) {
             loadDockerContainers()
         }
@@ -203,14 +212,17 @@ class MainActivity : AppCompatActivity() {
                     NasDataFetcher.fetchDocker(Prefs.nasBase(this), it)
                 }
             } else null
+            val wb2api = if (Prefs.showWb2api(this)) {
+                NasDataFetcher.fetchWb2apiCredits(Prefs.wb2apiBase(this), Prefs.wb2apiKey(this))
+            } else null
             runOnUiThread {
-                updatePreviewViews(result, docker)
+                updatePreviewViews(result, docker, wb2api)
                 previewBusy = false
             }
         }.start()
     }
 
-    private fun updatePreviewViews(result: Result<NasStats>, docker: Result<List<DockerContainer>>?) {
+    private fun updatePreviewViews(result: Result<NasStats>, docker: Result<List<DockerContainer>>?, wb2api: Result<Wb2apiStats>?) {
         val root = previewContainer.getChildAt(0) as? View ?: return
         val showCpu = Prefs.showCpu(this)
         val showMem = Prefs.showMem(this)
@@ -219,6 +231,7 @@ class MainActivity : AppCompatActivity() {
         val showTemp = Prefs.showTemp(this)
         val showUptime = Prefs.showUptime(this)
         val showDocker = Prefs.showDocker(this)
+        val showWb2api = Prefs.showWb2api(this)
 
         root.findViewById<View>(R.id.row_cpu).visibility = if (showCpu) View.VISIBLE else View.GONE
         root.findViewById<View>(R.id.row_mem).visibility = if (showMem) View.VISIBLE else View.GONE
@@ -226,6 +239,7 @@ class MainActivity : AppCompatActivity() {
         root.findViewById<View>(R.id.row_disk2).visibility = if (showDisk2) View.VISIBLE else View.GONE
         root.findViewById<View>(R.id.row_temp).visibility = if (showTemp) View.VISIBLE else View.GONE
         root.findViewById<View>(R.id.row_uptime).visibility = if (showUptime) View.VISIBLE else View.GONE
+        root.findViewById<View>(R.id.row_wb2api).visibility = if (showWb2api) View.VISIBLE else View.GONE
 
         result.onSuccess { s ->
             val t = java.text.SimpleDateFormat("HH:mm", java.util.Locale.getDefault())
@@ -264,6 +278,16 @@ class MainActivity : AppCompatActivity() {
             }
         }.onFailure {
             root.findViewById<TextView>(R.id.tv_time).text = "连接失败"
+        }
+
+        // wb2api 积分
+        if (showWb2api) {
+            val tvWb2api = root.findViewById<TextView>(R.id.tv_wb2api)
+            wb2api?.onSuccess { s ->
+                tvWb2api.text = "${s.totalCredits} · ${s.healthyCount}/${s.accountCount}健康"
+            }?.onFailure {
+                tvWb2api.text = "获取失败"
+            }
         }
 
         // Docker 容器预览
@@ -379,6 +403,11 @@ class MainActivity : AppCompatActivity() {
         val selected = dockerCheckboxes.filter { it.isChecked }
             .map { it.text.toString().substringBefore("（") }.toSet()
         Prefs.setDockerContainers(this, selected)
+
+        // wb2api 积分配置
+        Prefs.setShowWb2api(this, cbWb2api.isChecked)
+        Prefs.setWb2apiBase(this, etWb2apiBase.text.toString().trim().ifEmpty { Prefs.DEFAULT_WB2API_BASE })
+        Prefs.setWb2apiKey(this, etWb2apiKey.text.toString().trim().ifEmpty { Prefs.DEFAULT_WB2API_KEY })
 
         val am = AppWidgetManager.getInstance(this)
         val ids = am.getAppWidgetIds(ComponentName(this, NasWidgetProvider::class.java))
