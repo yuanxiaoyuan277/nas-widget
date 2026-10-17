@@ -2,6 +2,8 @@ package com.yxy.naswidget
 
 import android.app.Activity
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.view.View
 import android.webkit.WebResourceError
 import android.webkit.WebResourceRequest
@@ -18,8 +20,9 @@ class LoginActivity : AppCompatActivity() {
     private lateinit var btnGo: Button
     private lateinit var webView: WebView
     private var codeVerifier = ""
-    private var state = ""
     private var exchanged = false
+    private var extractCount = 0
+    private val handler = Handler(Looper.getMainLooper())
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -46,16 +49,15 @@ class LoginActivity : AppCompatActivity() {
 
         val (verifier, challenge) = OAuthClient.generatePkce()
         codeVerifier = verifier
-        state = randomState()
-        val authUrl = OAuthClient.buildAuthUrl(nasBase, challenge, state)
+        val state = java.util.UUID.randomUUID().toString().replace("-", "")
+        val deviceId = Prefs.deviceId(this)
+        val authUrl = OAuthClient.buildAuthUrl(nasBase, challenge, state, deviceId)
 
         webView.webViewClient = object : WebViewClient() {
-            override fun shouldOverrideUrlLoading(view: WebView, request: WebResourceRequest): Boolean =
-                handleCallback(request.url.toString())
-
-            @Suppress("DEPRECATION")
-            override fun shouldOverrideUrlLoading(view: WebView, url: String): Boolean =
-                handleCallback(url)
+            override fun onPageFinished(view: WebView, url: String) {
+                super.onPageFinished(view, url)
+                if (!exchanged) scheduleExtract()
+            }
 
             override fun onReceivedError(
                 view: WebView,
@@ -74,22 +76,33 @@ class LoginActivity : AppCompatActivity() {
         webView.loadUrl(authUrl)
     }
 
-    private fun randomState(): String =
-        java.util.UUID.randomUUID().toString().replace("-", "")
+    /** 授权成功后，飞牛页面会显示授权码（<code> 元素），这里定时轮询提取 */
+    private fun scheduleExtract() {
+        handler.postDelayed({
+            if (exchanged || isFinishing) return@postDelayed
+            extractCount++
+            if (extractCount > 120) {  // 最多轮询约 2 分钟
+                Toast.makeText(this, "授权超时，请重试", Toast.LENGTH_LONG).show()
+                return@postDelayed
+            }
+            extractCode { code ->
+                if (exchanged) return@extractCode
+                if (code.isNotEmpty()) {
+                    exchanged = true
+                    exchangeAndFinish(code)
+                } else {
+                    scheduleExtract()
+                }
+            }
+        }, 1000)
+    }
 
-    private fun handleCallback(url: String): Boolean {
-        if (!url.startsWith(OAuthClient.REDIRECT_URI)) return false
-        if (exchanged) return true
-        val pair = OAuthClient.parseCallback(url)
-        if (pair == null) {
-            setResult(Activity.RESULT_CANCELED)
-            finish()
-            return true
+    private fun extractCode(callback: (String) -> Unit) {
+        val js = "(function(){var cs=document.querySelectorAll('code');for(var i=0;i<cs.length;i++){var t=cs[i].textContent.trim();if(t.length>=10)return t;}return '';})()"
+        webView.evaluateJavascript(js) { value ->
+            val code = value?.trim()?.removeSurrounding("\"")?.trim() ?: ""
+            callback(code)
         }
-        val (code, _) = pair
-        exchanged = true
-        exchangeAndFinish(code)
-        return true
     }
 
     private fun exchangeAndFinish(code: String) {
@@ -110,5 +123,10 @@ class LoginActivity : AppCompatActivity() {
                 }
             }
         }.start()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        handler.removeCallbacksAndMessages(null)
     }
 }

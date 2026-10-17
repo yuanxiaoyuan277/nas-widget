@@ -16,6 +16,7 @@ object Prefs {
     private const val KEY_UPTIME = "show_uptime"
     private const val KEY_GLASS_DARK = "glass_dark"
     private const val KEY_NAS_BASE = "nas_base"
+    private const val KEY_DEVICE_ID = "device_id"
     private const val KEY_ACCESS_TOKEN = "access_token"
     private const val KEY_REFRESH_TOKEN = "refresh_token"
     private const val KEY_TOKEN_EXPIRES = "token_expires_at"
@@ -65,6 +66,15 @@ object Prefs {
             s = "http://$s"
         }
         return s.trimEnd('/')
+    }
+
+    /** OAuth device_id（首次生成后保持稳定） */
+    fun deviceId(ctx: Context): String {
+        val existing = sp(ctx).getString(KEY_DEVICE_ID, "") ?: ""
+        if (existing.isNotEmpty()) return existing
+        val id = java.util.UUID.randomUUID().toString().replace("-", "")
+        sp(ctx).edit().putString(KEY_DEVICE_ID, id).apply()
+        return id
     }
 
     // === 登录 token ===
