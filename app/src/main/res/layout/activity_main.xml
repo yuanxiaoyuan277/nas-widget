@@ -2,7 +2,7 @@
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#FF0D1117"
+    android:background="@drawable/bg_gradient"
     android:fillViewport="true">
 
     <LinearLayout
@@ -28,7 +28,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="NAS 监控"
-                    android:textColor="#FFFFFFFF"
+                    android:textColor="@color/app_text_primary"
                     android:textSize="24sp"
                     android:textStyle="bold" />
 
@@ -38,15 +38,15 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="2dp"
                     android:text="v1.0.0"
-                    android:textColor="#66FFFFFF"
+                    android:textColor="@color/app_text_hint"
                     android:textSize="12sp" />
             </LinearLayout>
 
             <Button
-                android:id="@+id/btn_check_update"
+                android:id="@+id/btn_toggle_theme"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="检查更新"
+                android:text="深色"
                 android:textSize="13sp"
                 android:minHeight="0dp"
                 android:minWidth="0dp"
@@ -54,30 +54,20 @@
                 android:paddingVertical="8dp" />
         </LinearLayout>
 
-        <!-- 更新状态 -->
-        <TextView
-            android:id="@+id/tv_update_status"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="6dp"
-            android:text=""
-            android:textColor="#B3FFFFFF"
-            android:textSize="12sp" />
-
         <!-- 小组件预览 -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
             android:orientation="vertical"
-            android:background="@drawable/glass_card"
+            android:background="@drawable/app_card"
             android:padding="16dp">
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="小组件预览（实时）"
-                android:textColor="#B3FFFFFF"
+                android:textColor="@color/app_text_secondary"
                 android:textSize="13sp" />
 
             <FrameLayout
@@ -93,14 +83,14 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
             android:orientation="vertical"
-            android:background="@drawable/glass_card"
+            android:background="@drawable/app_card"
             android:padding="16dp">
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="NAS 监控接口地址"
-                android:textColor="#B3FFFFFF"
+                android:textColor="@color/app_text_secondary"
                 android:textSize="13sp" />
 
             <EditText
@@ -111,8 +101,8 @@
                 android:hint="http://192.168.2.3:19254/nas"
                 android:inputType="textUri"
                 android:padding="10dp"
-                android:textColor="#FFFFFFFF"
-                android:textColorHint="#55FFFFFF"
+                android:textColor="@color/app_text_primary"
+                android:textColorHint="@color/app_text_hint"
                 android:textSize="14sp"
                 android:background="@drawable/edit_bg" />
         </LinearLayout>
@@ -123,14 +113,14 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
             android:orientation="vertical"
-            android:background="@drawable/glass_card"
+            android:background="@drawable/app_card"
             android:padding="16dp">
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="飞牛账号登录（可选，登录后才能用飞牛 API 功能）"
-                android:textColor="#B3FFFFFF"
+                android:textColor="@color/app_text_secondary"
                 android:textSize="13sp" />
 
             <TextView
@@ -139,7 +129,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="6dp"
                 android:text="未登录"
-                android:textColor="#FFFFFFFF"
+                android:textColor="@color/app_text_primary"
                 android:textSize="14sp" />
 
             <Button
@@ -156,14 +146,14 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
             android:orientation="vertical"
-            android:background="@drawable/glass_card"
+            android:background="@drawable/app_card"
             android:padding="16dp">
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="刷新间隔"
-                android:textColor="#B3FFFFFF"
+                android:textColor="@color/app_text_secondary"
                 android:textSize="13sp" />
 
             <Spinner
@@ -179,14 +169,14 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
             android:orientation="vertical"
-            android:background="@drawable/glass_card"
+            android:background="@drawable/app_card"
             android:padding="16dp">
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="显示的项目"
-                android:textColor="#B3FFFFFF"
+                android:textColor="@color/app_text_secondary"
                 android:textSize="13sp" />
 
             <LinearLayout
@@ -201,7 +191,7 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:text="CPU"
-                    android:textColor="#FFFFFFFF"
+                    android:textColor="@color/app_text_primary"
                     android:textSize="14sp" />
 
                 <CheckBox
@@ -210,7 +200,7 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:text="内存"
-                    android:textColor="#FFFFFFFF"
+                    android:textColor="@color/app_text_primary"
                     android:textSize="14sp" />
             </LinearLayout>
 
@@ -225,7 +215,7 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:text="NVMe"
-                    android:textColor="#FFFFFFFF"
+                    android:textColor="@color/app_text_primary"
                     android:textSize="14sp" />
 
                 <CheckBox
@@ -234,7 +224,7 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:text="黑盘"
-                    android:textColor="#FFFFFFFF"
+                    android:textColor="@color/app_text_primary"
                     android:textSize="14sp" />
             </LinearLayout>
 
@@ -249,7 +239,7 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:text="温度"
-                    android:textColor="#FFFFFFFF"
+                    android:textColor="@color/app_text_primary"
                     android:textSize="14sp" />
 
                 <CheckBox
@@ -258,7 +248,7 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:text="运行时长"
-                    android:textColor="#FFFFFFFF"
+                    android:textColor="@color/app_text_primary"
                     android:textSize="14sp" />
             </LinearLayout>
         </LinearLayout>
@@ -269,14 +259,14 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
             android:orientation="vertical"
-            android:background="@drawable/glass_card"
+            android:background="@drawable/app_card"
             android:padding="16dp">
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Docker 容器（登录飞牛后可选显示）"
-                android:textColor="#B3FFFFFF"
+                android:textColor="@color/app_text_secondary"
                 android:textSize="13sp" />
 
             <CheckBox
@@ -285,7 +275,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="6dp"
                 android:text="在小组件显示 Docker 容器"
-                android:textColor="#FFFFFFFF"
+                android:textColor="@color/app_text_primary"
                 android:textSize="14sp" />
 
             <LinearLayout
@@ -311,6 +301,24 @@
             android:layout_marginTop="20dp"
             android:text="保存并更新小组件"
             android:textSize="16sp" />
+
+        <!-- 检查更新 -->
+        <Button
+            android:id="@+id/btn_check_update"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:text="检查更新"
+            android:textSize="14sp" />
+
+        <TextView
+            android:id="@+id/tv_update_status"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:text=""
+            android:textColor="@color/app_text_secondary"
+            android:textSize="12sp" />
 
     </LinearLayout>
 </ScrollView>
