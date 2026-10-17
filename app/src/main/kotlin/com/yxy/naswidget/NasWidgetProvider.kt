@@ -132,7 +132,7 @@ class NasWidgetProvider : AppWidgetProvider() {
                             for (c in filtered) {
                                 val item = RemoteViews(context.packageName, R.layout.item_docker)
                                 item.setTextViewText(R.id.tv_name, c.name)
-                                item.setTextViewText(R.id.tv_state, c.stateText)
+                                item.setTextViewText(R.id.tv_state, c.detailText)
                                 val dotColor = when {
                                     c.running -> 0xFF4CAF50.toInt()
                                     c.state.equals("error", true) -> 0xFFF44336.toInt()
