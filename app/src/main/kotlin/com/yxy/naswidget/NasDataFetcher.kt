@@ -126,4 +126,47 @@ object NasDataFetcher {
             null
         }
     }
+
+    /** 拉取 wb2api（workbuddy2api）积分统计：GET /panel/api/overview，Bearer 认证 */
+    fun fetchWb2apiCredits(base: String, apiKey: String): Result<Wb2apiStats> {
+        return try {
+            val conn = URL(base.trimEnd('/') + "/panel/api/overview").openConnection() as HttpURLConnection
+            conn.connectTimeout = 8000
+            conn.readTimeout = 8000
+            conn.requestMethod = "GET"
+            conn.setRequestProperty("Accept", "application/json")
+            conn.setRequestProperty("Authorization", "Bearer $apiKey")
+            val code = conn.responseCode
+            val body = conn.inputStream?.bufferedReader()?.use { it.readText() }
+                ?: conn.errorStream?.bufferedReader()?.use { it.readText() } ?: ""
+            conn.disconnect()
+            if (code != 200) return Result.failure(Exception("HTTP $code: $body"))
+
+            val root = JSONObject(body)
+            val arr = root.optJSONArray("accounts") ?: return Result.failure(Exception("响应无 accounts"))
+            val accounts = mutableListOf<Wb2apiStats.AccountCredit>()
+            var total = 0L
+            var healthy = 0
+            for (i in 0 until arr.length()) {
+                val a = arr.optJSONObject(i) ?: continue
+                val credits = a.optLong("credits", 0L)
+                val cooling = a.optBoolean("cooling", false)
+                val disabled = a.optBoolean("disabled", false)
+                total += credits
+                if (!cooling && !disabled) healthy++
+                accounts.add(
+                    Wb2apiStats.AccountCredit(
+                        a.optString("nickname", "?"),
+                        credits,
+                        a.optLong("credits_total", 0L),
+                        cooling,
+                        disabled
+                    )
+                )
+            }
+            Result.success(Wb2apiStats(total, accounts.size, healthy, accounts))
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
 }
