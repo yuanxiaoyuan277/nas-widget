@@ -20,6 +20,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.content.ContextCompat
+import androidx.core.view.WindowCompat
 import java.io.File
 
 class MainActivity : AppCompatActivity() {
@@ -55,6 +56,7 @@ class MainActivity : AppCompatActivity() {
     private var previewBusy = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        WindowCompat.setDecorFitsSystemWindows(window, true)
         AppCompatDelegate.setDefaultNightMode(
             if (Prefs.isDarkTheme(this)) AppCompatDelegate.MODE_NIGHT_YES
             else AppCompatDelegate.MODE_NIGHT_NO
