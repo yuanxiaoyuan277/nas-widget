@@ -5,6 +5,22 @@ import org.json.JSONObject
 /** NAS 监控数据模型（对应 monitor_proxy 的 /nas 返回） */
 data class DiskStat(val name: String, val used: Long, val total: Long, val usePercent: Double)
 
+/** wb2api（workbuddy2api）积分统计 */
+data class Wb2apiStats(
+    val totalCredits: Long,
+    val accountCount: Int,
+    val healthyCount: Int,
+    val accounts: List<AccountCredit>
+) {
+    data class AccountCredit(
+        val nickname: String,
+        val credits: Long,
+        val creditsTotal: Long,
+        val cooling: Boolean,
+        val disabled: Boolean
+    )
+}
+
 /** Docker 容器（来自飞牛 appcgi.dockermgr.containerList + containerStats） */
 data class DockerContainer(
     val id: String,
