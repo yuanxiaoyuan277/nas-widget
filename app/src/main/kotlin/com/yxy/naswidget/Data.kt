@@ -5,8 +5,14 @@ import org.json.JSONObject
 /** NAS 监控数据模型（对应 monitor_proxy 的 /nas 返回） */
 data class DiskStat(val name: String, val used: Long, val total: Long, val usePercent: Double)
 
-/** Docker 容器（来自飞牛 appcgi.dockermgr.containerList） */
-data class DockerContainer(val name: String, val state: String, val status: String) {
+/** Docker 容器（来自飞牛 appcgi.dockermgr.containerList + containerStats） */
+data class DockerContainer(
+    val id: String,
+    val name: String,
+    val state: String,
+    val status: String,
+    val memBytes: Long? = null
+) {
     val running: Boolean get() = state.equals("running", ignoreCase = true)
 
     /** 精确状态标签（飞牛 State 字段可能为 running/exited/stopped/error/created/paused/restarting 等） */
@@ -21,9 +27,30 @@ data class DockerContainer(val name: String, val state: String, val status: Stri
         else -> state
     }
 
+    /** 内存占用可读文本（如 "78M"），未获取则为空串 */
+    val memText: String get() = memBytes?.let { Fmt.bytes(it) } ?: ""
+
+    /** 运行时长文本（从 Status 提取 "Up 2 days" 这类，清理掉 "(healthy)" 等后缀） */
+    val uptimeText: String get() {
+        if (!running) return ""
+        val cleaned = status.substringBefore(" (").trim()
+        return if (cleaned.startsWith("Up ")) cleaned else ""
+    }
+
     /** 状态 + 详情（如 "运行 · Up 2 days"、"异常 · 137"） */
     val stateText: String get() =
         if (status.isNotEmpty() && !running) "$stateLabel · $status" else stateLabel
+
+    /** 显示用完整详情：运行态拼 内存 + 运行时长；非运行态用 stateText */
+    val detailText: String get() {
+        if (running) {
+            val parts = mutableListOf(stateLabel)
+            if (memText.isNotEmpty()) parts.add(memText)
+            if (uptimeText.isNotEmpty()) parts.add(uptimeText)
+            return parts.joinToString(" · ")
+        }
+        return stateText
+    }
 }
 
 data class NasStats(
