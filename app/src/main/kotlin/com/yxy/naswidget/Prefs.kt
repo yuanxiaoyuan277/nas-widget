@@ -17,6 +17,7 @@ object Prefs {
     private const val KEY_GLASS_DARK = "glass_dark"
     private const val KEY_NAS_BASE = "nas_base"
     private const val KEY_DEVICE_ID = "device_id"
+    private const val KEY_PENDING_VERIFIER = "pending_verifier"
     private const val KEY_ACCESS_TOKEN = "access_token"
     private const val KEY_REFRESH_TOKEN = "refresh_token"
     private const val KEY_TOKEN_EXPIRES = "token_expires_at"
@@ -76,6 +77,13 @@ object Prefs {
         sp(ctx).edit().putString(KEY_DEVICE_ID, id).apply()
         return id
     }
+
+    /** 待换 token 的 code_verifier（跨浏览器授权期间保存） */
+    fun setPendingVerifier(ctx: Context, v: String) =
+        sp(ctx).edit().putString(KEY_PENDING_VERIFIER, v).apply()
+    fun pendingVerifier(ctx: Context): String = sp(ctx).getString(KEY_PENDING_VERIFIER, "") ?: ""
+    fun clearPendingVerifier(ctx: Context) =
+        sp(ctx).edit().remove(KEY_PENDING_VERIFIER).apply()
 
     // === 登录 token ===
     fun accessToken(ctx: Context) = sp(ctx).getString(KEY_ACCESS_TOKEN, "") ?: ""

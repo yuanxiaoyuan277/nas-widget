@@ -11,6 +11,7 @@ import org.json.JSONObject
 object OAuthClient {
 
     const val CLIENT_ID = "YJNMPJUGA9"
+    const val REDIRECT_URI = "naswidget://oauth/callback"
     const val SCOPE = "trim.user.all trim.file.read trim.file.write trim.download.all trim.appcenter.all trim.photo.all trim.baidu_netdisk.all trim.system.all trim.log.all trim.storage.all trim.docker.all"
 
     /** 生成 PKCE：返回 (code_verifier, code_challenge) */
@@ -25,14 +26,12 @@ object OAuthClient {
     private fun base64Url(bytes: ByteArray): String =
         Base64.encodeToString(bytes, Base64.URL_SAFE or Base64.NO_WRAP or Base64.NO_PADDING)
 
-    /**
-     * 构造授权 URL。
-     * public 客户端 PKCE 模式：无 redirect_uri（授权码显示在页面），含 code_challenge + device_id。
-     */
+    /** 构造授权 URL（带 redirect_uri，授权后跳回 App） */
     fun buildAuthUrl(nasBase: String, codeChallenge: String, state: String, deviceId: String): String {
         val base = nasBase.trimEnd('/')
         val sb = StringBuilder(base).append("/signin?")
         sb.append("client_id=").append(CLIENT_ID)
+        sb.append("&redirect_uri=").append(java.net.URLEncoder.encode(REDIRECT_URI, "UTF-8"))
         sb.append("&scope=").append(java.net.URLEncoder.encode(SCOPE, "UTF-8"))
         sb.append("&code_challenge=").append(codeChallenge)
         sb.append("&code_challenge_method=S256")
@@ -47,7 +46,7 @@ object OAuthClient {
         val expiresIn: Long
     )
 
-    /** 用授权码换 token（第三方 PKCE 换 token 接口） */
+    /** 用授权码换 token（第三方 PKCE 换 token 接口，需带 client_id） */
     fun exchangeCode(nasBase: String, code: String, codeVerifier: String): Result<TokenResult> {
         return try {
             val url = URL(nasBase.trimEnd('/') + "/oauthapi/third-part/token")
@@ -60,6 +59,7 @@ object OAuthClient {
             conn.doOutput = true
 
             val body = JSONObject().apply {
+                put("client_id", CLIENT_ID)
                 put("code", code)
                 put("code_verifier", codeVerifier)
                 put("device_name", "nas-widget")
@@ -75,7 +75,6 @@ object OAuthClient {
             if (code_ != 200) return Result.failure(Exception("HTTP $code_: $resp"))
 
             val root = JSONObject(resp)
-            // 飞牛返回可能是 {code,msg,data:{...}} 或直接 {...}
             val data = root.optJSONObject("data") ?: root
             val accessToken = data.optString("accessToken").ifEmpty { data.optString("access_token") }
             val refreshToken = data.optString("refreshToken").ifEmpty { data.optString("refresh_token") }
