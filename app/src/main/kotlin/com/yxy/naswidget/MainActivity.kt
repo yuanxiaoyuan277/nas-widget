@@ -176,8 +176,9 @@ class MainActivity : AppCompatActivity() {
         Thread {
             val result = NasDataFetcher.fetch(url)
             val docker = if (Prefs.showDocker(this)) {
-                val token = Prefs.accessToken(this)
-                if (token.isNotEmpty()) NasDataFetcher.fetchDocker(Prefs.nasBase(this), token) else null
+                OAuthClient.getValidAccessToken(this).getOrNull()?.let {
+                    NasDataFetcher.fetchDocker(Prefs.nasBase(this), it)
+                }
             } else null
             runOnUiThread {
                 updatePreviewViews(result, docker)
@@ -277,14 +278,18 @@ class MainActivity : AppCompatActivity() {
 
     // === Docker 配置 ===
     private fun loadDockerContainers() {
-        val token = Prefs.accessToken(this)
-        if (token.isEmpty()) {
+        if (!Prefs.isLoggedIn(this)) {
             Toast.makeText(this, "请先登录飞牛账号", Toast.LENGTH_SHORT).show()
             return
         }
         btnRefreshDocker.isEnabled = false
         Thread {
-            val result = NasDataFetcher.fetchDocker(Prefs.nasBase(this), token)
+            val token = OAuthClient.getValidAccessToken(this).getOrNull()
+            val result = if (token != null) {
+                NasDataFetcher.fetchDocker(Prefs.nasBase(this), token)
+            } else {
+                Result.failure(Exception("登录已过期，请重新登录"))
+            }
             runOnUiThread {
                 btnRefreshDocker.isEnabled = true
                 result.onSuccess { list ->
