@@ -29,6 +29,8 @@ class MainActivity : AppCompatActivity() {
     private lateinit var tvVersion: TextView
     private lateinit var tvUpdateStatus: TextView
     private lateinit var btnCheckUpdate: Button
+    private lateinit var tvLoginStatus: TextView
+    private lateinit var btnLogin: Button
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -45,6 +47,8 @@ class MainActivity : AppCompatActivity() {
         tvVersion = findViewById(R.id.tv_version)
         tvUpdateStatus = findViewById(R.id.tv_update_status)
         btnCheckUpdate = findViewById(R.id.btn_check_update)
+        tvLoginStatus = findViewById(R.id.tv_login_status)
+        btnLogin = findViewById(R.id.btn_login)
 
         widgetId = intent.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, AppWidgetManager.INVALID_APPWIDGET_ID)
         if (widgetId != AppWidgetManager.INVALID_APPWIDGET_ID) {
@@ -54,31 +58,32 @@ class MainActivity : AppCompatActivity() {
         val labels = refreshOptions.map { it.second }
         spRefresh.adapter = ArrayAdapter(this, android.R.layout.simple_spinner_dropdown_item, labels)
 
-        if (Prefs.isLoggedIn(this)) {
-            loadPrefs()
-        } else {
-            startActivityForResult(Intent(this, LoginActivity::class.java), REQ_LOGIN)
-        }
-
+        loadPrefs()
         tvVersion.text = "v${UpdateChecker.localVersion(this)}"
+        updateLoginStatus()
 
         btnCheckUpdate.setOnClickListener { checkUpdate() }
+        btnLogin.setOnClickListener {
+            startActivityForResult(Intent(this, LoginActivity::class.java), REQ_LOGIN)
+        }
         findViewById<Button>(R.id.btn_save).setOnClickListener { save() }
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == REQ_LOGIN) {
-            if (resultCode == RESULT_OK) {
-                loadPrefs()
-            } else {
-                finish()
-            }
+        if (requestCode == REQ_LOGIN && resultCode == RESULT_OK) {
+            updateLoginStatus()
         }
     }
 
     companion object {
         private const val REQ_LOGIN = 1001
+    }
+
+    private fun updateLoginStatus() {
+        val logged = Prefs.isLoggedIn(this)
+        tvLoginStatus.text = if (logged) "已登录飞牛账号" else "未登录"
+        btnLogin.text = if (logged) "重新登录" else "登录飞牛账号"
     }
 
     private fun loadPrefs() {

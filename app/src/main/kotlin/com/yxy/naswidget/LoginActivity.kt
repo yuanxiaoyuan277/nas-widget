@@ -2,6 +2,7 @@ package com.yxy.naswidget
 
 import android.app.Activity
 import android.os.Bundle
+import android.webkit.WebResourceError
 import android.webkit.WebResourceRequest
 import android.webkit.WebView
 import android.webkit.WebViewClient
@@ -37,6 +38,20 @@ class LoginActivity : AppCompatActivity() {
             @Suppress("DEPRECATION")
             override fun shouldOverrideUrlLoading(view: WebView, url: String): Boolean =
                 handleCallback(url)
+
+            override fun onReceivedError(
+                view: WebView,
+                request: WebResourceRequest,
+                error: WebResourceError
+            ) {
+                if (request.isForMainFrame) {
+                    Toast.makeText(
+                        this@LoginActivity,
+                        "无法连接飞牛，请确认已连家里 WiFi 或地址可达",
+                        Toast.LENGTH_LONG
+                    ).show()
+                }
+            }
         }
 
         webView.loadUrl(authUrl)
