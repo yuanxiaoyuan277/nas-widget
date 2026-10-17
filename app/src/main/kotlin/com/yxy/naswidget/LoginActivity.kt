@@ -133,12 +133,12 @@ class LoginActivity : AppCompatActivity() {
         }
     }
 
-    /** 提取失败时，抓当前 URL + 页面文本，帮助定位 */
+    /** 提取失败时，抓页面文本，帮助定位 */
     private fun diagnose() {
-        val js = "(function(){var b=document.body?document.body.innerText.replace(/\\s+/g,' ').trim():'';return location.href+' ### '+b.substring(0,120);})()"
+        val js = "(function(){var b=document.body?(document.body.innerText||'').replace(/\\s+/g,' ').trim():'';return b?b.substring(0,80):'[页面空白]';})()"
         webView.evaluateJavascript(js) { value ->
             val info = value?.trim()?.removeSurrounding("\"")?.trim() ?: ""
-            Toast.makeText(this, "诊断：$info", Toast.LENGTH_LONG).show()
+            Toast.makeText(this, "页面内容：$info", Toast.LENGTH_LONG).show()
         }
     }
 
