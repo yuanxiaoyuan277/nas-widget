@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- 主界面主题色（深色） -->
+    <color name="app_bg">#FF0D1117</color>
+    <color name="app_gradient_start">#FF0D1117</color>
+    <color name="app_gradient_end">#FF1A2332</color>
+    <color name="app_text_primary">#FFFFFFFF</color>
+    <color name="app_text_secondary">#B3FFFFFF</color>
+    <color name="app_text_hint">#66FFFFFF</color>
+    <color name="app_card_start">#38FFFFFF</color>
+    <color name="app_card_end">#1AFFFFFF</color>
+    <color name="app_card_border">#66FFFFFF</color>
+    <color name="app_card_highlight">#66FFFFFF</color>
+    <color name="app_input_bg">#1AFFFFFF</color>
+</resources>
