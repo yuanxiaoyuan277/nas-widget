@@ -9,11 +9,11 @@ import java.io.File
 import java.net.HttpURLConnection
 import java.net.URL
 
-/** 应用内更新：检查 GitHub Release、下载 APK、跳转安装 */
+/** 应用内更新：检查公网 version.json、下载 APK、跳转安装 */
 object UpdateChecker {
 
-    private const val REPO = "yuanxiaoyuan277/nas-widget"
-    private const val API = "https://api.github.com/repos/$REPO/releases/latest"
+    private const val UPDATE_BASE = "https://411223.xyz:44444"
+    private const val VERSION_URL = "$UPDATE_BASE/version.json"
 
     data class UpdateInfo(val version: String, val url: String, val size: Long, val notes: String)
 
@@ -25,14 +25,14 @@ object UpdateChecker {
             "0.0.0"
         }
 
-    /** 检查最新 release */
+    /** 检查最新版本：读公网 version.json */
     fun checkLatest(): Result<UpdateInfo> {
         return try {
-            val conn = URL(API).openConnection() as HttpURLConnection
+            val conn = URL(VERSION_URL).openConnection() as HttpURLConnection
             conn.connectTimeout = 8000
             conn.readTimeout = 8000
             conn.requestMethod = "GET"
-            conn.setRequestProperty("Accept", "application/vnd.github+json")
+            conn.setRequestProperty("Accept", "application/json")
             conn.setRequestProperty("User-Agent", "nas-widget-updater")
             val code = conn.responseCode
             if (code != 200) {
@@ -43,25 +43,14 @@ object UpdateChecker {
             conn.disconnect()
 
             val root = JSONObject(body)
-            val tag = root.optString("tag_name", "").removePrefix("v")
-            val assets = root.optJSONArray("assets")
-            if (assets == null || assets.length() == 0) {
-                return Result.failure(Exception("release 无 APK 附件"))
+            val version = root.optString("version", "").removePrefix("v")
+            val apk = root.optString("apk", "")
+            val notes = root.optString("notes", "")
+            if (version.isEmpty() || apk.isEmpty()) {
+                return Result.failure(Exception("version.json 格式错误"))
             }
-            var apkUrl = ""
-            var size = 0L
-            for (i in 0 until assets.length()) {
-                val a = assets.optJSONObject(i) ?: continue
-                val name = a.optString("name", "")
-                if (name.endsWith(".apk")) {
-                    apkUrl = a.optString("browser_download_url", "")
-                    size = a.optLong("size", 0L)
-                    break
-                }
-            }
-            if (apkUrl.isEmpty()) return Result.failure(Exception("未找到 APK 下载地址"))
-            val notes = root.optString("body", "")
-            Result.success(UpdateInfo(tag, apkUrl, size, notes))
+            val url = "$UPDATE_BASE/$apk"
+            Result.success(UpdateInfo(version, url, 0L, notes))
         } catch (e: Exception) {
             Result.failure(e)
         }
