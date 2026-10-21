@@ -17,8 +17,11 @@ import android.view.View
 import android.widget.Button
 import android.widget.CheckBox
 import android.widget.EditText
+import android.widget.AdapterView
+import android.widget.ArrayAdapter
 import android.widget.ProgressBar
 import android.widget.ScrollView
+import android.widget.Spinner
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
@@ -34,6 +37,9 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
         private const val REQ_LOGIN = 1001
     }
 
+    private val refreshOptions = listOf(10 to "10 秒", 15 to "15 秒", 30 to "30 秒", 60 to "60 秒", 300 to "5 分钟")
+    private lateinit var spRefresh: Spinner
+    private lateinit var etFontSize: EditText
     private lateinit var scrollRoot: ScrollView
     private lateinit var tvLoginStatus: TextView
     private lateinit var btnLogin: Button
@@ -56,6 +62,8 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
         super.onViewCreated(view, savedInstanceState)
 
         scrollRoot = view.findViewById(R.id.settings_scroll)
+        spRefresh = view.findViewById(R.id.sp_refresh)
+        etFontSize = view.findViewById(R.id.et_font_size)
         tvLoginStatus = view.findViewById(R.id.tv_login_status)
         btnLogin = view.findViewById(R.id.btn_login)
         etUrl = view.findViewById(R.id.et_url)
@@ -86,6 +94,18 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
         watchEditText(etUrl)
         watchEditText(etWb2apiBase)
         watchEditText(etWb2apiKey)
+        spRefresh.adapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_dropdown_item, refreshOptions.map { it.second })
+        spRefresh.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                if (!suppressSave) scheduleSave()
+            }
+            override fun onNothingSelected(parent: AdapterView<*>?) {}
+        }
+        etFontSize.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+            override fun afterTextChanged(s: Editable?) { if (!suppressSave) scheduleSave() }
+        })
 
         // 输入框默认隐藏 + 显示/隐藏切换
         setupToggle(etUrl, view.findViewById(R.id.btn_toggle_url))
@@ -124,6 +144,10 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
         suppressSave = true
         updateLoginStatus()
         etUrl.setText(Prefs.url(requireContext()))
+        val cur = Prefs.refreshSec(requireContext())
+        val idx = refreshOptions.indexOfFirst { it.first == cur }
+        spRefresh.setSelection(if (idx >= 0) idx else 2)
+        etFontSize.setText(Prefs.fontSize(requireContext()).toString())
         cbWb2api.isChecked = Prefs.showWb2api(requireContext())
         etWb2apiBase.setText(Prefs.wb2apiBase(requireContext()))
         etWb2apiKey.setText(Prefs.wb2apiKey(requireContext()))
@@ -196,6 +220,10 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
         val url = etUrl.text.toString().trim().ifEmpty { Prefs.DEFAULT_URL }
         Prefs.setUrl(requireContext(), url)
         Prefs.setShowWb2api(requireContext(), cbWb2api.isChecked)
+        val sel = spRefresh.selectedItemPosition
+        Prefs.setRefresh(requireContext(), refreshOptions.getOrElse(sel) { 30 to "30 秒" }.first)
+        val fs = etFontSize.text.toString().toIntOrNull()?.coerceIn(8, 200) ?: 16
+        Prefs.setFontSize(requireContext(), fs)
         Prefs.setWb2apiBase(requireContext(), etWb2apiBase.text.toString().trim().ifEmpty { Prefs.DEFAULT_WB2API_BASE })
         Prefs.setWb2apiKey(requireContext(), etWb2apiKey.text.toString().trim().ifEmpty { Prefs.DEFAULT_WB2API_KEY })
 

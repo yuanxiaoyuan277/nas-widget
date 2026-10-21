@@ -11,8 +11,6 @@ import android.util.TypedValue
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.View
-import android.widget.AdapterView
-import android.widget.ArrayAdapter
 import android.widget.Button
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.widget.SwitchCompat
@@ -22,7 +20,6 @@ import android.widget.LinearLayout
 import android.widget.ProgressBar
 import android.widget.ScrollView
 import android.widget.SeekBar
-import android.widget.Spinner
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -31,9 +28,7 @@ import androidx.fragment.app.Fragment
 class HomeFragment : Fragment(R.layout.fragment_home) {
 
     private var widgetId = AppWidgetManager.INVALID_APPWIDGET_ID
-    private val refreshOptions = listOf(10 to "10 秒", 15 to "15 秒", 30 to "30 秒", 60 to "60 秒", 300 to "5 分钟")
 
-    private lateinit var spRefresh: Spinner
     private lateinit var scrollRoot: ScrollView
     private lateinit var cbCpu: SwitchCompat
     private lateinit var cbMem: SwitchCompat
@@ -44,7 +39,6 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
     private lateinit var cbDocker: SwitchCompat
     private lateinit var dockerListContainer: LinearLayout
     private lateinit var btnRefreshDocker: Button
-    private lateinit var etFontSize: EditText
     private lateinit var sbCpuX: SeekBar
     private lateinit var sbCpuY: SeekBar
     private lateinit var sbMemX: SeekBar
@@ -77,7 +71,6 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
     private var suppressSave = false
     private var autoUpdateChecked = false
     private var dockerLoaded = false
-    private val fontSaveRunnable = Runnable { persist() }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -88,7 +81,6 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
             requestPermissions(arrayOf(android.Manifest.permission.POST_NOTIFICATIONS), 100)
         }
 
-        spRefresh = view.findViewById(R.id.sp_refresh)
         scrollRoot = view.findViewById(R.id.scroll_root)
         cbCpu = view.findViewById(R.id.cb_cpu)
         cbMem = view.findViewById(R.id.cb_mem)
@@ -99,7 +91,6 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         cbDocker = view.findViewById(R.id.cb_docker)
         dockerListContainer = view.findViewById(R.id.docker_list_container)
         btnRefreshDocker = view.findViewById(R.id.btn_refresh_docker)
-        etFontSize = view.findViewById(R.id.et_font_size)
         sbCpuX = view.findViewById(R.id.sb_cpu_x)
         sbCpuY = view.findViewById(R.id.sb_cpu_y)
         sbMemX = view.findViewById(R.id.sb_mem_x)
@@ -129,9 +120,6 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         if (widgetId != AppWidgetManager.INVALID_APPWIDGET_ID) {
             requireActivity().setResult(Activity.RESULT_OK, Intent().putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, widgetId))
         }
-
-        val labels = refreshOptions.map { it.second }
-        spRefresh.adapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_dropdown_item, labels)
 
         // 小组件预览
         layoutInflater.inflate(R.layout.nas_widget_preview, previewContainer, true)
@@ -223,16 +211,12 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
 
     private fun loadPrefs() {
         suppressSave = true
-        val cur = Prefs.refreshSec(requireContext())
-        val idx = refreshOptions.indexOfFirst { it.first == cur }
-        spRefresh.setSelection(if (idx >= 0) idx else 2)
         cbCpu.isChecked = Prefs.showCpu(requireContext())
         cbMem.isChecked = Prefs.showMem(requireContext())
         cbDisk1.isChecked = Prefs.showDisk1(requireContext())
         cbDisk2.isChecked = Prefs.showDisk2(requireContext())
         cbNet.isChecked = Prefs.showNet(requireContext())
         cbDocker.isChecked = Prefs.showDocker(requireContext())
-        etFontSize.setText(Prefs.fontSize(requireContext()).toString())
         sbCpuX.progress = Prefs.compX(requireContext(), "cpu") + 50
         sbCpuY.progress = Prefs.compY(requireContext(), "cpu") + 50
         sbMemX.progress = Prefs.compX(requireContext(), "mem") + 50
@@ -538,17 +522,12 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
     }
 
     private fun persist() {
-        val sel = spRefresh.selectedItemPosition
-        Prefs.setRefresh(requireContext(), refreshOptions.getOrElse(sel) { 30 to "30 秒" }.first)
         Prefs.setShowCpu(requireContext(), cbCpu.isChecked)
         Prefs.setShowMem(requireContext(), cbMem.isChecked)
         Prefs.setShowDisk1(requireContext(), cbDisk1.isChecked)
         Prefs.setShowDisk2(requireContext(), cbDisk2.isChecked)
         Prefs.setShowDocker(requireContext(), cbDocker.isChecked)
         Prefs.setShowNet(requireContext(), cbNet.isChecked)
-        // 字号
-        val fs = etFontSize.text.toString().toIntOrNull()?.coerceIn(8, 200) ?: 16
-        Prefs.setFontSize(requireContext(), fs)
         // Docker 选中容器
         if (dockerCheckboxes.isNotEmpty()) {
             val selected = dockerCheckboxes.filter { it.isChecked }.mapNotNull { it.tag as? String }.toSet()
@@ -620,24 +599,6 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         for (cb in listOf(cbCpu, cbMem, cbDisk1, cbDisk2, cbDocker, cbNet)) {
             cb.setOnCheckedChangeListener { _, _ -> if (!suppressSave) persist() }
         }
-
-        spRefresh.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-                if (!suppressSave) persist()
-            }
-            override fun onNothingSelected(parent: AdapterView<*>?) {}
-        }
-
-        etFontSize.addTextChangedListener(object : TextWatcher {
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
-            override fun afterTextChanged(s: Editable?) {
-                if (!suppressSave) {
-                    handler.removeCallbacks(fontSaveRunnable)
-                    handler.postDelayed(fontSaveRunnable, 400)
-                }
-            }
-        })
 
         // 滑块实时同步：拖动即时更新输入框 + 保存 + 刷新预览
         val etMap = mapOf(
