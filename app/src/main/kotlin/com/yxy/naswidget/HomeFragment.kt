@@ -1,5 +1,6 @@
 package com.yxy.naswidget
 
+import android.app.Activity
 import android.appwidget.AppWidgetManager
 import android.content.ComponentName
 import android.content.Intent
@@ -126,7 +127,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
 
         widgetId = requireActivity().intent.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, AppWidgetManager.INVALID_APPWIDGET_ID)
         if (widgetId != AppWidgetManager.INVALID_APPWIDGET_ID) {
-            requireActivity().setResult(RESULT_OK, Intent().putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, widgetId))
+            requireActivity().setResult(Activity.RESULT_OK, Intent().putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, widgetId))
         }
 
         val labels = refreshOptions.map { it.second }
@@ -164,7 +165,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == REQ_LOGIN) {
-            if (resultCode == RESULT_OK) {
+            if (resultCode == Activity.RESULT_OK) {
                 loadPrefs()
                 startPreviewRefresh()
             } else {
@@ -567,7 +568,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         persist()
         if (widgetId != AppWidgetManager.INVALID_APPWIDGET_ID) {
             val result = Intent().putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, widgetId)
-            requireActivity().setResult(RESULT_OK, result)
+            requireActivity().setResult(Activity.RESULT_OK, result)
             requireActivity().finish()
         } else {
             requireActivity().finish()

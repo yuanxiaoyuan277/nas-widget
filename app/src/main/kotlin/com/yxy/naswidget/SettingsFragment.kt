@@ -1,5 +1,6 @@
 package com.yxy.naswidget
 
+import android.app.Activity
 import android.appwidget.AppWidgetManager
 import android.content.ComponentName
 import android.content.ClipData
@@ -108,7 +109,7 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == REQ_LOGIN && resultCode == RESULT_OK) {
+        if (requestCode == REQ_LOGIN && resultCode == Activity.RESULT_OK) {
             updateLoginStatus()
         }
     }
