@@ -89,7 +89,9 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
         watchEditText(etUrl)
         watchEditText(etWb2apiBase)
         watchEditText(etWb2apiKey)
-        spRefresh.adapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_dropdown_item, refreshOptions.map { it.second })
+        val adapter = ArrayAdapter(requireContext(), R.layout.spinner_item, refreshOptions.map { it.second })
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        spRefresh.adapter = adapter
         spRefresh.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
                 if (!suppressSave) scheduleSave()
