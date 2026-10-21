@@ -33,7 +33,6 @@ class MainActivity : AppCompatActivity() {
 
         bottomNav.setOnItemSelectedListener { item ->
             val target = item.itemId
-            // 已在这个 tab，不重复切换
             if (target == currentTab) {
                 return@setOnItemSelectedListener true
             }
@@ -43,28 +42,45 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    /** 用 show/hide 复用 Fragment 实例，避免每次切换重新 inflate 布局导致卡顿 */
+    /** show/hide 复用实例（不重 inflate），手动做 enter 滑入 + exit 滑出动画 */
     private fun switchFragment(tabId: Int) {
         val home = homeFragment ?: HomeFragment().also { homeFragment = it }
         val settings = settingsFragment ?: SettingsFragment().also { settingsFragment = it }
-
         val goingRight = tabId == R.id.nav_settings
-        val enter = if (goingRight) R.anim.slide_in_right else R.anim.slide_in_left
-        val exit = if (goingRight) R.anim.slide_out_left else R.anim.slide_out_right
+        val enterFrag = if (tabId == R.id.nav_home) home else settings
+        val exitFrag = if (tabId == R.id.nav_home) settings else home
 
-        val tx = supportFragmentManager.beginTransaction()
-        if (tabId == R.id.nav_home) {
-            // 主页：确保 home 已 add，隐藏 settings，显示 home
-            if (!home.isAdded) tx.add(R.id.fragment_container, home, "home")
-            if (settings.isAdded) tx.hide(settings)
-            tx.show(home)
-        } else {
-            // 设置：确保 settings 已 add，隐藏 home，显示 settings
-            if (!settings.isAdded) tx.add(R.id.fragment_container, settings, "settings")
-            tx.hide(home)
-            if (settings.isAdded) tx.show(settings)
+        // 首次 add（同步，确保 view 准备好）
+        if (!enterFrag.isAdded) {
+            supportFragmentManager.beginTransaction()
+                .add(R.id.fragment_container, enterFrag)
+                .commitNow()
         }
-        tx.setCustomAnimations(enter, exit, enter, exit)
-        tx.commit()
+
+        val enterView = enterFrag.view ?: run {
+            supportFragmentManager.beginTransaction().hide(exitFrag).show(enterFrag).commit()
+            return
+        }
+        val exitView = exitFrag.view
+
+        val w = enterView.width.toFloat()
+        val enterFrom = if (goingRight) w else -w
+        val exitTo = if (goingRight) -w else w
+
+        // show enter（立即），hide exit（等 exit 滑出动画结束）
+        supportFragmentManager.beginTransaction().show(enterFrag).commit()
+
+        exitView?.animate()
+            ?.translationX(exitTo)
+            ?.setDuration(700)
+            ?.withEndAction { supportFragmentManager.beginTransaction().hide(exitFrag).commit() }
+            ?.start()
+
+        enterView.translationX = enterFrom
+        enterView.animate()
+            .translationX(0f)
+            .setDuration(700)
+            .setInterpolator(android.view.animation.DecelerateInterpolator())
+            .start()
     }
 }

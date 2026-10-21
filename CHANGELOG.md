@@ -1,5 +1,8 @@
 # 更新日志
 
+## v1.11.8
+- 修复 show/hide 后切换无过渡：改用手动 enter/exit 平移动画
+
 ## v1.11.7
 - 动画时长加长到 700ms
 - 改用 show/hide 复用 Fragment，消除切换时重新 inflate 布局导致的卡顿
