@@ -15,14 +15,33 @@ object Prefs {
     private const val KEY_TEMP = "show_temp"
     private const val KEY_UPTIME = "show_uptime"
     private const val KEY_GLASS_DARK = "glass_dark"
+    private const val KEY_SHOW_DOCKER = "show_docker"
+    private const val KEY_DOCKER_CONTAINERS = "docker_containers"
     private const val KEY_NAS_BASE = "nas_base"
     private const val KEY_DEVICE_ID = "device_id"
+    private const val KEY_PENDING_VERIFIER = "pending_verifier"
     private const val KEY_ACCESS_TOKEN = "access_token"
     private const val KEY_REFRESH_TOKEN = "refresh_token"
     private const val KEY_TOKEN_EXPIRES = "token_expires_at"
+    private const val KEY_THEME = "theme"
+    private const val KEY_SHOW_WB2API = "show_wb2api"
+    private const val KEY_WB2API_BASE = "wb2api_base"
+    private const val KEY_WB2API_KEY = "wb2api_key"
+    private const val KEY_FONT_SIZE = "font_size"
+    private const val KEY_CPU_SIDE = "cpu_side"
+    private const val KEY_MEM_SIDE = "mem_side"
+    private const val KEY_DISK1_SIDE = "disk1_side"
+    private const val KEY_DISK2_SIDE = "disk2_side"
+    private const val KEY_DOCKER_SIDE = "docker_side"
+    private const val KEY_SHOW_NET = "show_net"
+    private const val KEY_NET_SIDE = "net_side"
+    private const val KEY_LAST_ALERT_KEY = "last_alert_key"
+    private const val KEY_LAST_ALERT_TIME = "last_alert_time"
 
     const val DEFAULT_URL = "http://192.168.2.3:19254/nas"
     const val DEFAULT_NAS_BASE = "http://192.168.2.3:1223"
+    const val DEFAULT_WB2API_BASE = "http://192.168.2.3:7863"
+    const val DEFAULT_WB2API_KEY = "yxyhhr.."
 
     private fun sp(ctx: Context): SharedPreferences =
         ctx.getSharedPreferences(NAME, Context.MODE_PRIVATE)
@@ -54,6 +73,17 @@ object Prefs {
     fun glassDark(ctx: Context) = sp(ctx).getBoolean(KEY_GLASS_DARK, true)
     fun setGlassDark(ctx: Context, v: Boolean) = sp(ctx).edit().putBoolean(KEY_GLASS_DARK, v).apply()
 
+    // === Docker 显示配置 ===
+    fun showDocker(ctx: Context) = sp(ctx).getBoolean(KEY_SHOW_DOCKER, false)
+    fun setShowDocker(ctx: Context, v: Boolean) = sp(ctx).edit().putBoolean(KEY_SHOW_DOCKER, v).apply()
+
+    fun dockerContainers(ctx: Context): Set<String> =
+        sp(ctx).getString(KEY_DOCKER_CONTAINERS, "")?.split(",")
+            ?.map { it.trim() }?.filter { it.isNotEmpty() }?.toSet() ?: emptySet()
+
+    fun setDockerContainers(ctx: Context, names: Set<String>) =
+        sp(ctx).edit().putString(KEY_DOCKER_CONTAINERS, names.joinToString(",")).apply()
+
     // === 飞牛 NAS Web 地址（登录用） ===
     fun nasBase(ctx: Context) = sp(ctx).getString(KEY_NAS_BASE, DEFAULT_NAS_BASE) ?: DEFAULT_NAS_BASE
     fun setNasBase(ctx: Context, v: String) = sp(ctx).edit().putString(KEY_NAS_BASE, v).apply()
@@ -77,6 +107,13 @@ object Prefs {
         return id
     }
 
+    /** 待换 token 的 code_verifier（跨浏览器授权期间保存） */
+    fun setPendingVerifier(ctx: Context, v: String) =
+        sp(ctx).edit().putString(KEY_PENDING_VERIFIER, v).apply()
+    fun pendingVerifier(ctx: Context): String = sp(ctx).getString(KEY_PENDING_VERIFIER, "") ?: ""
+    fun clearPendingVerifier(ctx: Context) =
+        sp(ctx).edit().remove(KEY_PENDING_VERIFIER).apply()
+
     // === 登录 token ===
     fun accessToken(ctx: Context) = sp(ctx).getString(KEY_ACCESS_TOKEN, "") ?: ""
     fun refreshToken(ctx: Context) = sp(ctx).getString(KEY_REFRESH_TOKEN, "") ?: ""
@@ -95,4 +132,37 @@ object Prefs {
 
     fun clearToken(ctx: Context) = sp(ctx).edit()
         .remove(KEY_ACCESS_TOKEN).remove(KEY_REFRESH_TOKEN).remove(KEY_TOKEN_EXPIRES).apply()
+
+    // === 主题（浅色/深色） ===
+    fun theme(ctx: Context): String = sp(ctx).getString(KEY_THEME, "dark") ?: "dark"
+    fun setTheme(ctx: Context, v: String) = sp(ctx).edit().putString(KEY_THEME, v).apply()
+    fun isDarkTheme(ctx: Context): Boolean = theme(ctx) != "light"
+
+    // === wb2api 积分 ===
+    fun showWb2api(ctx: Context) = sp(ctx).getBoolean(KEY_SHOW_WB2API, false)
+    fun setShowWb2api(ctx: Context, v: Boolean) = sp(ctx).edit().putBoolean(KEY_SHOW_WB2API, v).apply()
+    fun wb2apiBase(ctx: Context) = sp(ctx).getString(KEY_WB2API_BASE, DEFAULT_WB2API_BASE) ?: DEFAULT_WB2API_BASE
+    fun setWb2apiBase(ctx: Context, v: String) = sp(ctx).edit().putString(KEY_WB2API_BASE, v).apply()
+    fun wb2apiKey(ctx: Context) = sp(ctx).getString(KEY_WB2API_KEY, DEFAULT_WB2API_KEY) ?: DEFAULT_WB2API_KEY
+    fun setWb2apiKey(ctx: Context, v: String) = sp(ctx).edit().putString(KEY_WB2API_KEY, v).apply()
+
+    // === 字号（全局，px） ===
+    fun fontSize(ctx: Context) = sp(ctx).getInt(KEY_FONT_SIZE, 16)
+    fun setFontSize(ctx: Context, v: Int) = sp(ctx).edit().putInt(KEY_FONT_SIZE, v).apply()
+
+    // === 组件位置（x=水平偏移, y=垂直偏移, 0=居中, 范围 -50~+50） ===
+    fun compX(ctx: Context, comp: String) = sp(ctx).getInt("${comp}_x", 0)
+    fun setCompX(ctx: Context, comp: String, v: Int) = sp(ctx).edit().putInt("${comp}_x", v).apply()
+    fun compY(ctx: Context, comp: String) = sp(ctx).getInt("${comp}_y", 0)
+    fun setCompY(ctx: Context, comp: String, v: Int) = sp(ctx).edit().putInt("${comp}_y", v).apply()
+
+    fun showNet(ctx: Context) = sp(ctx).getBoolean(KEY_SHOW_NET, false)
+    fun setShowNet(ctx: Context, v: Boolean) = sp(ctx).edit().putBoolean(KEY_SHOW_NET, v).apply()
+
+    fun lastAlertKey(ctx: Context) = sp(ctx).getString(KEY_LAST_ALERT_KEY, "") ?: ""
+    fun lastAlertTime(ctx: Context) = sp(ctx).getLong(KEY_LAST_ALERT_TIME, 0L)
+    fun setLastAlert(ctx: Context, key: String) = sp(ctx).edit()
+        .putString(KEY_LAST_ALERT_KEY, key)
+        .putLong(KEY_LAST_ALERT_TIME, System.currentTimeMillis())
+        .apply()
 }

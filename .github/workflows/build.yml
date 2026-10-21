@@ -44,13 +44,24 @@ jobs:
           VER=$(grep 'versionName' app/build.gradle.kts | head -1 | sed -E 's/.*"([^"]+)".*/\1/')
           echo "VERSION=$VER" >> "$GITHUB_ENV"
 
+      - name: Extract changelog
+        run: |
+          VER="${{ env.VERSION }}"
+          awk -v ver="v$VER" '$0 == "## " ver {flag=1; next} /^## / {if(flag) exit} flag' CHANGELOG.md > /tmp/notes.md
+          {
+            echo 'NOTES<<EOF'
+            cat /tmp/notes.md
+            echo 'EOF'
+          } >> "$GITHUB_ENV"
+
       - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: v${{ env.VERSION }}
           name: "NAS Widget v${{ env.VERSION }}"
+          body: ${{ env.NOTES }}
           files: app/build/outputs/apk/debug/*.apk
-          generate_release_notes: true
+          generate_release_notes: false
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4

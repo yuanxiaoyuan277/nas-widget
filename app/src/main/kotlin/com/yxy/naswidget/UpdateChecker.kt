@@ -3,17 +3,23 @@ package com.yxy.naswidget
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import android.view.View
+import android.widget.ProgressBar
+import android.widget.TextView
+import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.FileProvider
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import org.json.JSONObject
 import java.io.File
 import java.net.HttpURLConnection
 import java.net.URL
 
-/** 应用内更新：检查 GitHub Release、下载 APK、跳转安装 */
+/** 应用内更新：检查公网 version.json、下载 APK、跳转安装 */
 object UpdateChecker {
 
-    private const val REPO = "yuanxiaoyuan277/nas-widget"
-    private const val API = "https://api.github.com/repos/$REPO/releases/latest"
+    private const val UPDATE_BASE = "https://411223.xyz:44444"
+    private const val VERSION_URL = "$UPDATE_BASE/version.json"
 
     data class UpdateInfo(val version: String, val url: String, val size: Long, val notes: String)
 
@@ -25,14 +31,14 @@ object UpdateChecker {
             "0.0.0"
         }
 
-    /** 检查最新 release */
+    /** 检查最新版本：读公网 version.json */
     fun checkLatest(): Result<UpdateInfo> {
         return try {
-            val conn = URL(API).openConnection() as HttpURLConnection
+            val conn = URL(VERSION_URL).openConnection() as HttpURLConnection
             conn.connectTimeout = 8000
             conn.readTimeout = 8000
             conn.requestMethod = "GET"
-            conn.setRequestProperty("Accept", "application/vnd.github+json")
+            conn.setRequestProperty("Accept", "application/json")
             conn.setRequestProperty("User-Agent", "nas-widget-updater")
             val code = conn.responseCode
             if (code != 200) {
@@ -43,25 +49,14 @@ object UpdateChecker {
             conn.disconnect()
 
             val root = JSONObject(body)
-            val tag = root.optString("tag_name", "").removePrefix("v")
-            val assets = root.optJSONArray("assets")
-            if (assets == null || assets.length() == 0) {
-                return Result.failure(Exception("release 无 APK 附件"))
+            val version = root.optString("version", "").removePrefix("v")
+            val apk = root.optString("apk", "")
+            val notes = root.optString("notes", "")
+            if (version.isEmpty() || apk.isEmpty()) {
+                return Result.failure(Exception("version.json 格式错误"))
             }
-            var apkUrl = ""
-            var size = 0L
-            for (i in 0 until assets.length()) {
-                val a = assets.optJSONObject(i) ?: continue
-                val name = a.optString("name", "")
-                if (name.endsWith(".apk")) {
-                    apkUrl = a.optString("browser_download_url", "")
-                    size = a.optLong("size", 0L)
-                    break
-                }
-            }
-            if (apkUrl.isEmpty()) return Result.failure(Exception("未找到 APK 下载地址"))
-            val notes = root.optString("body", "")
-            Result.success(UpdateInfo(tag, apkUrl, size, notes))
+            val url = "$UPDATE_BASE/$apk"
+            Result.success(UpdateInfo(version, url, 0L, notes))
         } catch (e: Exception) {
             Result.failure(e)
         }
@@ -85,6 +80,8 @@ object UpdateChecker {
     /** 下载 APK 到 cache 目录，回调进度(0-100) */
     fun download(url: String, dest: File, onProgress: ((Int) -> Unit)? = null): Result<File> {
         return try {
+            // 先删旧文件，避免缓存/残留导致安装到旧版本
+            if (dest.exists()) dest.delete()
             val conn = URL(url).openConnection() as HttpURLConnection
             conn.connectTimeout = 10000
             conn.readTimeout = 30000
@@ -125,5 +122,52 @@ object UpdateChecker {
             addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         }
         context.startActivity(intent)
+    }
+
+    /** 弹框：圆角 Material 弹窗，显示新版本号 + 更新内容（每条一行），点「立即更新」在弹框内显示下载进度 */
+    fun showUpdateDialog(activity: AppCompatActivity, info: UpdateInfo) {
+        val view = activity.layoutInflater.inflate(R.layout.dialog_update, null)
+        val tvTitle = view.findViewById<TextView>(R.id.tv_update_title)
+        val tvNotes = view.findViewById<TextView>(R.id.tv_update_notes)
+        val pbDownload = view.findViewById<ProgressBar>(R.id.pb_download)
+        val tvProgress = view.findViewById<TextView>(R.id.tv_download_progress)
+        tvTitle.text = "新版本 v${info.version}"
+        tvNotes.text = info.notes.trim().ifEmpty { "（无更新说明）" }
+
+        val dialog = MaterialAlertDialogBuilder(activity)
+            .setTitle("发现新版本")
+            .setView(view)
+            .setPositiveButton("立即更新", null)
+            .setNegativeButton("暂不更新", null)
+            .setCancelable(true)
+            .show()
+
+        dialog.getButton(androidx.appcompat.app.AlertDialog.BUTTON_POSITIVE).setOnClickListener {
+            pbDownload.visibility = View.VISIBLE
+            tvProgress.visibility = View.VISIBLE
+            tvProgress.text = "0%"
+            dialog.getButton(androidx.appcompat.app.AlertDialog.BUTTON_POSITIVE).isEnabled = false
+            dialog.getButton(androidx.appcompat.app.AlertDialog.BUTTON_NEGATIVE).isEnabled = false
+            dialog.setCancelable(false)
+
+            Thread {
+                val dest = File(activity.cacheDir, "nas-widget-update.apk")
+                val result = download(info.url, dest) { p ->
+                    activity.runOnUiThread {
+                        pbDownload.progress = p
+                        tvProgress.text = "$p%"
+                    }
+                }
+                activity.runOnUiThread {
+                    result.onSuccess {
+                        dialog.dismiss()
+                        install(activity, it)
+                    }.onFailure { e ->
+                        dialog.dismiss()
+                        Toast.makeText(activity, "下载失败：${e.message}", Toast.LENGTH_LONG).show()
+                    }
+                }
+            }.start()
+        }
     }
 }

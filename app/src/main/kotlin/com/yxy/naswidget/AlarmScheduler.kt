@@ -6,7 +6,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.SystemClock
 
-/** 定时刷新调度（30 秒循环） */
+/** 定时刷新调度（30 秒循环，Doze 下也能触发） */
 object AlarmScheduler {
 
     fun schedule(context: Context) {
@@ -17,15 +17,18 @@ object AlarmScheduler {
             context, 0, intent,
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
-        val interval = refreshSec * 1000L
+        val triggerAt = SystemClock.elapsedRealtime() + refreshSec * 1000L
         try {
-            am.setRepeating(
-                AlarmManager.ELAPSED_REALTIME,
-                SystemClock.elapsedRealtime() + interval,
-                interval,
-                pi
-            )
+            // Doze 下也能触发（系统会限频到约 15 分钟一次）
+            am.setExactAndAllowWhileIdle(AlarmManager.ELAPSED_REALTIME_WAKEUP, triggerAt, pi)
         } catch (_: Exception) {
+            try {
+                am.setExact(AlarmManager.ELAPSED_REALTIME_WAKEUP, triggerAt, pi)
+            } catch (_: Exception) {
+                am.setRepeating(
+                    AlarmManager.ELAPSED_REALTIME, triggerAt, refreshSec * 1000L, pi
+                )
+            }
         }
     }
 

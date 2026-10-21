@@ -1,25 +1,33 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
-    <!-- 底部玻璃底色 -->
+    <!-- 1. 深蓝灰玻璃底：冷色调半透明 -->
     <item>
         <shape android:shape="rectangle">
             <corners android:radius="26dp" />
             <gradient
                 android:angle="270"
-                android:startColor="#38FFFFFF"
-                android:endColor="#1AFFFFFF" />
-            <stroke
-                android:width="1dp"
-                android:color="#66FFFFFF" />
+                android:startColor="#661A2028"
+                android:endColor="#70283038" />
         </shape>
     </item>
-    <!-- 顶部高光条 -->
-    <item android:top="1dp" android:left="2dp" android:right="2dp">
+
+    <!-- 2. 边缘内高光：一圈细亮描边（玻璃切面折射，核心边缘光） -->
+    <item>
         <shape android:shape="rectangle">
-            <corners android:radius="24dp" />
+            <corners android:radius="26dp" />
+            <stroke
+                android:width="1dp"
+                android:color="#73FFFFFF" />
+        </shape>
+    </item>
+
+    <!-- 3. 顶部边缘极淡受光：subtle，只让顶部略亮 -->
+    <item android:top="1dp" android:left="4dp" android:right="4dp">
+        <shape android:shape="rectangle">
+            <corners android:radius="21dp" />
             <gradient
                 android:angle="270"
-                android:startColor="#66FFFFFF"
+                android:startColor="#26FFFFFF"
                 android:endColor="#00FFFFFF" />
         </shape>
     </item>

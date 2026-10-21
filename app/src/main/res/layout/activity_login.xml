@@ -1,60 +1,100 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:background="#FF0D1117">
+    android:background="@drawable/bg_gradient"
+    android:fillViewport="true">
 
-    <!-- 顶部：域名输入区 -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="18dp">
+        android:gravity="center_horizontal"
+        android:padding="24dp">
 
+        <!-- 顶部标题 -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="登录飞牛账号"
-            android:textColor="#FFFFFFFF"
-            android:textSize="22sp"
+            android:layout_marginTop="40dp"
+            android:text="NAS 监控"
+            android:textColor="@color/app_text_primary"
+            android:textSize="28sp"
             android:textStyle="bold" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="6dp"
-            android:text="先填飞牛访问地址（内网 IP 或公网域名），再在飞牛官方页面输账号密码"
-            android:textColor="#66FFFFFF"
-            android:textSize="12sp" />
+            android:layout_marginTop="4dp"
+            android:text="登录飞牛账号，开始监控你的 NAS"
+            android:textColor="@color/app_text_hint"
+            android:textSize="13sp" />
 
-        <EditText
-            android:id="@+id/et_host"
+        <!-- 登录卡片 -->
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            android:hint="如 http://192.168.2.3:1223 或 https://nas.你的域名"
-            android:inputType="textUri"
-            android:padding="10dp"
-            android:textColor="#FFFFFFFF"
-            android:textColorHint="#55FFFFFF"
-            android:textSize="14sp"
-            android:background="@drawable/edit_bg" />
+            android:layout_marginTop="28dp"
+            android:orientation="vertical"
+            android:background="@drawable/app_card"
+            android:padding="20dp">
 
-        <Button
-            android:id="@+id/btn_go"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:text="前往登录" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="飞牛访问地址"
+                android:textColor="@color/app_text_secondary"
+                android:textSize="13sp" />
+
+                        <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp">
+
+                <EditText
+                    android:id="@+id/et_host"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:padding="10dp"
+                    android:paddingEnd="60dp"
+                    android:hint="如 http://192.168.2.3:1223 或 https://nas.你的域名"
+                    android:inputType="textUri"
+                    android:textColor="@color/app_text_primary"
+                    android:textColorHint="@color/app_text_hint"
+                    android:textSize="14sp"
+                    android:background="@drawable/edit_bg" />
+
+                <TextView
+                    android:id="@+id/btn_toggle_host"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_gravity="end|center_vertical"
+                    android:gravity="center"
+                    android:paddingStart="12dp"
+                    android:paddingEnd="12dp"
+                    android:text="隐藏"
+                    android:textColor="@color/app_text_secondary"
+                    android:textSize="13sp" />
+
+            </FrameLayout>
+
+            <Button
+                android:id="@+id/btn_go"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="14dp"
+                android:text="前往登录"
+                android:textSize="15sp" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="14dp"
+                android:text="点登录后跳转手机浏览器，输账号密码授权，完成后自动跳回 App"
+                android:textColor="@color/app_text_hint"
+                android:textSize="11sp"
+                android:gravity="center" />
+        </LinearLayout>
+
     </LinearLayout>
-
-    <!-- WebView 登录区 -->
-    <WebView
-        android:id="@+id/webview"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:visibility="gone" />
-
-</LinearLayout>
+</ScrollView>
