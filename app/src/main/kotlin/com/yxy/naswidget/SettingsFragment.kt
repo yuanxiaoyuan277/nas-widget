@@ -247,7 +247,7 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
         tvUpdateStatus.text = "检查更新中…"
         Thread {
             val result = UpdateChecker.checkLatest()
-            runOnUiThread {
+            requireActivity().runOnUiThread {
                 btnCheckUpdate.isEnabled = true
                 result.onSuccess { info ->
                     val local = UpdateChecker.localVersion(requireContext())
