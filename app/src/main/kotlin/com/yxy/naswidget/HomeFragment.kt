@@ -521,8 +521,9 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
     }
 
     private fun refreshDockerVisibility() {
-        val show = Prefs.showDocker(requireContext())
-        dockerListContainer.visibility = if (show) View.VISIBLE else View.GONE
+        // Docker 配置区（勾选列表）始终显示，让用户能配置勾选哪些容器
+        // showDocker 只控制桌面组件/预览是否显示 Docker 项目，不应隐藏配置列表
+        dockerListContainer.visibility = View.VISIBLE
     }
 
     private fun persist() {

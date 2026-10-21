@@ -9,6 +9,7 @@ import com.google.android.material.bottomnavigation.BottomNavigationView
 class MainActivity : AppCompatActivity() {
 
     private lateinit var bottomNav: BottomNavigationView
+    private var currentTab = R.id.nav_home
 
     override fun onCreate(savedInstanceState: Bundle?) {
         AppCompatDelegate.setDefaultNightMode(
@@ -20,6 +21,7 @@ class MainActivity : AppCompatActivity() {
 
         bottomNav = findViewById(R.id.bottom_nav)
         bottomNav.selectedItemId = R.id.nav_home
+        currentTab = R.id.nav_home
 
         if (savedInstanceState == null) {
             supportFragmentManager.beginTransaction()
@@ -28,20 +30,25 @@ class MainActivity : AppCompatActivity() {
         }
 
         bottomNav.setOnItemSelectedListener { item ->
-            val fragment: Fragment = when (item.itemId) {
+            val target = item.itemId
+            // 已在这个 tab，不重复切换（避免重复动画）
+            if (target == currentTab) {
+                return@setOnItemSelectedListener true
+            }
+            val fragment: Fragment = when (target) {
                 R.id.nav_home -> HomeFragment()
                 R.id.nav_settings -> SettingsFragment()
                 else -> HomeFragment()
             }
+            // 主页→设置 向右滑，设置→主页 向左滑
+            val goingRight = target == R.id.nav_settings
+            val enter = if (goingRight) R.anim.slide_in_right else R.anim.slide_in_left
+            val exit = if (goingRight) R.anim.slide_out_left else R.anim.slide_out_right
             supportFragmentManager.beginTransaction()
-                .setCustomAnimations(
-                    R.anim.slide_in_right,
-                    R.anim.slide_out_left,
-                    R.anim.slide_in_left,
-                    R.anim.slide_out_right
-                )
+                .setCustomAnimations(enter, exit, enter, exit)
                 .replace(R.id.fragment_container, fragment)
                 .commit()
+            currentTab = target
             true
         }
     }
