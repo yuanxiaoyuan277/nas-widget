@@ -314,19 +314,4 @@
 
     </LinearLayout>
     </ScrollView>
-
-    <!-- 底部状态栏（悬浮液态玻璃） -->
-    <com.google.android.material.bottomnavigation.BottomNavigationView
-        android:id="@+id/bottom_nav"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginEnd="16dp"
-        android:layout_marginBottom="12dp"
-        android:background="@drawable/bottom_nav_bg"
-        app:itemIconTint="@color/app_text_primary"
-        app:itemTextColor="@color/app_text_primary"
-        app:labelVisibilityMode="labeled"
-        app:menu="@menu/bottom_nav_menu" />
-
 </LinearLayout>

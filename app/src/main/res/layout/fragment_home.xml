@@ -1,0 +1,974 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@drawable/bg_gradient">
+
+    <ScrollView
+        android:id="@+id/scroll_root"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:fillViewport="true">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="14dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:text="NAS 监控"
+                android:textColor="@color/app_text_primary"
+                android:textSize="22sp"
+                android:textStyle="bold" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:orientation="vertical"
+                android:background="@drawable/app_card"
+                android:padding="14dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="小组件预览（实时）"
+                    android:textColor="@color/app_text_secondary"
+                    android:textSize="13sp" />
+
+                <FrameLayout
+                    android:id="@+id/preview_container"
+                    android:layout_width="match_parent"
+                    android:layout_height="208dp"
+                    android:layout_marginTop="8dp" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:orientation="vertical"
+                android:background="@drawable/app_card"
+                android:padding="14dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="显示设置"
+                    android:textColor="@color/app_text_secondary"
+                    android:textSize="13sp" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="6dp"
+                    android:orientation="horizontal">
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="刷新间隔"
+                            android:textColor="@color/app_text_hint"
+                            android:textSize="12sp" />
+
+                        <Spinner
+                            android:id="@+id/sp_refresh"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:background="@drawable/spinner_bg" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_marginStart="14dp"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="字号(px)"
+                            android:textColor="@color/app_text_hint"
+                            android:textSize="12sp" />
+
+                        <EditText
+                            android:id="@+id/et_font_size"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:inputType="number"
+                            android:singleLine="true"
+                            android:padding="8dp"
+                            android:textColor="@color/app_text_primary"
+                            android:textColorHint="@color/app_text_hint"
+                            android:background="@drawable/edit_bg" />
+                    </LinearLayout>
+                </LinearLayout>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:orientation="vertical"
+                android:background="@drawable/app_card"
+                android:padding="14dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="组件配置"
+                    android:textColor="@color/app_text_secondary"
+                    android:textSize="13sp" />
+
+                <!-- CPU -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="6dp"
+                    android:orientation="vertical">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="CPU"
+                            android:textColor="@color/app_text_primary"
+                            android:textSize="15sp" />
+
+                        <LinearLayout
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:layout_marginStart="12dp"
+                                android:orientation="horizontal"
+                                android:gravity="center_vertical">
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="↔"
+                                    android:textColor="@color/app_text_hint"
+                                    android:textSize="11sp" />
+
+                                <SeekBar
+                                    android:id="@+id/sb_cpu_x"
+                                    android:layout_width="0dp"
+                                    android:layout_height="10dp"
+                                    android:layout_weight="1"
+                                    android:layout_marginStart="4dp"
+                                    android:minHeight="0dp"
+                                    android:minWidth="0dp"
+                                    android:max="100"
+                                    android:progress="50"
+                                    android:progressDrawable="@drawable/seekbar_track"
+                                    android:thumb="@drawable/seekbar_thumb"
+                                    android:splitTrack="false"
+                                    android:paddingStart="7dp"
+                                    android:paddingEnd="7dp" />
+
+                                <EditText
+                                    android:id="@+id/et_cpu_x"
+                                    android:layout_width="46dp"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginStart="6dp"
+                                    android:background="@drawable/edit_bg"
+                                    android:gravity="center"
+                                    android:inputType="numberSigned"
+                                    android:padding="4dp"
+                                    android:singleLine="true"
+                                    android:text="0"
+                                    android:textColor="@color/app_text_primary"
+                                    android:textSize="11sp" />
+                            </LinearLayout>
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical">
+
+                        <androidx.appcompat.widget.SwitchCompat
+                            android:id="@+id/cb_cpu"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:scaleX="0.85"
+                            android:scaleY="0.85"
+                            android:transformPivotX="0dp"
+                            android:transformPivotY="14dp"
+                            android:layout_marginStart="-10dp"
+                            android:layout_marginEnd="-8dp" />
+
+                        <LinearLayout
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:layout_marginStart="12dp"
+                                android:orientation="horizontal"
+                                android:gravity="center_vertical">
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="↕"
+                                    android:textColor="@color/app_text_hint"
+                                    android:textSize="11sp" />
+
+                                <SeekBar
+                                    android:id="@+id/sb_cpu_y"
+                                    android:layout_width="0dp"
+                                    android:layout_height="10dp"
+                                    android:layout_weight="1"
+                                    android:layout_marginStart="4dp"
+                                    android:minHeight="0dp"
+                                    android:minWidth="0dp"
+                                    android:max="100"
+                                    android:progress="50"
+                                    android:progressDrawable="@drawable/seekbar_track"
+                                    android:thumb="@drawable/seekbar_thumb"
+                                    android:splitTrack="false"
+                                    android:paddingStart="7dp"
+                                    android:paddingEnd="7dp" />
+
+                                <EditText
+                                    android:id="@+id/et_cpu_y"
+                                    android:layout_width="46dp"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginStart="6dp"
+                                    android:background="@drawable/edit_bg"
+                                    android:gravity="center"
+                                    android:inputType="numberSigned"
+                                    android:padding="4dp"
+                                    android:singleLine="true"
+                                    android:text="0"
+                                    android:textColor="@color/app_text_primary"
+                                    android:textSize="11sp" />
+                            </LinearLayout>
+                    </LinearLayout>
+                </LinearLayout>
+                <!-- 内存 -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="6dp"
+                    android:orientation="vertical">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="内存"
+                            android:textColor="@color/app_text_primary"
+                            android:textSize="15sp" />
+
+                        <LinearLayout
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:layout_marginStart="12dp"
+                                android:orientation="horizontal"
+                                android:gravity="center_vertical">
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="↔"
+                                    android:textColor="@color/app_text_hint"
+                                    android:textSize="11sp" />
+
+                                <SeekBar
+                                    android:id="@+id/sb_mem_x"
+                                    android:layout_width="0dp"
+                                    android:layout_height="10dp"
+                                    android:layout_weight="1"
+                                    android:layout_marginStart="4dp"
+                                    android:minHeight="0dp"
+                                    android:minWidth="0dp"
+                                    android:max="100"
+                                    android:progress="50"
+                                    android:progressDrawable="@drawable/seekbar_track"
+                                    android:thumb="@drawable/seekbar_thumb"
+                                    android:splitTrack="false"
+                                    android:paddingStart="7dp"
+                                    android:paddingEnd="7dp" />
+
+                                <EditText
+                                    android:id="@+id/et_mem_x"
+                                    android:layout_width="46dp"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginStart="6dp"
+                                    android:background="@drawable/edit_bg"
+                                    android:gravity="center"
+                                    android:inputType="numberSigned"
+                                    android:padding="4dp"
+                                    android:singleLine="true"
+                                    android:text="0"
+                                    android:textColor="@color/app_text_primary"
+                                    android:textSize="11sp" />
+                            </LinearLayout>
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical">
+
+                        <androidx.appcompat.widget.SwitchCompat
+                            android:id="@+id/cb_mem"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:scaleX="0.85"
+                            android:scaleY="0.85"
+                            android:transformPivotX="0dp"
+                            android:transformPivotY="14dp"
+                            android:layout_marginStart="-10dp"
+                            android:layout_marginEnd="-8dp" />
+
+                        <LinearLayout
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:layout_marginStart="12dp"
+                                android:orientation="horizontal"
+                                android:gravity="center_vertical">
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="↕"
+                                    android:textColor="@color/app_text_hint"
+                                    android:textSize="11sp" />
+
+                                <SeekBar
+                                    android:id="@+id/sb_mem_y"
+                                    android:layout_width="0dp"
+                                    android:layout_height="10dp"
+                                    android:layout_weight="1"
+                                    android:layout_marginStart="4dp"
+                                    android:minHeight="0dp"
+                                    android:minWidth="0dp"
+                                    android:max="100"
+                                    android:progress="50"
+                                    android:progressDrawable="@drawable/seekbar_track"
+                                    android:thumb="@drawable/seekbar_thumb"
+                                    android:splitTrack="false"
+                                    android:paddingStart="7dp"
+                                    android:paddingEnd="7dp" />
+
+                                <EditText
+                                    android:id="@+id/et_mem_y"
+                                    android:layout_width="46dp"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginStart="6dp"
+                                    android:background="@drawable/edit_bg"
+                                    android:gravity="center"
+                                    android:inputType="numberSigned"
+                                    android:padding="4dp"
+                                    android:singleLine="true"
+                                    android:text="0"
+                                    android:textColor="@color/app_text_primary"
+                                    android:textSize="11sp" />
+                            </LinearLayout>
+                    </LinearLayout>
+                </LinearLayout>
+                <!-- NVMe -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="6dp"
+                    android:orientation="vertical">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="NVMe"
+                            android:textColor="@color/app_text_primary"
+                            android:textSize="15sp" />
+
+                        <LinearLayout
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:layout_marginStart="12dp"
+                                android:orientation="horizontal"
+                                android:gravity="center_vertical">
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="↔"
+                                    android:textColor="@color/app_text_hint"
+                                    android:textSize="11sp" />
+
+                                <SeekBar
+                                    android:id="@+id/sb_disk1_x"
+                                    android:layout_width="0dp"
+                                    android:layout_height="10dp"
+                                    android:layout_weight="1"
+                                    android:layout_marginStart="4dp"
+                                    android:minHeight="0dp"
+                                    android:minWidth="0dp"
+                                    android:max="100"
+                                    android:progress="50"
+                                    android:progressDrawable="@drawable/seekbar_track"
+                                    android:thumb="@drawable/seekbar_thumb"
+                                    android:splitTrack="false"
+                                    android:paddingStart="7dp"
+                                    android:paddingEnd="7dp" />
+
+                                <EditText
+                                    android:id="@+id/et_disk1_x"
+                                    android:layout_width="46dp"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginStart="6dp"
+                                    android:background="@drawable/edit_bg"
+                                    android:gravity="center"
+                                    android:inputType="numberSigned"
+                                    android:padding="4dp"
+                                    android:singleLine="true"
+                                    android:text="0"
+                                    android:textColor="@color/app_text_primary"
+                                    android:textSize="11sp" />
+                            </LinearLayout>
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical">
+
+                        <androidx.appcompat.widget.SwitchCompat
+                            android:id="@+id/cb_disk1"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:scaleX="0.85"
+                            android:scaleY="0.85"
+                            android:transformPivotX="0dp"
+                            android:transformPivotY="14dp"
+                            android:layout_marginStart="-10dp"
+                            android:layout_marginEnd="-8dp" />
+
+                        <LinearLayout
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:layout_marginStart="12dp"
+                                android:orientation="horizontal"
+                                android:gravity="center_vertical">
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="↕"
+                                    android:textColor="@color/app_text_hint"
+                                    android:textSize="11sp" />
+
+                                <SeekBar
+                                    android:id="@+id/sb_disk1_y"
+                                    android:layout_width="0dp"
+                                    android:layout_height="10dp"
+                                    android:layout_weight="1"
+                                    android:layout_marginStart="4dp"
+                                    android:minHeight="0dp"
+                                    android:minWidth="0dp"
+                                    android:max="100"
+                                    android:progress="50"
+                                    android:progressDrawable="@drawable/seekbar_track"
+                                    android:thumb="@drawable/seekbar_thumb"
+                                    android:splitTrack="false"
+                                    android:paddingStart="7dp"
+                                    android:paddingEnd="7dp" />
+
+                                <EditText
+                                    android:id="@+id/et_disk1_y"
+                                    android:layout_width="46dp"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginStart="6dp"
+                                    android:background="@drawable/edit_bg"
+                                    android:gravity="center"
+                                    android:inputType="numberSigned"
+                                    android:padding="4dp"
+                                    android:singleLine="true"
+                                    android:text="0"
+                                    android:textColor="@color/app_text_primary"
+                                    android:textSize="11sp" />
+                            </LinearLayout>
+                    </LinearLayout>
+                </LinearLayout>
+                <!-- 黑盘 -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="6dp"
+                    android:orientation="vertical">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="黑盘"
+                            android:textColor="@color/app_text_primary"
+                            android:textSize="15sp" />
+
+                        <LinearLayout
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:layout_marginStart="12dp"
+                                android:orientation="horizontal"
+                                android:gravity="center_vertical">
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="↔"
+                                    android:textColor="@color/app_text_hint"
+                                    android:textSize="11sp" />
+
+                                <SeekBar
+                                    android:id="@+id/sb_disk2_x"
+                                    android:layout_width="0dp"
+                                    android:layout_height="10dp"
+                                    android:layout_weight="1"
+                                    android:layout_marginStart="4dp"
+                                    android:minHeight="0dp"
+                                    android:minWidth="0dp"
+                                    android:max="100"
+                                    android:progress="50"
+                                    android:progressDrawable="@drawable/seekbar_track"
+                                    android:thumb="@drawable/seekbar_thumb"
+                                    android:splitTrack="false"
+                                    android:paddingStart="7dp"
+                                    android:paddingEnd="7dp" />
+
+                                <EditText
+                                    android:id="@+id/et_disk2_x"
+                                    android:layout_width="46dp"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginStart="6dp"
+                                    android:background="@drawable/edit_bg"
+                                    android:gravity="center"
+                                    android:inputType="numberSigned"
+                                    android:padding="4dp"
+                                    android:singleLine="true"
+                                    android:text="0"
+                                    android:textColor="@color/app_text_primary"
+                                    android:textSize="11sp" />
+                            </LinearLayout>
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical">
+
+                        <androidx.appcompat.widget.SwitchCompat
+                            android:id="@+id/cb_disk2"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:scaleX="0.85"
+                            android:scaleY="0.85"
+                            android:transformPivotX="0dp"
+                            android:transformPivotY="14dp"
+                            android:layout_marginStart="-10dp"
+                            android:layout_marginEnd="-8dp" />
+
+                        <LinearLayout
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:layout_marginStart="12dp"
+                                android:orientation="horizontal"
+                                android:gravity="center_vertical">
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="↕"
+                                    android:textColor="@color/app_text_hint"
+                                    android:textSize="11sp" />
+
+                                <SeekBar
+                                    android:id="@+id/sb_disk2_y"
+                                    android:layout_width="0dp"
+                                    android:layout_height="10dp"
+                                    android:layout_weight="1"
+                                    android:layout_marginStart="4dp"
+                                    android:minHeight="0dp"
+                                    android:minWidth="0dp"
+                                    android:max="100"
+                                    android:progress="50"
+                                    android:progressDrawable="@drawable/seekbar_track"
+                                    android:thumb="@drawable/seekbar_thumb"
+                                    android:splitTrack="false"
+                                    android:paddingStart="7dp"
+                                    android:paddingEnd="7dp" />
+
+                                <EditText
+                                    android:id="@+id/et_disk2_y"
+                                    android:layout_width="46dp"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginStart="6dp"
+                                    android:background="@drawable/edit_bg"
+                                    android:gravity="center"
+                                    android:inputType="numberSigned"
+                                    android:padding="4dp"
+                                    android:singleLine="true"
+                                    android:text="0"
+                                    android:textColor="@color/app_text_primary"
+                                    android:textSize="11sp" />
+                            </LinearLayout>
+                    </LinearLayout>
+                </LinearLayout>
+                <!-- Docker -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="6dp"
+                    android:orientation="vertical">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Docker"
+                            android:textColor="@color/app_text_primary"
+                            android:textSize="15sp" />
+
+                        <LinearLayout
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:layout_marginStart="12dp"
+                                android:orientation="horizontal"
+                                android:gravity="center_vertical">
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="↔"
+                                    android:textColor="@color/app_text_hint"
+                                    android:textSize="11sp" />
+
+                                <SeekBar
+                                    android:id="@+id/sb_docker_x"
+                                    android:layout_width="0dp"
+                                    android:layout_height="10dp"
+                                    android:layout_weight="1"
+                                    android:layout_marginStart="4dp"
+                                    android:minHeight="0dp"
+                                    android:minWidth="0dp"
+                                    android:max="100"
+                                    android:progress="50"
+                                    android:progressDrawable="@drawable/seekbar_track"
+                                    android:thumb="@drawable/seekbar_thumb"
+                                    android:splitTrack="false"
+                                    android:paddingStart="7dp"
+                                    android:paddingEnd="7dp" />
+
+                                <EditText
+                                    android:id="@+id/et_docker_x"
+                                    android:layout_width="46dp"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginStart="6dp"
+                                    android:background="@drawable/edit_bg"
+                                    android:gravity="center"
+                                    android:inputType="numberSigned"
+                                    android:padding="4dp"
+                                    android:singleLine="true"
+                                    android:text="0"
+                                    android:textColor="@color/app_text_primary"
+                                    android:textSize="11sp" />
+                            </LinearLayout>
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical">
+
+                        <androidx.appcompat.widget.SwitchCompat
+                            android:id="@+id/cb_docker"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:scaleX="0.85"
+                            android:scaleY="0.85"
+                            android:transformPivotX="0dp"
+                            android:transformPivotY="14dp"
+                            android:layout_marginStart="-10dp"
+                            android:layout_marginEnd="-8dp" />
+
+                        <LinearLayout
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:layout_marginStart="12dp"
+                                android:orientation="horizontal"
+                                android:gravity="center_vertical">
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="↕"
+                                    android:textColor="@color/app_text_hint"
+                                    android:textSize="11sp" />
+
+                                <SeekBar
+                                    android:id="@+id/sb_docker_y"
+                                    android:layout_width="0dp"
+                                    android:layout_height="10dp"
+                                    android:layout_weight="1"
+                                    android:layout_marginStart="4dp"
+                                    android:minHeight="0dp"
+                                    android:minWidth="0dp"
+                                    android:max="100"
+                                    android:progress="50"
+                                    android:progressDrawable="@drawable/seekbar_track"
+                                    android:thumb="@drawable/seekbar_thumb"
+                                    android:splitTrack="false"
+                                    android:paddingStart="7dp"
+                                    android:paddingEnd="7dp" />
+
+                                <EditText
+                                    android:id="@+id/et_docker_y"
+                                    android:layout_width="46dp"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginStart="6dp"
+                                    android:background="@drawable/edit_bg"
+                                    android:gravity="center"
+                                    android:inputType="numberSigned"
+                                    android:padding="4dp"
+                                    android:singleLine="true"
+                                    android:text="0"
+                                    android:textColor="@color/app_text_primary"
+                                    android:textSize="11sp" />
+                            </LinearLayout>
+                    </LinearLayout>
+                </LinearLayout>
+                <!-- 网络 -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="6dp"
+                    android:orientation="vertical">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="网络"
+                            android:textColor="@color/app_text_primary"
+                            android:textSize="15sp" />
+
+                        <LinearLayout
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:layout_marginStart="12dp"
+                                android:orientation="horizontal"
+                                android:gravity="center_vertical">
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="↔"
+                                    android:textColor="@color/app_text_hint"
+                                    android:textSize="11sp" />
+
+                                <SeekBar
+                                    android:id="@+id/sb_net_x"
+                                    android:layout_width="0dp"
+                                    android:layout_height="10dp"
+                                    android:layout_weight="1"
+                                    android:layout_marginStart="4dp"
+                                    android:minHeight="0dp"
+                                    android:minWidth="0dp"
+                                    android:max="100"
+                                    android:progress="50"
+                                    android:progressDrawable="@drawable/seekbar_track"
+                                    android:thumb="@drawable/seekbar_thumb"
+                                    android:splitTrack="false"
+                                    android:paddingStart="7dp"
+                                    android:paddingEnd="7dp" />
+
+                                <EditText
+                                    android:id="@+id/et_net_x"
+                                    android:layout_width="46dp"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginStart="6dp"
+                                    android:background="@drawable/edit_bg"
+                                    android:gravity="center"
+                                    android:inputType="numberSigned"
+                                    android:padding="4dp"
+                                    android:singleLine="true"
+                                    android:text="0"
+                                    android:textColor="@color/app_text_primary"
+                                    android:textSize="11sp" />
+                            </LinearLayout>
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical">
+
+                        <androidx.appcompat.widget.SwitchCompat
+                            android:id="@+id/cb_net"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:scaleX="0.85"
+                            android:scaleY="0.85"
+                            android:transformPivotX="0dp"
+                            android:transformPivotY="14dp"
+                            android:layout_marginStart="-10dp"
+                            android:layout_marginEnd="-8dp" />
+
+                        <LinearLayout
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:layout_marginStart="12dp"
+                                android:orientation="horizontal"
+                                android:gravity="center_vertical">
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="↕"
+                                    android:textColor="@color/app_text_hint"
+                                    android:textSize="11sp" />
+
+                                <SeekBar
+                                    android:id="@+id/sb_net_y"
+                                    android:layout_width="0dp"
+                                    android:layout_height="10dp"
+                                    android:layout_weight="1"
+                                    android:layout_marginStart="4dp"
+                                    android:minHeight="0dp"
+                                    android:minWidth="0dp"
+                                    android:max="100"
+                                    android:progress="50"
+                                    android:progressDrawable="@drawable/seekbar_track"
+                                    android:thumb="@drawable/seekbar_thumb"
+                                    android:splitTrack="false"
+                                    android:paddingStart="7dp"
+                                    android:paddingEnd="7dp" />
+
+                                <EditText
+                                    android:id="@+id/et_net_y"
+                                    android:layout_width="46dp"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginStart="6dp"
+                                    android:background="@drawable/edit_bg"
+                                    android:gravity="center"
+                                    android:inputType="numberSigned"
+                                    android:padding="4dp"
+                                    android:singleLine="true"
+                                    android:text="0"
+                                    android:textColor="@color/app_text_primary"
+                                    android:textSize="11sp" />
+                            </LinearLayout>
+                    </LinearLayout>
+                </LinearLayout>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:orientation="vertical"
+                android:background="@drawable/app_card"
+                android:padding="14dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Docker 容器"
+                        android:textColor="@color/app_text_secondary"
+                        android:textSize="13sp" />
+
+                    <Button
+                        android:id="@+id/btn_refresh_docker"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="刷新"
+                        android:textSize="13sp"
+                        android:minWidth="0dp"
+                        android:minHeight="0dp"
+                        android:paddingHorizontal="12dp"
+                        android:paddingVertical="6dp" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/docker_list_container"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:orientation="vertical" />
+            </LinearLayout>
+
+        </LinearLayout>
+    </ScrollView>
+</LinearLayout>
