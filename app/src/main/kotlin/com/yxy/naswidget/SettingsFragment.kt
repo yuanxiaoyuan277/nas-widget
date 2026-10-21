@@ -78,11 +78,6 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
         btnRestore = view.findViewById(R.id.btn_restore)
         tvBackupStatus = view.findViewById(R.id.tv_backup_status)
 
-        view.findViewById<Button>(R.id.btn_back).setOnClickListener {
-            requireActivity().supportFragmentManager.beginTransaction()
-                .replace(R.id.fragment_container, HomeFragment())
-                .commit()
-        }
         btnLogin.setOnClickListener {
             requireActivity().startActivityForResult(Intent(requireContext(), LoginActivity::class.java), REQ_LOGIN)
         }

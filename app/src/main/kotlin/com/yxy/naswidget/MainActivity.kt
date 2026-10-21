@@ -63,24 +63,28 @@ class MainActivity : AppCompatActivity() {
         }
         val exitView = exitFrag.view
 
-        val w = enterView.width.toFloat()
-        val enterFrom = if (goingRight) w else -w
-        val exitTo = if (goingRight) -w else w
-
-        // show enter（立即），hide exit（等 exit 滑出动画结束）
+        // show enter（立即）
         supportFragmentManager.beginTransaction().show(enterFrag).commit()
 
-        exitView?.animate()
-            ?.translationX(exitTo)
-            ?.setDuration(650)
-            ?.withEndAction { supportFragmentManager.beginTransaction().hide(exitFrag).commit() }
-            ?.start()
+        // exit 滑出：用 exitView 自身宽度（exit 已 layout，宽度正常）
+        exitView?.let { v ->
+            val exitTo = if (goingRight) -v.width.toFloat() else v.width.toFloat()
+            v.animate()
+                .translationX(exitTo)
+                .setDuration(650)
+                .withEndAction { supportFragmentManager.beginTransaction().hide(exitFrag).commit() }
+                .start()
+        }
 
-        enterView.translationX = enterFrom
-        enterView.animate()
-            .translationX(0f)
-            .setDuration(650)
-            .setInterpolator(android.view.animation.DecelerateInterpolator())
-            .start()
+        // enter 滑入：post 到 layout 完成后执行，避免首次 add 时 width 还是 0
+        enterView.post {
+            val from = if (goingRight) enterView.width.toFloat() else -enterView.width.toFloat()
+            enterView.translationX = from
+            enterView.animate()
+                .translationX(0f)
+                .setDuration(650)
+                .setInterpolator(android.view.animation.DecelerateInterpolator())
+                .start()
+        }
     }
 }
