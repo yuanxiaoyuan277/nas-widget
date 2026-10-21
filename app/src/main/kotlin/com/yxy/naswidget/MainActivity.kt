@@ -72,14 +72,14 @@ class MainActivity : AppCompatActivity() {
 
         exitView?.animate()
             ?.translationX(exitTo)
-            ?.setDuration(700)
+            ?.setDuration(650)
             ?.withEndAction { supportFragmentManager.beginTransaction().hide(exitFrag).commit() }
             ?.start()
 
         enterView.translationX = enterFrom
         enterView.animate()
             .translationX(0f)
-            .setDuration(700)
+            .setDuration(650)
             .setInterpolator(android.view.animation.DecelerateInterpolator())
             .start()
     }
