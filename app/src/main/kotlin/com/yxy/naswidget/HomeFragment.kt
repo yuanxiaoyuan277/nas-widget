@@ -179,6 +179,17 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         handler.removeCallbacksAndMessages(null)
     }
 
+    // show/hide 复用实例时：隐藏停止后台刷新，显示恢复
+    override fun onHiddenChanged(hidden: Boolean) {
+        super.onHiddenChanged(hidden)
+        if (hidden) {
+            handler.removeCallbacks(previewRunnable)
+            handler.removeCallbacks(previewThrottle)
+        } else {
+            startPreviewRefresh()
+        }
+    }
+
     // 启动时自动检查更新，有新版本静默弹出更新弹框
     private fun maybeAutoCheckUpdate() {
         if (autoUpdateChecked) return

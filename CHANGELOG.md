@@ -1,5 +1,9 @@
 # 更新日志
 
+## v1.11.7
+- 动画时长加长到 700ms
+- 改用 show/hide 复用 Fragment，消除切换时重新 inflate 布局导致的卡顿
+
 ## v1.11.6
 - 动画时长加长到 600ms
 - 修复 Docker 配置区 item 宽度为 0 导致容器列表空白（layout_width 0dp→match_parent）
