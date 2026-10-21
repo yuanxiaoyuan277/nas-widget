@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.view.View
+import android.widget.Button
 import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
@@ -124,30 +125,32 @@ object UpdateChecker {
         context.startActivity(intent)
     }
 
-    /** 弹框：圆角 Material 弹窗，显示新版本号 + 更新内容（每条一行），点「立即更新」在弹框内显示下载进度 */
+    /** 弹框：现代风格更新弹窗（大版本号 + bullet 更新内容 + 全宽主按钮 + 文字取消） */
     fun showUpdateDialog(activity: AppCompatActivity, info: UpdateInfo) {
         val view = activity.layoutInflater.inflate(R.layout.dialog_update, null)
-        val tvTitle = view.findViewById<TextView>(R.id.tv_update_title)
+        val tvVersion = view.findViewById<TextView>(R.id.tv_update_version)
         val tvNotes = view.findViewById<TextView>(R.id.tv_update_notes)
         val pbDownload = view.findViewById<ProgressBar>(R.id.pb_download)
         val tvProgress = view.findViewById<TextView>(R.id.tv_download_progress)
-        tvTitle.text = "新版本 v${info.version}"
-        tvNotes.text = info.notes.trim().ifEmpty { "（无更新说明）" }
+        val btnNow = view.findViewById<Button>(R.id.btn_update_now)
+        val btnLater = view.findViewById<TextView>(R.id.btn_update_later)
+
+        tvVersion.text = "v${info.version}"
+        tvNotes.text = formatNotes(info.notes)
 
         val dialog = MaterialAlertDialogBuilder(activity)
-            .setTitle("发现新版本")
             .setView(view)
-            .setPositiveButton("立即更新", null)
-            .setNegativeButton("暂不更新", null)
             .setCancelable(true)
             .show()
 
-        dialog.getButton(androidx.appcompat.app.AlertDialog.BUTTON_POSITIVE).setOnClickListener {
+        btnLater.setOnClickListener { dialog.dismiss() }
+
+        btnNow.setOnClickListener {
+            btnNow.isEnabled = false
+            btnNow.text = "下载中…"
             pbDownload.visibility = View.VISIBLE
             tvProgress.visibility = View.VISIBLE
             tvProgress.text = "0%"
-            dialog.getButton(androidx.appcompat.app.AlertDialog.BUTTON_POSITIVE).isEnabled = false
-            dialog.getButton(androidx.appcompat.app.AlertDialog.BUTTON_NEGATIVE).isEnabled = false
             dialog.setCancelable(false)
 
             Thread {
@@ -169,5 +172,15 @@ object UpdateChecker {
                 }
             }.start()
         }
+    }
+
+    /** 更新说明格式化为 bullet 列表：按换行/逗号/顿号拆分，每条加 "•  " */
+    private fun formatNotes(notes: String): String {
+        val items = notes.split("\n")
+            .flatMap { it.split("，", ",") }
+            .map { it.trim() }
+            .filter { it.isNotEmpty() }
+        return if (items.isEmpty()) "•  无更新说明"
+               else items.joinToString("\n") { "•  $it" }
     }
 }
