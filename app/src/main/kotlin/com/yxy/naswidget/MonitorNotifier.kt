@@ -47,6 +47,13 @@ object MonitorNotifier {
             onFailure = { "NAS 离线，无法连接监控数据源" }
         )
 
+        // 「刷新」快捷操作：广播到 UpdateReceiver 立即拉取最新数据（组件+通知一起刷新）
+        val refreshPi = PendingIntent.getBroadcast(
+            context, 101,
+            Intent(context, UpdateReceiver::class.java),
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+
         val notif = NotificationCompat.Builder(context, CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_launcher)
             .setContentTitle("NAS 监控")
@@ -54,6 +61,7 @@ object MonitorNotifier {
             .setStyle(NotificationCompat.BigTextStyle().bigText(text))
             .setOngoing(true)
             .setOnlyAlertOnce(true)
+            .addAction(R.drawable.ic_launcher, "刷新", refreshPi)
             .setContentIntent(
                 PendingIntent.getActivity(
                     context, 0,
