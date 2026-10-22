@@ -123,6 +123,9 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
     private lateinit var cardDocker: LinearLayout
     private lateinit var tvDockerTitle: TextView
     private var dockerCollapsed = false
+    private lateinit var cardSystem: LinearLayout
+    private lateinit var tvSystemTitle: TextView
+    private var systemCollapsed = false
 
     private val handler = Handler(Looper.getMainLooper())
     private var dockerContainers: List<DockerContainer> = emptyList()
@@ -261,6 +264,16 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
             dockerCollapsed = !dockerCollapsed
             Prefs.setDockerCollapsed(requireContext(), dockerCollapsed)
             applyDockerCollapsed()
+        }
+        // 「系统信息」卡片折叠/展开：点击标题收起/展开下方明细行与折线图
+        cardSystem = view.findViewById(R.id.card_system)
+        tvSystemTitle = view.findViewById(R.id.tv_system_title)
+        systemCollapsed = Prefs.systemCollapsed(requireContext())
+        applySystemCollapsed()
+        tvSystemTitle.setOnClickListener {
+            systemCollapsed = !systemCollapsed
+            Prefs.setSystemCollapsed(requireContext(), systemCollapsed)
+            applySystemCollapsed()
         }
 
         widgetId = requireActivity().intent.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, AppWidgetManager.INVALID_APPWIDGET_ID)
@@ -1617,6 +1630,14 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
             cardDocker.getChildAt(i).visibility = if (dockerCollapsed) View.GONE else View.VISIBLE
         }
         tvDockerTitle.text = if (dockerCollapsed) "Docker 容器（点击展开）" else "Docker 容器（点击折叠）"
+    }
+
+    /** 折叠/展开「系统信息」卡片：保留标题行（含诊断报告按钮），收起下方明细行与折线图 */
+    private fun applySystemCollapsed() {
+        for (i in 1 until cardSystem.childCount) {
+            cardSystem.getChildAt(i).visibility = if (systemCollapsed) View.GONE else View.VISIBLE
+        }
+        tvSystemTitle.text = if (systemCollapsed) "系统信息（点击展开）" else "系统信息（点击折叠）"
     }
 
     private fun persist() {
