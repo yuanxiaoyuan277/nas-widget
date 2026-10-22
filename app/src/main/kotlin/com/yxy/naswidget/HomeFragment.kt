@@ -70,7 +70,6 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
     private var previewBusy = false
     private var suppressSave = false
     private var autoUpdateChecked = false
-    private var dockerLoaded = false
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -469,8 +468,6 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
 
     // === Docker 配置 ===
     private fun loadDockerContainers() {
-        if (dockerLoaded) return
-        dockerLoaded = true
         if (!Prefs.isLoggedIn(requireContext())) {
             Toast.makeText(requireContext(), "请先登录飞牛账号", Toast.LENGTH_SHORT).show()
             return
