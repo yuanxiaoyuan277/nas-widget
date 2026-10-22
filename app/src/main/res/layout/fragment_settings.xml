@@ -422,6 +422,15 @@
                     android:text="网络"
                     android:textColor="@color/app_text_primary"
                     android:textSize="13sp" />
+
+                <CheckBox
+                    android:id="@+id/cb_mon_traffic"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:text="流量"
+                    android:textColor="@color/app_text_primary"
+                    android:textSize="13sp" />
             </LinearLayout>
 
             <LinearLayout

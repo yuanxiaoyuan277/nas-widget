@@ -73,6 +73,7 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
     private lateinit var cbMonStorage: CheckBox
     private lateinit var cbMonTemp: CheckBox
     private lateinit var cbMonNet: CheckBox
+    private lateinit var cbMonTraffic: CheckBox
     private lateinit var etAlertUsage: EditText
     private lateinit var etAlertCpuTemp: EditText
     private lateinit var etAlertNvmeTemp: EditText
@@ -121,6 +122,7 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
         cbMonStorage = view.findViewById(R.id.cb_mon_storage)
         cbMonTemp = view.findViewById(R.id.cb_mon_temp)
         cbMonNet = view.findViewById(R.id.cb_mon_net)
+        cbMonTraffic = view.findViewById(R.id.cb_mon_traffic)
         etAlertUsage = view.findViewById(R.id.et_alert_usage)
         etAlertCpuTemp = view.findViewById(R.id.et_alert_cpu_temp)
         etAlertNvmeTemp = view.findViewById(R.id.et_alert_nvme_temp)
@@ -173,6 +175,7 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
         cbMonStorage.setOnCheckedChangeListener { _, _ -> if (!suppressSave) scheduleSave() }
         cbMonTemp.setOnCheckedChangeListener { _, _ -> if (!suppressSave) scheduleSave() }
         cbMonNet.setOnCheckedChangeListener { _, _ -> if (!suppressSave) scheduleSave() }
+        cbMonTraffic.setOnCheckedChangeListener { _, _ -> if (!suppressSave) scheduleSave() }
         cbSilent.setOnCheckedChangeListener { _, _ -> if (!suppressSave) scheduleSave() }
         watchEditText(etUrl)
         watchEditText(etWb2apiBase)
@@ -258,6 +261,7 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
         cbMonStorage.isChecked = "storage" in monItems
         cbMonTemp.isChecked = "temp" in monItems
         cbMonNet.isChecked = "net" in monItems
+        cbMonTraffic.isChecked = "traffic" in monItems
         etAlertUsage.setText(Prefs.alertUsageThreshold(requireContext()).toString())
         etAlertCpuTemp.setText(Prefs.alertCpuTempThreshold(requireContext()).toString())
         etAlertNvmeTemp.setText(Prefs.alertNvmeTempThreshold(requireContext()).toString())
@@ -438,6 +442,7 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
         if (cbMonStorage.isChecked) monItems.add("storage")
         if (cbMonTemp.isChecked) monItems.add("temp")
         if (cbMonNet.isChecked) monItems.add("net")
+        if (cbMonTraffic.isChecked) monItems.add("traffic")
         Prefs.setMonNotifItems(requireContext(), monItems)
         Prefs.setAlertUsageThreshold(requireContext(), etAlertUsage.text.toString().toIntOrNull()?.coerceIn(1, 100) ?: 90)
         Prefs.setAlertCpuTempThreshold(requireContext(), etAlertCpuTemp.text.toString().toIntOrNull()?.coerceIn(1, 120) ?: 85)
