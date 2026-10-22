@@ -803,7 +803,9 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         val tDown = Prefs.trafficDown(requireContext())
         val tUp = Prefs.trafficUp(requireContext())
         if (tDown > 0L || tUp > 0L) lines.add("今日流量 ↓${Fmt.bytes(tDown)} ↑${Fmt.bytes(tUp)}")
+        if (s.osVersion.isNotEmpty()) lines.add("系统 ${s.osVersion}")
         lines.add("运行 ${Fmt.uptime(s.uptimeSec)}")
+        if (s.latencyMs > 0) lines.add("数据源延迟 ${s.latencyMs}ms")
         return lines.joinToString("\n")
     }
 
