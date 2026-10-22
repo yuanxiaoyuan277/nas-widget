@@ -1845,7 +1845,7 @@
                         android:layout_width="0dp"
                         android:layout_height="40dp"
                         android:layout_weight="1"
-                        android:hint="搜索容器名…"
+                        android:hint="搜索名称/镜像…"
                         android:inputType="text"
                         android:maxLines="1"
                         android:paddingStart="10dp"
@@ -1868,11 +1868,20 @@
                         android:paddingVertical="6dp" />
                 </LinearLayout>
 
+                <TextView
+                    android:id="@+id/tv_docker_count"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:text=""
+                    android:textColor="@color/app_text_hint"
+                    android:textSize="12sp" />
+
                 <LinearLayout
                     android:id="@+id/docker_list_container"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
+                    android:layout_marginTop="4dp"
                     android:orientation="vertical" />
             </LinearLayout>
 

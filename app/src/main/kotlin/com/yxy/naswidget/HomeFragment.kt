@@ -63,6 +63,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
     private lateinit var btnDockerRestartAll: Button
     private lateinit var etDockerSearch: EditText
     private lateinit var btnDockerFilter: Button
+    private lateinit var tvDockerCount: TextView
     private lateinit var sbCpuX: SeekBar
     private lateinit var sbCpuY: SeekBar
     private lateinit var sbMemX: SeekBar
@@ -174,6 +175,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         btnDockerRestartAll = view.findViewById(R.id.btn_docker_restart_all)
         etDockerSearch = view.findViewById(R.id.et_docker_search)
         btnDockerFilter = view.findViewById(R.id.btn_docker_filter)
+        tvDockerCount = view.findViewById(R.id.tv_docker_count)
         sbCpuX = view.findViewById(R.id.sb_cpu_x)
         sbCpuY = view.findViewById(R.id.sb_cpu_y)
         sbMemX = view.findViewById(R.id.sb_mem_x)
@@ -1279,6 +1281,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
                 if (!suppressSave) {
                     persist()
                     applyDockerFilter()
+                    updateDockerCount()
                 }
             }
             dockerCheckboxes.add(cb)
@@ -1298,7 +1301,17 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
 
             dockerListContainer.addView(item)
         }
+        updateDockerCount()
         applyDockerFilter()
+    }
+
+    /** 更新 Docker 统计头：运行/总计 + 已勾选数量（无容器时提示刷新） */
+    private fun updateDockerCount() {
+        val total = dockerContainers.size
+        val running = dockerContainers.count { it.running }
+        val checked = dockerCheckboxes.count { it.isChecked }
+        tvDockerCount.text = if (total == 0) "暂无容器，点击「刷新」加载"
+        else "$running 运行 / $total 总计 · 已勾选 $checked"
     }
 
     /** 点击容器行弹出详情（状态/详情/CPU/内存/运行时长） */
@@ -1468,9 +1481,12 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
             "selected" -> dockerCheckboxes.filter { it.isChecked }.mapNotNull { it.tag as? String }.toSet()
             else -> null
         }
+        val nameToContainer = dockerContainers.associateBy { it.name }
         for (cb in dockerCheckboxes) {
             val name = cb.tag as? String ?: ""
-            val nameMatch = query.isEmpty() || name.lowercase().contains(query)
+            val c = nameToContainer[name]
+            val haystack = if (c != null && c.image.isNotEmpty()) "$name ${c.image}".lowercase() else name.lowercase()
+            val nameMatch = query.isEmpty() || haystack.contains(query)
             val filterMatch = matchNames == null || name in matchNames
             (cb.parent as? View)?.visibility = if (nameMatch && filterMatch) View.VISIBLE else View.GONE
         }
