@@ -39,6 +39,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
     private lateinit var cbMem: SwitchCompat
     private lateinit var cbDisk1: SwitchCompat
     private lateinit var cbDisk2: SwitchCompat
+    private lateinit var cbDisk3: SwitchCompat
     private lateinit var cbNet: SwitchCompat
     private lateinit var cbStorage: SwitchCompat
     private lateinit var cbTempItem: SwitchCompat
@@ -60,6 +61,8 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
     private lateinit var sbDisk1Y: SeekBar
     private lateinit var sbDisk2X: SeekBar
     private lateinit var sbDisk2Y: SeekBar
+    private lateinit var sbDisk3X: SeekBar
+    private lateinit var sbDisk3Y: SeekBar
     private lateinit var sbDockerX: SeekBar
     private lateinit var sbDockerY: SeekBar
     private lateinit var sbNetX: SeekBar
@@ -76,6 +79,8 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
     private lateinit var etDisk1Y: EditText
     private lateinit var etDisk2X: EditText
     private lateinit var etDisk2Y: EditText
+    private lateinit var etDisk3X: EditText
+    private lateinit var etDisk3Y: EditText
     private lateinit var etDockerX: EditText
     private lateinit var etDockerY: EditText
     private lateinit var etNetX: EditText
@@ -114,6 +119,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         cbMem = view.findViewById(R.id.cb_mem)
         cbDisk1 = view.findViewById(R.id.cb_disk1)
         cbDisk2 = view.findViewById(R.id.cb_disk2)
+        cbDisk3 = view.findViewById(R.id.cb_disk3)
         cbNet = view.findViewById(R.id.cb_net)
         cbStorage = view.findViewById(R.id.cb_storage)
         cbTempItem = view.findViewById(R.id.cb_temp)
@@ -135,6 +141,8 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         sbDisk1Y = view.findViewById(R.id.sb_disk1_y)
         sbDisk2X = view.findViewById(R.id.sb_disk2_x)
         sbDisk2Y = view.findViewById(R.id.sb_disk2_y)
+        sbDisk3X = view.findViewById(R.id.sb_disk3_x)
+        sbDisk3Y = view.findViewById(R.id.sb_disk3_y)
         sbDockerX = view.findViewById(R.id.sb_docker_x)
         sbDockerY = view.findViewById(R.id.sb_docker_y)
         sbNetX = view.findViewById(R.id.sb_net_x)
@@ -151,6 +159,8 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         etDisk1Y = view.findViewById(R.id.et_disk1_y)
         etDisk2X = view.findViewById(R.id.et_disk2_x)
         etDisk2Y = view.findViewById(R.id.et_disk2_y)
+        etDisk3X = view.findViewById(R.id.et_disk3_x)
+        etDisk3Y = view.findViewById(R.id.et_disk3_y)
         etDockerX = view.findViewById(R.id.et_docker_x)
         etDockerY = view.findViewById(R.id.et_docker_y)
         etNetX = view.findViewById(R.id.et_net_x)
@@ -280,7 +290,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
 
     // 清掉之前拉满的极端偏移值（±80 会把组件顶出卡片），归零归中
     private fun resetExtremeOffsets() {
-        for (comp in listOf("cpu", "mem", "disk1", "disk2", "docker", "net", "storage", "temp")) {
+        for (comp in listOf("cpu", "mem", "disk1", "disk2", "disk3", "docker", "net", "storage", "temp")) {
             val x = Prefs.compX(requireContext(), comp)
             val y = Prefs.compY(requireContext(), comp)
             if (kotlin.math.abs(x) > 20) Prefs.setCompX(requireContext(), comp, 0)
@@ -298,6 +308,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         cbMem.isChecked = Prefs.showMem(requireContext())
         cbDisk1.isChecked = Prefs.showDisk1(requireContext())
         cbDisk2.isChecked = Prefs.showDisk2(requireContext())
+        cbDisk3.isChecked = Prefs.showDisk3(requireContext())
         cbNet.isChecked = Prefs.showNet(requireContext())
         cbStorage.isChecked = Prefs.showStorage(requireContext())
         cbTempItem.isChecked = Prefs.showTempItem(requireContext())
@@ -310,6 +321,8 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         sbDisk1Y.progress = Prefs.compY(requireContext(), "disk1") + 50
         sbDisk2X.progress = Prefs.compX(requireContext(), "disk2") + 50
         sbDisk2Y.progress = Prefs.compY(requireContext(), "disk2") + 50
+        sbDisk3X.progress = Prefs.compX(requireContext(), "disk3") + 50
+        sbDisk3Y.progress = Prefs.compY(requireContext(), "disk3") + 50
         sbDockerX.progress = Prefs.compX(requireContext(), "docker") + 50
         sbDockerY.progress = Prefs.compY(requireContext(), "docker") + 50
         sbNetX.progress = Prefs.compX(requireContext(), "net") + 50
@@ -326,6 +339,8 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         etDisk1Y.setText(Prefs.compY(requireContext(), "disk1").toString())
         etDisk2X.setText(Prefs.compX(requireContext(), "disk2").toString())
         etDisk2Y.setText(Prefs.compY(requireContext(), "disk2").toString())
+        etDisk3X.setText(Prefs.compX(requireContext(), "disk3").toString())
+        etDisk3Y.setText(Prefs.compY(requireContext(), "disk3").toString())
         etDockerX.setText(Prefs.compX(requireContext(), "docker").toString())
         etDockerY.setText(Prefs.compY(requireContext(), "docker").toString())
         etNetX.setText(Prefs.compX(requireContext(), "net").toString())
@@ -503,6 +518,27 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
             item.findViewById<TextView>(R.id.tv_disk2_label).setTextSize(TypedValue.COMPLEX_UNIT_PX, fs.toFloat())
             item.findViewById<TextView>(R.id.tv_disk2).setTextSize(TypedValue.COMPLEX_UNIT_PX, fs.toFloat())
             addTo("disk2", item)
+        }
+
+        if (Prefs.showDisk3(requireContext())) {
+            val item = layoutInflater.inflate(R.layout.item_disk3_preview, contentArea, false)
+            stats?.let { s ->
+                if (s.disks.size > 2) {
+                    val d = s.disks[2]
+                    item.findViewById<TextView>(R.id.tv_disk3_label).text = d.name
+                    item.findViewById<ProgressBar>(R.id.pb_disk3).progress = d.usePercent.toInt().coerceIn(0, 100)
+                    item.findViewById<ProgressBar>(R.id.pb_disk3).progressTintList = ColorStateList.valueOf(Fmt.levelColor(d.usePercent))
+                    item.findViewById<TextView>(R.id.tv_disk3).text = diskText(null, d.usePercent, d.total - d.used, false)
+                    if (d.usePercent >= usageThr) {
+                        item.findViewById<TextView>(R.id.tv_disk3).setTextColor(Fmt.ALERT_COLOR)
+                    }
+                } else {
+                    item.findViewById<TextView>(R.id.tv_disk3).text = "--%"
+                }
+            } ?: run { item.findViewById<TextView>(R.id.tv_disk3).text = "--%" }
+            item.findViewById<TextView>(R.id.tv_disk3_label).setTextSize(TypedValue.COMPLEX_UNIT_PX, fs.toFloat())
+            item.findViewById<TextView>(R.id.tv_disk3).setTextSize(TypedValue.COMPLEX_UNIT_PX, fs.toFloat())
+            addTo("disk3", item)
         }
 
         if (Prefs.showStorage(requireContext())) {
@@ -784,6 +820,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         Prefs.setShowMem(requireContext(), cbMem.isChecked)
         Prefs.setShowDisk1(requireContext(), cbDisk1.isChecked)
         Prefs.setShowDisk2(requireContext(), cbDisk2.isChecked)
+        Prefs.setShowDisk3(requireContext(), cbDisk3.isChecked)
         Prefs.setShowDocker(requireContext(), cbDocker.isChecked)
         Prefs.setShowNet(requireContext(), cbNet.isChecked)
         Prefs.setShowStorage(requireContext(), cbStorage.isChecked)
@@ -802,6 +839,8 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         Prefs.setCompY(requireContext(), "disk1", sbDisk1Y.progress - 50)
         Prefs.setCompX(requireContext(), "disk2", sbDisk2X.progress - 50)
         Prefs.setCompY(requireContext(), "disk2", sbDisk2Y.progress - 50)
+        Prefs.setCompX(requireContext(), "disk3", sbDisk3X.progress - 50)
+        Prefs.setCompY(requireContext(), "disk3", sbDisk3Y.progress - 50)
         Prefs.setCompX(requireContext(), "docker", sbDockerX.progress - 50)
         Prefs.setCompY(requireContext(), "docker", sbDockerY.progress - 50)
         Prefs.setCompX(requireContext(), "net", sbNetX.progress - 50)
@@ -855,6 +894,8 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         bindSlider(etDisk1Y, sbDisk1Y, "disk1", false)
         bindSlider(etDisk2X, sbDisk2X, "disk2", true)
         bindSlider(etDisk2Y, sbDisk2Y, "disk2", false)
+        bindSlider(etDisk3X, sbDisk3X, "disk3", true)
+        bindSlider(etDisk3Y, sbDisk3Y, "disk3", false)
         bindSlider(etDockerX, sbDockerX, "docker", true)
         bindSlider(etDockerY, sbDockerY, "docker", false)
         bindSlider(etNetX, sbNetX, "net", true)
@@ -864,7 +905,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         bindSlider(etTempX, sbTempX, "temp", true)
         bindSlider(etTempY, sbTempY, "temp", false)
 
-        for (cb in listOf(cbCpu, cbMem, cbDisk1, cbDisk2, cbDocker, cbNet, cbStorage, cbTempItem)) {
+        for (cb in listOf(cbCpu, cbMem, cbDisk1, cbDisk2, cbDisk3, cbDocker, cbNet, cbStorage, cbTempItem)) {
             cb.setOnCheckedChangeListener { _, _ -> if (!suppressSave) persist() }
         }
 
@@ -874,6 +915,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
             sbMemX to etMemX, sbMemY to etMemY,
             sbDisk1X to etDisk1X, sbDisk1Y to etDisk1Y,
             sbDisk2X to etDisk2X, sbDisk2Y to etDisk2Y,
+            sbDisk3X to etDisk3X, sbDisk3Y to etDisk3Y,
             sbDockerX to etDockerX, sbDockerY to etDockerY,
             sbNetX to etNetX, sbNetY to etNetY,
             sbStorageX to etStorageX, sbStorageY to etStorageY,

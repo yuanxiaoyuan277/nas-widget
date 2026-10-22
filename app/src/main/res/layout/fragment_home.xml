@@ -828,6 +828,138 @@
                             </LinearLayout>
                     </LinearLayout>
                 </LinearLayout>
+                <!-- 磁盘3 -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="6dp"
+                    android:orientation="vertical">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="磁盘3"
+                            android:textColor="@color/app_text_primary"
+                            android:textSize="15sp" />
+
+                        <LinearLayout
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:layout_marginStart="12dp"
+                                android:orientation="horizontal"
+                                android:gravity="center_vertical">
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="↔"
+                                    android:textColor="@color/app_text_hint"
+                                    android:textSize="11sp" />
+
+                                <SeekBar
+                                    android:id="@+id/sb_disk3_x"
+                                    android:layout_width="0dp"
+                                    android:layout_height="10dp"
+                                    android:layout_weight="1"
+                                    android:layout_marginStart="4dp"
+                                    android:minHeight="0dp"
+                                    android:minWidth="0dp"
+                                    android:max="100"
+                                    android:progress="50"
+                                    android:progressDrawable="@drawable/seekbar_track"
+                                    android:thumb="@drawable/seekbar_thumb"
+                                    android:splitTrack="false"
+                                    android:paddingStart="7dp"
+                                    android:paddingEnd="7dp" />
+
+                                <EditText
+                                    android:id="@+id/et_disk3_x"
+                                    android:layout_width="46dp"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginStart="6dp"
+                                    android:background="@drawable/edit_bg"
+                                    android:gravity="center"
+                                    android:inputType="numberSigned"
+                                    android:padding="4dp"
+                                    android:singleLine="true"
+                                    android:text="0"
+                                    android:textColor="@color/app_text_primary"
+                                    android:textSize="11sp" />
+                            </LinearLayout>
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical">
+
+                        <androidx.appcompat.widget.SwitchCompat
+                            android:id="@+id/cb_disk3"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:scaleX="0.85"
+                            android:scaleY="0.85"
+                            android:transformPivotX="0dp"
+                            android:transformPivotY="14dp"
+                            android:layout_marginStart="-10dp"
+                            android:layout_marginEnd="-8dp" />
+
+                        <LinearLayout
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:layout_marginStart="12dp"
+                                android:orientation="horizontal"
+                                android:gravity="center_vertical">
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="↕"
+                                    android:textColor="@color/app_text_hint"
+                                    android:textSize="11sp" />
+
+                                <SeekBar
+                                    android:id="@+id/sb_disk3_y"
+                                    android:layout_width="0dp"
+                                    android:layout_height="10dp"
+                                    android:layout_weight="1"
+                                    android:layout_marginStart="4dp"
+                                    android:minHeight="0dp"
+                                    android:minWidth="0dp"
+                                    android:max="100"
+                                    android:progress="50"
+                                    android:progressDrawable="@drawable/seekbar_track"
+                                    android:thumb="@drawable/seekbar_thumb"
+                                    android:splitTrack="false"
+                                    android:paddingStart="7dp"
+                                    android:paddingEnd="7dp" />
+
+                                <EditText
+                                    android:id="@+id/et_disk3_y"
+                                    android:layout_width="46dp"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginStart="6dp"
+                                    android:background="@drawable/edit_bg"
+                                    android:gravity="center"
+                                    android:inputType="numberSigned"
+                                    android:padding="4dp"
+                                    android:singleLine="true"
+                                    android:text="0"
+                                    android:textColor="@color/app_text_primary"
+                                    android:textSize="11sp" />
+                            </LinearLayout>
+                    </LinearLayout>
+                </LinearLayout>
                 <!-- 存储总览 -->
                 <LinearLayout
                     android:layout_width="match_parent"

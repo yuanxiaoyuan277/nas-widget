@@ -12,6 +12,7 @@ object Prefs {
     private const val KEY_MEM = "show_mem"
     private const val KEY_DISK1 = "show_disk1"
     private const val KEY_DISK2 = "show_disk2"
+    private const val KEY_DISK3 = "show_disk3"
     private const val KEY_TEMP = "show_temp"
     private const val KEY_UPTIME = "show_uptime"
     private const val KEY_GLASS_DARK = "glass_dark"
@@ -77,6 +78,9 @@ object Prefs {
 
     fun showDisk2(ctx: Context) = sp(ctx).getBoolean(KEY_DISK2, true)
     fun setShowDisk2(ctx: Context, v: Boolean) = sp(ctx).edit().putBoolean(KEY_DISK2, v).apply()
+
+    fun showDisk3(ctx: Context) = sp(ctx).getBoolean(KEY_DISK3, false)
+    fun setShowDisk3(ctx: Context, v: Boolean) = sp(ctx).edit().putBoolean(KEY_DISK3, v).apply()
 
     fun showTemp(ctx: Context) = sp(ctx).getBoolean(KEY_TEMP, true)
     fun setShowTemp(ctx: Context, v: Boolean) = sp(ctx).edit().putBoolean(KEY_TEMP, v).apply()

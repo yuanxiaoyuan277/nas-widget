@@ -83,6 +83,7 @@ class NasWidgetProvider : AppWidgetProvider() {
             val showMem = Prefs.showMem(context)
             val showDisk1 = Prefs.showDisk1(context)
             val showDisk2 = Prefs.showDisk2(context)
+            val showDisk3 = Prefs.showDisk3(context)
             val showTemp = Prefs.showTemp(context)
             val showUptime = Prefs.showUptime(context)
             val showDocker = Prefs.showDocker(context)
@@ -188,6 +189,28 @@ class NasWidgetProvider : AppWidgetProvider() {
                 item.setTextViewTextSize(R.id.tv_disk2_label, TypedValue.COMPLEX_UNIT_PX, fs.toFloat())
                 item.setTextViewTextSize(R.id.tv_disk2, TypedValue.COMPLEX_UNIT_PX, fs.toFloat())
                 addTo("disk2", R.id.item_disk2_root, item)
+            }
+
+            // 磁盘3（第3块盘）
+            if (showDisk3) {
+                val item = RemoteViews(context.packageName, R.layout.item_disk3)
+                stats?.let { s ->
+                    if (s.disks.size > 2) {
+                        val d = s.disks[2]
+                        item.setTextViewText(R.id.tv_disk3_label, d.name)
+                        item.setProgressBar(R.id.pb_disk3, 100, d.usePercent.toInt().coerceIn(0, 100), false)
+                        item.setColorStateList(R.id.pb_disk3, "setProgressTintList", ColorStateList.valueOf(Fmt.levelColor(d.usePercent)))
+                        item.setTextViewText(R.id.tv_disk3, diskText(null, d.usePercent, d.total - d.used, false))
+                        if (d.usePercent >= usageThr) {
+                            item.setTextColor(R.id.tv_disk3, Fmt.ALERT_COLOR)
+                        }
+                    } else {
+                        item.setTextViewText(R.id.tv_disk3, "--%")
+                    }
+                } ?: item.setTextViewText(R.id.tv_disk3, "--%")
+                item.setTextViewTextSize(R.id.tv_disk3_label, TypedValue.COMPLEX_UNIT_PX, fs.toFloat())
+                item.setTextViewTextSize(R.id.tv_disk3, TypedValue.COMPLEX_UNIT_PX, fs.toFloat())
+                addTo("disk3", R.id.item_disk3_root, item)
             }
 
             // 存储总览（所有磁盘汇总）
