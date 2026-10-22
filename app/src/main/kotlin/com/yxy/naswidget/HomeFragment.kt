@@ -108,6 +108,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
     private lateinit var btnClearPeak: TextView
     private lateinit var tvSysRefresh: TextView
     private lateinit var sparklineTrend: SparklineView
+    private lateinit var tvTrendLabel: TextView
 
     private val handler = Handler(Looper.getMainLooper())
     private var dockerContainers: List<DockerContainer> = emptyList()
@@ -116,6 +117,12 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
     private var lastStats: NasStats? = null
     private val cpuHistory = mutableListOf<Float>()
     private val memHistory = mutableListOf<Float>()
+    private val cpuTempHistory = mutableListOf<Float>()
+    private val nvmeTempHistory = mutableListOf<Float>()
+    private val netDownHistory = mutableListOf<Float>()
+    private val netUpHistory = mutableListOf<Float>()
+    /** 折线图视图模式：0=资源(CPU/内存) 1=温度(CPU/NVMe) 2=网络(下行/上行) */
+    private var sparklineMode = 0
     private var suppressSave = false
     private var autoUpdateChecked = false
     private val refreshSecOptions = listOf(10, 15, 30, 60, 300)
@@ -208,6 +215,12 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         btnClearPeak = view.findViewById(R.id.btn_clear_peak)
         tvSysRefresh = view.findViewById(R.id.tv_sys_refresh)
         sparklineTrend = view.findViewById(R.id.sparkline_trend)
+        tvTrendLabel = view.findViewById(R.id.tv_trend_label)
+        // 点击折线图循环切换视图：资源 / 温度 / 网络
+        sparklineTrend.setOnClickListener {
+            sparklineMode = (sparklineMode + 1) % 3
+            updateSparkline()
+        }
 
         widgetId = requireActivity().intent.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, AppWidgetManager.INVALID_APPWIDGET_ID)
         if (widgetId != AppWidgetManager.INVALID_APPWIDGET_ID) {
@@ -503,7 +516,13 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
             if (cpuHistory.size > 60) cpuHistory.removeAt(0)
             memHistory.add(s.memPercent.toFloat())
             if (memHistory.size > 60) memHistory.removeAt(0)
-            sparklineTrend.setData(cpuHistory.toList(), memHistory.toList())
+            s.tempCpu?.let { cpuTempHistory.add(it.toFloat()); if (cpuTempHistory.size > 60) cpuTempHistory.removeAt(0) }
+            s.tempNvme?.let { nvmeTempHistory.add(it.toFloat()); if (nvmeTempHistory.size > 60) nvmeTempHistory.removeAt(0) }
+            netDownHistory.add(s.netDown.toFloat())
+            if (netDownHistory.size > 60) netDownHistory.removeAt(0)
+            netUpHistory.add(s.netUp.toFloat())
+            if (netUpHistory.size > 60) netUpHistory.removeAt(0)
+            updateSparkline()
             root.findViewById<TextView>(R.id.tv_uptime).text = "运行 " + Fmt.uptime(s.uptimeSec) + " · " + Fmt.time(s.fetchTime)
             // 状态徽标：任一指标超阈值 → 告警
             val overUsage = s.cpuPercent >= usageThr || s.memPercent >= usageThr ||
@@ -775,6 +794,37 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         val cm = requireContext().getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
         cm.setPrimaryClip(ClipData.newPlainText("nas-summary", text))
         Toast.makeText(requireContext(), "监控摘要已复制", Toast.LENGTH_SHORT).show()
+    }
+
+    /** 更新折线图：按当前视图模式（资源/温度/网络）重建序列并刷新图例标签 */
+    private fun updateSparkline() {
+        val label: String
+        val series: List<SparklineView.Series>
+        when (sparklineMode) {
+            0 -> {
+                label = "CPU / 内存趋势（点击切换）"
+                series = listOf(
+                    SparklineView.Series(0xFF5E9EFF.toInt(), cpuHistory.toList(), 100f),
+                    SparklineView.Series(0xFF58D68D.toInt(), memHistory.toList(), 100f)
+                )
+            }
+            1 -> {
+                label = "温度趋势（点击切换）"
+                series = listOf(
+                    SparklineView.Series(0xFFFF7043.toInt(), cpuTempHistory.toList(), 100f),
+                    SparklineView.Series(0xFFBA68C8.toInt(), nvmeTempHistory.toList(), 100f)
+                )
+            }
+            else -> {
+                label = "网络速率趋势（点击切换）"
+                series = listOf(
+                    SparklineView.Series(0xFF58D68D.toInt(), netDownHistory.toList(), 0f),
+                    SparklineView.Series(0xFFFFB74D.toInt(), netUpHistory.toList(), 0f)
+                )
+            }
+        }
+        tvTrendLabel.text = label
+        sparklineTrend.setSeries(series)
     }
 
     /** 给系统信息卡片的各项数值绑定「点击复制」：点一下把「标签: 值」复制到剪贴板 */
