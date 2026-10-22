@@ -129,8 +129,12 @@ object AlertNotifier {
                     PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
                 )
             )
-            .build()
-        runCatching { NotificationManagerCompat.from(context).notify(1, notif) }
+        // 关闭震动时用空振动模式覆盖（通道默认带震动，逐条通知覆盖为不震）
+        if (!Prefs.alertVibrate(context)) {
+            notif.setVibrate(longArrayOf(0L))
+        }
+        val built = notif.build()
+        runCatching { NotificationManagerCompat.from(context).notify(1, built) }
     }
 
     private fun ensureChannel(context: Context) {

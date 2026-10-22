@@ -76,6 +76,7 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
     private lateinit var tvAboutFeedback: TextView
     private lateinit var cbAlert: CheckBox
     private lateinit var cbAlertSound: CheckBox
+    private lateinit var cbAlertVibrate: CheckBox
     private lateinit var cbMonitorNotif: CheckBox
     private lateinit var cbMonCpu: CheckBox
     private lateinit var cbMonMem: CheckBox
@@ -135,6 +136,7 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
         tvAboutFeedback = view.findViewById(R.id.tv_about_feedback)
         cbAlert = view.findViewById(R.id.cb_alert)
         cbAlertSound = view.findViewById(R.id.cb_alert_sound)
+        cbAlertVibrate = view.findViewById(R.id.cb_alert_vibrate)
         cbMonitorNotif = view.findViewById(R.id.cb_monitor_notif)
         cbMonCpu = view.findViewById(R.id.cb_mon_cpu)
         cbMonMem = view.findViewById(R.id.cb_mon_mem)
@@ -205,6 +207,7 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
         cbWb2api.setOnCheckedChangeListener { _, _ -> if (!suppressSave) scheduleSave() }
         cbAlert.setOnCheckedChangeListener { _, _ -> if (!suppressSave) scheduleSave() }
         cbAlertSound.setOnCheckedChangeListener { _, _ -> if (!suppressSave) scheduleSave() }
+        cbAlertVibrate.setOnCheckedChangeListener { _, _ -> if (!suppressSave) scheduleSave() }
         cbMonitorNotif.setOnCheckedChangeListener { _, _ -> if (!suppressSave) scheduleSave() }
         cbMonCpu.setOnCheckedChangeListener { _, _ -> if (!suppressSave) scheduleSave() }
         cbMonMem.setOnCheckedChangeListener { _, _ -> if (!suppressSave) scheduleSave() }
@@ -305,6 +308,7 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
         cbWb2api.isChecked = Prefs.showWb2api(requireContext())
         cbAlert.isChecked = Prefs.showAlert(requireContext())
         cbAlertSound.isChecked = Prefs.alertSound(requireContext())
+        cbAlertVibrate.isChecked = Prefs.alertVibrate(requireContext())
         cbMonitorNotif.isChecked = Prefs.showMonitorNotif(requireContext())
         val monItems = Prefs.monNotifItems(requireContext())
         cbMonCpu.isChecked = "cpu" in monItems
@@ -649,6 +653,7 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
         Prefs.setShowWb2api(requireContext(), cbWb2api.isChecked)
         Prefs.setShowAlert(requireContext(), cbAlert.isChecked)
         Prefs.setAlertSound(requireContext(), cbAlertSound.isChecked)
+        Prefs.setAlertVibrate(requireContext(), cbAlertVibrate.isChecked)
         Prefs.setShowMonitorNotif(requireContext(), cbMonitorNotif.isChecked)
         val monItems = mutableSetOf<String>()
         if (cbMonCpu.isChecked) monItems.add("cpu")
