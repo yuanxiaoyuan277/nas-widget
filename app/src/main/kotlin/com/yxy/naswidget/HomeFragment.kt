@@ -29,6 +29,7 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 
 class HomeFragment : Fragment(R.layout.fragment_home) {
 
@@ -764,6 +765,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
             item.findViewById<TextView>(R.id.tv_dot).setTextColor(if (c.running) 0xFF4CAF50.toInt() else 0xFF888888.toInt())
             item.findViewById<TextView>(R.id.tv_name).text = c.name
             item.findViewById<TextView>(R.id.tv_detail).text = c.detailText
+            item.findViewById<View>(R.id.ll_info).setOnClickListener { showContainerDetail(c) }
             val cb = item.findViewById<SwitchCompat>(R.id.cb_select)
             cb.isChecked = c.name in selected
             cb.tag = c.name
@@ -786,6 +788,21 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
             dockerListContainer.addView(item)
         }
         applyDockerFilter()
+    }
+
+    /** 点击容器行弹出详情（状态/详情/CPU/内存/运行时长） */
+    private fun showContainerDetail(c: DockerContainer) {
+        val lines = mutableListOf<String>()
+        lines.add("状态：${c.stateLabel}")
+        if (c.status.isNotEmpty()) lines.add("详情：${c.status}")
+        lines.add("CPU：${c.cpuText.ifEmpty { "--" }}")
+        lines.add("内存：${c.memText.ifEmpty { "--" }}")
+        if (c.uptimeText.isNotEmpty()) lines.add("运行时长：${c.uptimeText}")
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle(c.name)
+            .setMessage(lines.joinToString("\n"))
+            .setPositiveButton("关闭", null)
+            .show()
     }
 
     /** 容器启动/停止/重启：调飞牛 API，成功后刷新列表与预览 */
