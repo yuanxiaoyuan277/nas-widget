@@ -471,6 +471,10 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         }
 
         // 系统信息卡片（CPU 型号+核心数 / 系统版本 / 运行时长 / 温度）
+        val defaultTextColor = requireContext().getColor(R.color.app_text_primary)
+        fun tintSys(tv: TextView, over: Boolean) {
+            tv.setTextColor(if (over) Fmt.ALERT_COLOR else defaultTextColor)
+        }
         tvSysCpu.text = stats?.let { s ->
             s.cpuModel.takeIf { it.isNotEmpty() }?.let { "$it · ${s.cores}核" } ?: "--"
         } ?: "--"
@@ -478,6 +482,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
             val free = (s.memTotal - s.memUsed).coerceAtLeast(0)
             String.format("%s/%s %.0f%%", Fmt.bytes(free), Fmt.bytes(s.memTotal), s.memPercent)
         } ?: "--"
+        tintSys(tvSysMem, (stats?.memPercent ?: 0.0) >= usageThr)
         tvSysOs.text = stats?.osVersion?.takeIf { it.isNotEmpty() } ?: "--"
         tvSysUptime.text = stats?.let { Fmt.uptime(it.uptimeSec) } ?: "--"
         tvSysTime.text = stats?.let { Fmt.time(it.fetchTime) } ?: "--"
@@ -487,7 +492,12 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
             val nvmeT = s.tempNvme?.let { String.format("%.0f°", it) } ?: "--°"
             "CPU $cpuT · NVMe $nvmeT"
         } ?: "--"
+        val overTemp = stats?.let { s ->
+            (s.tempCpu?.let { it >= cpuTempThr } == true) || (s.tempNvme?.let { it >= nvmeTempThr } == true)
+        } ?: false
+        tintSys(tvSysTemp, overTemp)
         tvSysStorage.text = stats?.storageText ?: "--"
+        tintSys(tvSysStorage, (stats?.storagePercent ?: 0.0) >= usageThr)
         tvSysPeak.text = peakText()
 
         fun addTo(comp: String, v: View) {
