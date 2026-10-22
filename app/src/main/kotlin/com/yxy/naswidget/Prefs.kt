@@ -38,6 +38,7 @@ object Prefs {
     private const val KEY_NET_SIDE = "net_side"
     private const val KEY_LAST_ALERT_KEY = "last_alert_key"
     private const val KEY_LAST_ALERT_TIME = "last_alert_time"
+    private const val KEY_ALERT = "show_alert"
 
     const val DEFAULT_URL = "http://192.168.2.3:19254/nas"
     const val DEFAULT_NAS_BASE = "http://192.168.2.3:1223"
@@ -185,4 +186,8 @@ object Prefs {
         .putString(KEY_LAST_ALERT_KEY, key)
         .putLong(KEY_LAST_ALERT_TIME, System.currentTimeMillis())
         .apply()
+
+    // === 资源告警通知开关 ===
+    fun showAlert(ctx: Context) = sp(ctx).getBoolean(KEY_ALERT, true)
+    fun setShowAlert(ctx: Context, v: Boolean) = sp(ctx).edit().putBoolean(KEY_ALERT, v).apply()
 }

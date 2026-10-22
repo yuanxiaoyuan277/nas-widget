@@ -15,6 +15,7 @@ object AlertNotifier {
     private const val REPEAT_MS = 30 * 60 * 1000L  // 同一组告警 30 分钟内不重复
 
     fun checkAndNotify(context: Context, stats: NasStats) {
+        if (!Prefs.showAlert(context)) return
         val alerts = mutableListOf<String>()
         if (stats.cpuPercent >= THRESHOLD) alerts.add("CPU ${stats.cpuPercent.toInt()}%")
         if (stats.memPercent >= THRESHOLD) alerts.add("内存 ${stats.memPercent.toInt()}%")

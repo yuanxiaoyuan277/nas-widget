@@ -288,6 +288,32 @@
             </LinearLayout>
         </LinearLayout>
 
+        <!-- 通知卡片 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:orientation="vertical"
+            android:background="@drawable/app_card"
+            android:padding="16dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="通知"
+                android:textColor="@color/app_text_secondary"
+                android:textSize="13sp" />
+
+            <CheckBox
+                android:id="@+id/cb_alert"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:text="资源告警（CPU/内存/磁盘超 90% 时提醒）"
+                android:textColor="@color/app_text_primary"
+                android:textSize="14sp" />
+        </LinearLayout>
+
         <!-- 外观卡片 -->
         <LinearLayout
             android:layout_width="match_parent"

@@ -57,6 +57,7 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
     private lateinit var tvBackupStatus: TextView
     private lateinit var tvAboutVersion: TextView
     private lateinit var tvAboutRepo: TextView
+    private lateinit var cbAlert: CheckBox
     private var suppressSave = false
     private val saveHandler = Handler(Looper.getMainLooper())
     private val saveRunnable = Runnable { persist() }
@@ -82,6 +83,7 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
         tvBackupStatus = view.findViewById(R.id.tv_backup_status)
         tvAboutVersion = view.findViewById(R.id.tv_about_version)
         tvAboutRepo = view.findViewById(R.id.tv_about_repo)
+        cbAlert = view.findViewById(R.id.cb_alert)
 
         btnLogin.setOnClickListener {
             requireActivity().startActivityForResult(Intent(requireContext(), LoginActivity::class.java), REQ_LOGIN)
@@ -98,6 +100,7 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
             }
         }
         cbWb2api.setOnCheckedChangeListener { _, _ -> if (!suppressSave) scheduleSave() }
+        cbAlert.setOnCheckedChangeListener { _, _ -> if (!suppressSave) scheduleSave() }
         watchEditText(etUrl)
         watchEditText(etWb2apiBase)
         watchEditText(etWb2apiKey)
@@ -158,6 +161,7 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
         spRefresh.setSelection(if (idx >= 0) idx else 2)
         etFontSize.setText(Prefs.fontSize(requireContext()).toString())
         cbWb2api.isChecked = Prefs.showWb2api(requireContext())
+        cbAlert.isChecked = Prefs.showAlert(requireContext())
         etWb2apiBase.setText(Prefs.wb2apiBase(requireContext()))
         etWb2apiKey.setText(Prefs.wb2apiKey(requireContext()))
         tvVersion.text = "v${UpdateChecker.localVersion(requireContext())}"
@@ -238,6 +242,7 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
         val url = etUrl.text.toString().trim().ifEmpty { Prefs.DEFAULT_URL }
         Prefs.setUrl(requireContext(), url)
         Prefs.setShowWb2api(requireContext(), cbWb2api.isChecked)
+        Prefs.setShowAlert(requireContext(), cbAlert.isChecked)
         val sel = spRefresh.selectedItemPosition
         Prefs.setRefresh(requireContext(), refreshOptions.getOrElse(sel) { 30 to "30 秒" }.first)
         val fs = etFontSize.text.toString().toIntOrNull()?.coerceIn(8, 200) ?: 16
