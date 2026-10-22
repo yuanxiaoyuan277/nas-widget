@@ -68,6 +68,27 @@ object AlertNotifier {
         }
     }
 
+    /** 对比容器运行快照，检测从上一次刷新以来停止/异常的容器并发通知 */
+    fun checkContainerStops(context: Context, containers: List<DockerContainer>) {
+        val running = containers.filter { it.running }.map { it.name }.toSet()
+        val prev = Prefs.dockerRunningSnapshot(context)
+        val prevTime = Prefs.dockerSnapshotTime(context)
+        Prefs.setDockerRunningSnapshot(context, running)
+        Prefs.setDockerSnapshotTime(context, System.currentTimeMillis())
+
+        // 首次快照无基线，不告警
+        if (prevTime == 0L || prev.isEmpty()) return
+        val stopped = prev.filter { name ->
+            val c = containers.find { it.name == name }
+            // 容器被移除，或退出运行态且非「重启中/暂停/已创建」等过渡态
+            c == null || (!c.running && c.state.lowercase() !in setOf("restarting", "paused", "created"))
+        }
+        if (stopped.isEmpty()) return
+        if (!Prefs.showAlert(context)) return
+        if (Prefs.isSilentNow(context)) return
+        send(context, "容器停止", stopped.joinToString("、") + " 已停止")
+    }
+
     /** 发送本地通知（标题 + 内容），点击打开 App 主界面 */
     private fun send(context: Context, title: String, text: String) {
         ensureChannel(context)

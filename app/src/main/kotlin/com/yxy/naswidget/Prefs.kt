@@ -49,6 +49,8 @@ object Prefs {
     private const val KEY_SILENT_END = "silent_end"
     private const val KEY_OFFLINE_SINCE = "offline_since"
     private const val KEY_OFFLINE_NOTIFIED = "offline_notified"
+    private const val KEY_DOCKER_RUNNING_SNAPSHOT = "docker_running_snapshot"
+    private const val KEY_DOCKER_SNAPSHOT_TIME = "docker_snapshot_time"
 
     const val DEFAULT_URL = "http://192.168.2.3:19254/nas"
     const val DEFAULT_NAS_BASE = "http://192.168.2.3:1223"
@@ -241,4 +243,13 @@ object Prefs {
     fun setOfflineSince(ctx: Context, v: Long) = sp(ctx).edit().putLong(KEY_OFFLINE_SINCE, v).apply()
     fun offlineNotified(ctx: Context): Boolean = sp(ctx).getBoolean(KEY_OFFLINE_NOTIFIED, false)
     fun setOfflineNotified(ctx: Context, v: Boolean) = sp(ctx).edit().putBoolean(KEY_OFFLINE_NOTIFIED, v).apply()
+
+    // === Docker 容器运行状态快照（检测容器意外停止） ===
+    fun dockerRunningSnapshot(ctx: Context): Set<String> =
+        sp(ctx).getString(KEY_DOCKER_RUNNING_SNAPSHOT, "")?.split(",")
+            ?.map { it.trim() }?.filter { it.isNotEmpty() }?.toSet() ?: emptySet()
+    fun setDockerRunningSnapshot(ctx: Context, names: Set<String>) =
+        sp(ctx).edit().putString(KEY_DOCKER_RUNNING_SNAPSHOT, names.joinToString(",")).apply()
+    fun dockerSnapshotTime(ctx: Context): Long = sp(ctx).getLong(KEY_DOCKER_SNAPSHOT_TIME, 0L)
+    fun setDockerSnapshotTime(ctx: Context, t: Long) = sp(ctx).edit().putLong(KEY_DOCKER_SNAPSHOT_TIME, t).apply()
 }
