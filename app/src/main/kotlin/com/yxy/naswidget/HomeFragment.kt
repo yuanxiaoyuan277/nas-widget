@@ -1213,11 +1213,54 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         lines.add("CPU：${c.cpuText.ifEmpty { "--" }}")
         lines.add("内存：${c.memText.ifEmpty { "--" }}")
         if (c.uptimeText.isNotEmpty()) lines.add("运行时长：${c.uptimeText}")
-        MaterialAlertDialogBuilder(requireContext())
+        val builder = MaterialAlertDialogBuilder(requireContext())
             .setTitle(c.name)
             .setMessage(lines.joinToString("\n"))
             .setPositiveButton("关闭", null)
-            .show()
+        if (c.publicPorts.isNotEmpty()) {
+            builder.setNeutralButton("打开 Web") { _, _ -> openContainerWeb(c) }
+        }
+        builder.show()
+    }
+
+    /** 打开容器对外服务：优先 443 用 https、其余 http，多端口时让用户选一个 */
+    private fun openContainerWeb(c: DockerContainer) {
+        val ports = c.publicPorts
+        if (ports.isEmpty()) return
+        val base = Prefs.nasBase(requireContext())
+        val uri = runCatching { Uri.parse(base) }.getOrNull()
+        val host = uri?.let {
+            val scheme = it.scheme ?: "http"
+            val h = it.host
+            if (h == null) null else "$scheme://$h"
+        }
+        if (host == null) {
+            Toast.makeText(requireContext(), "无法解析 NAS 地址，请在设置页确认", Toast.LENGTH_SHORT).show()
+            return
+        }
+        fun urlOf(port: Int): String {
+            val scheme = if (port == 443) "https" else host.substringBefore("://")
+            return "$scheme://${host.substringAfter("://")}:$port"
+        }
+        if (ports.size == 1) {
+            openUrl(urlOf(ports[0]))
+        } else {
+            val items = ports.map { p -> urlOf(p) }.toTypedArray()
+            MaterialAlertDialogBuilder(requireContext())
+                .setTitle("选择要打开的端口")
+                .setItems(items) { _, which -> openUrl(items[which]) }
+                .setNegativeButton("取消", null)
+                .show()
+        }
+    }
+
+    /** 用系统浏览器打开 URL，失败时提示 */
+    private fun openUrl(url: String) {
+        try {
+            startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
+        } catch (_: Exception) {
+            Toast.makeText(requireContext(), "无法打开浏览器", Toast.LENGTH_SHORT).show()
+        }
     }
 
     /** 容器启动/停止/重启：调飞牛 API，成功后刷新列表与预览 */

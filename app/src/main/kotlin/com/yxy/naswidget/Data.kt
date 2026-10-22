@@ -37,6 +37,12 @@ data class DockerContainer(
     /** 端口映射可读文本（如 "8080→80/tcp, 8443→443/tcp"），无端口则为空串 */
     val portText: String get() = ports.joinToString(", ").ifEmpty { "" }
 
+    /** 对外映射的公网端口列表（如 8080、8443），用于「打开 Web 界面」；无公网端口则为空 */
+    val publicPorts: List<Int> get() = ports.mapNotNull { p ->
+        val before = p.substringBefore("→").trim()
+        before.toIntOrNull()
+    }
+
     /** 精确状态标签（飞牛 State 字段可能为 running/exited/stopped/error/created/paused/restarting 等） */
     val stateLabel: String get() = when (state.lowercase()) {
         "running" -> "运行"
