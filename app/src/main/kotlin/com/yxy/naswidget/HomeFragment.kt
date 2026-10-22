@@ -488,11 +488,13 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         result.onSuccess { s ->
             stats = s
             lastStats = s
+            AlertNotifier.markOnline(requireContext())
             Prefs.recordPeaks(requireContext(), s.cpuPercent, s.memPercent, s.tempCpu, s.tempNvme)
             Prefs.recordNetPeak(requireContext(), s.netDown, s.netUp)
             root.findViewById<TextView>(R.id.tv_uptime).text = "运行 " + Fmt.uptime(s.uptimeSec) + " · " + Fmt.time(s.fetchTime)
         }.onFailure {
-            root.findViewById<TextView>(R.id.tv_uptime).text = "连接失败"
+            AlertNotifier.markOffline(requireContext())
+            root.findViewById<TextView>(R.id.tv_uptime).text = Fmt.offlineDuration(Prefs.offlineSince(requireContext()))
         }
 
         // 系统信息卡片（CPU 型号+核心数 / 系统版本 / 运行时长 / 温度）

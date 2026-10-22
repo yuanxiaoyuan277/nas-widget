@@ -52,16 +52,15 @@ object AlertNotifier {
         }
     }
 
-    /** 拉取失败：连续失败超过 OFFLINE_DELAY_MS 后发「NAS 离线」通知（一次离线只提醒一次） */
+    /** 拉取失败：记录离线起始时间（不受告警开关影响）；连续失败超过 OFFLINE_DELAY_MS 后发「NAS 离线」通知（一次离线只提醒一次） */
     fun markOffline(context: Context) {
-        if (!Prefs.showAlert(context)) return
-        if (Prefs.isSilentNow(context)) return
         val now = System.currentTimeMillis()
         val since = Prefs.offlineSince(context)
         if (since == 0L) {
             Prefs.setOfflineSince(context, now)
             return
         }
+        if (!Prefs.showAlert(context) || Prefs.isSilentNow(context)) return
         if (!Prefs.offlineNotified(context) && now - since >= OFFLINE_DELAY_MS) {
             Prefs.setOfflineNotified(context, true)
             send(context, "NAS 离线", "无法连接监控数据源，请检查 NAS 是否在线")

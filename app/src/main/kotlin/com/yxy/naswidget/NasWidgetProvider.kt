@@ -107,7 +107,7 @@ class NasWidgetProvider : AppWidgetProvider() {
                 stats = s
                 views.setTextViewText(R.id.tv_uptime, "运行 " + Fmt.uptime(s.uptimeSec) + " · " + Fmt.time(s.fetchTime))
             }.onFailure {
-                views.setTextViewText(R.id.tv_uptime, "连接失败")
+                views.setTextViewText(R.id.tv_uptime, Fmt.offlineDuration(Prefs.offlineSince(context)))
             }
 
             fun addTo(comp: String, rootId: Int, item: RemoteViews) {

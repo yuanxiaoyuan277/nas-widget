@@ -216,6 +216,17 @@ object Fmt {
         }
     }
 
+    /** 离线时长可读文本（从离线起始时间戳算起） */
+    fun offlineDuration(sinceMillis: Long): String {
+        if (sinceMillis <= 0) return "连接失败"
+        val mins = (System.currentTimeMillis() - sinceMillis) / 60000
+        return when {
+            mins < 1 -> "离线 <1 分钟"
+            mins < 60 -> "已离线 ${mins} 分钟"
+            else -> "已离线 ${mins / 60} 时 ${mins % 60} 分"
+        }
+    }
+
     /** 使用率分级颜色：<60% 绿、60~85% 黄、≥85% 红（监控项进度条配色） */
     fun levelColor(pct: Double): Int = when {
         pct >= 85 -> 0xFFF44336.toInt()
