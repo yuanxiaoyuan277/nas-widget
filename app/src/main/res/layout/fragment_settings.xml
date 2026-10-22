@@ -371,6 +371,15 @@
                 android:textSize="14sp" />
 
             <CheckBox
+                android:id="@+id/cb_offline_alert"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:text="离线/恢复提醒（NAS 断连或恢复时单独提醒，不受资源告警开关影响）"
+                android:textColor="@color/app_text_primary"
+                android:textSize="14sp" />
+
+            <CheckBox
                 android:id="@+id/cb_monitor_notif"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"

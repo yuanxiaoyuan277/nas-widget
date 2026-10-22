@@ -41,13 +41,15 @@ object AlertNotifier {
         send(context, "NAS 告警", alerts.joinToString("、"))
     }
 
-    /** 拉取成功：若此前处于离线状态，则发「NAS 已恢复」通知并复位 */
+    /** 拉取成功：若此前处于离线状态，则发「NAS 已恢复」通知并复位（受离线/恢复提醒开关控制） */
     fun markOnline(context: Context) {
         if (Prefs.offlineSince(context) == 0L) return
         Prefs.setOfflineSince(context, 0L)
         if (Prefs.offlineNotified(context)) {
             Prefs.setOfflineNotified(context, false)
-            send(context, "NAS 已恢复", "监控数据源连接已恢复正常")
+            if (Prefs.showOfflineAlert(context)) {
+                send(context, "NAS 已恢复", "监控数据源连接已恢复正常")
+            }
         }
     }
 
@@ -59,7 +61,7 @@ object AlertNotifier {
             Prefs.setOfflineSince(context, now)
             return
         }
-        if (!Prefs.showAlert(context) || Prefs.isSilentNow(context)) return
+        if (!Prefs.showOfflineAlert(context) || Prefs.isSilentNow(context)) return
         if (!Prefs.offlineNotified(context) && now - since >= OFFLINE_DELAY_MS) {
             Prefs.setOfflineNotified(context, true)
             send(context, "NAS 离线", "无法连接监控数据源，请检查 NAS 是否在线")

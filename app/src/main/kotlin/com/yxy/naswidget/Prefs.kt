@@ -344,6 +344,11 @@ object Prefs {
         else hour >= start || hour < end
     }
 
+    // === 离线/恢复提醒独立开关（默认开；关闭后 NAS 断连/恢复不再单独提醒，资源告警仍按自身开关） ===
+    private const val KEY_OFFLINE_ALERT = "offline_alert"
+    fun showOfflineAlert(ctx: Context) = sp(ctx).getBoolean(KEY_OFFLINE_ALERT, true)
+    fun setShowOfflineAlert(ctx: Context, v: Boolean) = sp(ctx).edit().putBoolean(KEY_OFFLINE_ALERT, v).apply()
+
     // === NAS 离线状态跟踪（离线/恢复告警） ===
     fun offlineSince(ctx: Context): Long = sp(ctx).getLong(KEY_OFFLINE_SINCE, 0L)
     fun setOfflineSince(ctx: Context, v: Long) = sp(ctx).edit().putLong(KEY_OFFLINE_SINCE, v).apply()
