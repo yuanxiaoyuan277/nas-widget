@@ -176,7 +176,7 @@ object NasDataFetcher {
             if (code != 200) return Result.failure(Exception("HTTP $code: $resp"))
             val rootObj = parseRootObj(resp)
             val result = rootObj?.optString("result", "") ?: ""
-            val errmsg = rootObj?.optString("errmsg", "")
+            val errmsg = rootObj?.optString("errmsg", "") ?: ""
             if (!result.equals("succ", true)) {
                 return Result.failure(Exception(errmsg.ifEmpty { "操作失败" }))
             }
