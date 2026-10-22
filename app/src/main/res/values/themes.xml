@@ -19,12 +19,12 @@
         <item name="itemActiveIndicatorStyle">@style/NasWidget.BottomNavigation.ActiveIndicator</item>
     </style>
 
-    <style name="NasWidget.BottomNavigation.ActiveIndicator" parent="Widget.MaterialComponents.BottomNavigationView.ActiveIndicator">
+    <style name="NasWidget.BottomNavigation.ActiveIndicator" parent="">
         <item name="android:color">@color/app_primary_translucent</item>
         <item name="shapeAppearance">@style/ShapeAppearance.NasWidget.ActiveIndicator</item>
     </style>
 
-    <style name="ShapeAppearance.NasWidget.ActiveIndicator" parent="ShapeAppearance.MaterialComponents.CornerFamily">
+    <style name="ShapeAppearance.NasWidget.ActiveIndicator" parent="ShapeAppearance.MaterialComponents.SmallComponent">
         <item name="cornerFamily">rounded</item>
         <item name="cornerSize">16dp</item>
     </style>
