@@ -106,6 +106,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
     private lateinit var tvSysStorage: TextView
     private lateinit var tvSysPeak: TextView
     private lateinit var tvSysTraffic: TextView
+    private lateinit var tvSysAlertHistory: TextView
     private lateinit var btnClearPeak: TextView
     private lateinit var tvSysRefresh: TextView
     private lateinit var sparklineTrend: SparklineView
@@ -214,6 +215,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         tvSysStorage = view.findViewById(R.id.tv_sys_storage)
         tvSysPeak = view.findViewById(R.id.tv_sys_peak)
         tvSysTraffic = view.findViewById(R.id.tv_sys_traffic)
+        tvSysAlertHistory = view.findViewById(R.id.tv_sys_alert_history)
         btnClearPeak = view.findViewById(R.id.btn_clear_peak)
         tvSysRefresh = view.findViewById(R.id.tv_sys_refresh)
         sparklineTrend = view.findViewById(R.id.sparkline_trend)
@@ -251,6 +253,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         tvSysStorage.setOnClickListener { showDiskDetail() }
         tvSysPeak.setOnClickListener { showPeakDetail() }
         tvSysTraffic.setOnClickListener { showTrafficDetail() }
+        tvSysAlertHistory.setOnClickListener { showAlertHistory() }
         // 「清零」按钮：一键清零今日峰值记录
         btnClearPeak.setOnClickListener { clearPeaks() }
         // 「刷新间隔」行点击循环切换
@@ -567,6 +570,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         } ?: "--"
         tvSysNet.text = stats?.let { "↓${Fmt.speed(it.netDown)} ↑${Fmt.speed(it.netUp)}" } ?: "--"
         tvSysTraffic.text = trafficText()
+        tvSysAlertHistory.text = alertHistoryLabel()
         tvSysTemp.text = stats?.let { s ->
             val cpuT = s.tempCpu?.let { String.format("%.0f°", it) } ?: "--°"
             val nvmeT = s.tempNvme?.let { String.format("%.0f°", it) } ?: "--°"
@@ -955,6 +959,43 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         val down = Prefs.trafficDown(requireContext())
         val up = Prefs.trafficUp(requireContext())
         return if (down <= 0L && up <= 0L) "--" else "↓${Fmt.bytes(down)} ↑${Fmt.bytes(up)}"
+    }
+
+    /** 告警历史入口可读文本：有记录显示条数，无记录显示「无」 */
+    private fun alertHistoryLabel(): String {
+        val n = Prefs.alertHistory(requireContext()).size
+        return if (n > 0) "$n 条 ›" else "无 ›"
+    }
+
+    /** 弹出告警历史弹窗（最近 20 条，可清空 / 分享） */
+    private fun showAlertHistory() {
+        val history = Prefs.alertHistory(requireContext())
+        val message = if (history.isEmpty()) "暂无告警记录" else history.joinToString("\n")
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle("告警历史")
+            .setMessage(message)
+            .setNeutralButton("分享") { _, _ -> shareAlertHistory(history) }
+            .setPositiveButton("清空") { _, _ ->
+                Prefs.clearAlertHistory(requireContext())
+                tvSysAlertHistory.text = alertHistoryLabel()
+                Toast.makeText(requireContext(), "告警历史已清空", Toast.LENGTH_SHORT).show()
+            }
+            .setNegativeButton("关闭", null)
+            .show()
+    }
+
+    /** 分享告警历史（走系统分享，可发到微信/QQ 等） */
+    private fun shareAlertHistory(history: List<String>) {
+        if (history.isEmpty()) {
+            Toast.makeText(requireContext(), "暂无告警记录", Toast.LENGTH_SHORT).show()
+            return
+        }
+        val text = "NAS 告警历史（最近 ${history.size} 条）\n" + history.joinToString("\n")
+        val send = Intent(Intent.ACTION_SEND).apply {
+            type = "text/plain"
+            putExtra(Intent.EXTRA_TEXT, text)
+        }
+        requireContext().startActivity(Intent.createChooser(send, "分享告警历史"))
     }
 
     /** 清零今日峰值记录（CPU/内存/温度/网络），并立即刷新显示 */
