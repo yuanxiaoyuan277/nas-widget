@@ -253,7 +253,6 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         bindCopyRow(
             "CPU" to tvSysCpu,
             "系统" to tvSysOs,
-            "运行" to tvSysUptime,
             "更新" to tvSysTime,
             "网络" to tvSysNet
         )
@@ -264,6 +263,8 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         tvSysPeak.setOnClickListener { showPeakDetail() }
         tvSysTraffic.setOnClickListener { showTrafficDetail() }
         tvSysAlertHistory.setOnClickListener { showAlertHistory() }
+        // 「运行」行点击弹出已运行时长 + 本次启动时间
+        tvSysUptime.setOnClickListener { showUptimeDetail() }
         // 「清零」按钮：一键清零今日峰值记录
         btnClearPeak.setOnClickListener { clearPeaks() }
         // 「刷新间隔」行点击循环切换
@@ -918,6 +919,29 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
             .setTitle("磁盘明细")
             .setMessage(lines.joinToString("\n"))
             .setPositiveButton("关闭", null)
+            .show()
+    }
+
+    /** 查看运行时长明细：点「运行」行弹出已运行时长 + 本次启动时间，可复制 */
+    private fun showUptimeDetail() {
+        val s = lastStats
+        if (s == null) {
+            Toast.makeText(requireContext(), "暂无数据，请稍候刷新", Toast.LENGTH_SHORT).show()
+            return
+        }
+        val bootMillis = s.fetchTime - s.uptimeSec * 1000L
+        val fmt = java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss", java.util.Locale.getDefault())
+        val bootStr = fmt.format(java.util.Date(bootMillis))
+        val uptimeStr = Fmt.uptime(s.uptimeSec)
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle("运行时长")
+            .setMessage("已运行：$uptimeStr\n本次启动：$bootStr")
+            .setPositiveButton("复制") { _, _ ->
+                val cm = requireContext().getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                cm.setPrimaryClip(ClipData.newPlainText("uptime", "运行 $uptimeStr · 自 $bootStr 启动"))
+                Toast.makeText(requireContext(), "运行时长已复制", Toast.LENGTH_SHORT).show()
+            }
+            .setNegativeButton("关闭", null)
             .show()
     }
 
