@@ -800,7 +800,12 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         lines.add("NAS 监控")
         lines.add("CPU ${s.cpuPercent.toInt()}% · ${s.cores}核${s.cpuModel.takeIf { it.isNotEmpty() }?.let { " · $it" } ?: ""}")
         lines.add("内存 ${Fmt.bytes((s.memTotal - s.memUsed).coerceAtLeast(0))}/${Fmt.bytes(s.memTotal)} ${s.memPercent.toInt()}%")
-        if (s.disks.isNotEmpty()) lines.add("存储 ${s.storageText}")
+        if (s.disks.isNotEmpty()) {
+            lines.add("存储 ${s.storageText}")
+            for (d in s.disks.sortedByDescending { it.usePercent }) {
+                lines.add("  ${d.name} ${Fmt.bytes(d.total - d.used)}/${Fmt.bytes(d.total)} ${d.usePercent.toInt()}%")
+            }
+        }
         val tempLine = when {
             s.tempCpu != null && s.tempNvme != null -> "温度 CPU ${s.tempCpu.toInt()}° · NVMe ${s.tempNvme.toInt()}°"
             s.tempCpu != null -> "温度 CPU ${s.tempCpu.toInt()}°"
