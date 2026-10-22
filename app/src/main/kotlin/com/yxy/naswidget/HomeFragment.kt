@@ -1080,7 +1080,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
             val finalOk = ok
             val finalFail = fail
             requireActivity().runOnUiThread {
-                Toast.makeText(requireContext(), "批量$verb完成：成功 $finalOk，失败 $finalFail", Toast.LENGTH_LONG).show()
+                Toast.makeText(requireContext(), "批量${verb}完成：成功 $finalOk，失败 $finalFail", Toast.LENGTH_LONG).show()
                 loadDockerContainers()
                 schedulePreviewRefresh()
             }
