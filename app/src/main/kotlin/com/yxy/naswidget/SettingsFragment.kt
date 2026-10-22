@@ -64,6 +64,7 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
     private lateinit var tvAboutVersion: TextView
     private lateinit var tvAboutRepo: TextView
     private lateinit var cbAlert: CheckBox
+    private lateinit var cbMonitorNotif: CheckBox
     private lateinit var etAlertUsage: EditText
     private lateinit var etAlertCpuTemp: EditText
     private lateinit var etAlertNvmeTemp: EditText
@@ -101,6 +102,7 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
         tvAboutVersion = view.findViewById(R.id.tv_about_version)
         tvAboutRepo = view.findViewById(R.id.tv_about_repo)
         cbAlert = view.findViewById(R.id.cb_alert)
+        cbMonitorNotif = view.findViewById(R.id.cb_monitor_notif)
         etAlertUsage = view.findViewById(R.id.et_alert_usage)
         etAlertCpuTemp = view.findViewById(R.id.et_alert_cpu_temp)
         etAlertNvmeTemp = view.findViewById(R.id.et_alert_nvme_temp)
@@ -129,6 +131,7 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
         }
         cbWb2api.setOnCheckedChangeListener { _, _ -> if (!suppressSave) scheduleSave() }
         cbAlert.setOnCheckedChangeListener { _, _ -> if (!suppressSave) scheduleSave() }
+        cbMonitorNotif.setOnCheckedChangeListener { _, _ -> if (!suppressSave) scheduleSave() }
         cbSilent.setOnCheckedChangeListener { _, _ -> if (!suppressSave) scheduleSave() }
         watchEditText(etUrl)
         watchEditText(etWb2apiBase)
@@ -201,6 +204,7 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
         etFontSize.setText(Prefs.fontSize(requireContext()).toString())
         cbWb2api.isChecked = Prefs.showWb2api(requireContext())
         cbAlert.isChecked = Prefs.showAlert(requireContext())
+        cbMonitorNotif.isChecked = Prefs.showMonitorNotif(requireContext())
         etAlertUsage.setText(Prefs.alertUsageThreshold(requireContext()).toString())
         etAlertCpuTemp.setText(Prefs.alertCpuTempThreshold(requireContext()).toString())
         etAlertNvmeTemp.setText(Prefs.alertNvmeTempThreshold(requireContext()).toString())
@@ -338,6 +342,7 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
         Prefs.setUrl(requireContext(), url)
         Prefs.setShowWb2api(requireContext(), cbWb2api.isChecked)
         Prefs.setShowAlert(requireContext(), cbAlert.isChecked)
+        Prefs.setShowMonitorNotif(requireContext(), cbMonitorNotif.isChecked)
         Prefs.setAlertUsageThreshold(requireContext(), etAlertUsage.text.toString().toIntOrNull()?.coerceIn(1, 100) ?: 90)
         Prefs.setAlertCpuTempThreshold(requireContext(), etAlertCpuTemp.text.toString().toIntOrNull()?.coerceIn(1, 120) ?: 85)
         Prefs.setAlertNvmeTempThreshold(requireContext(), etAlertNvmeTemp.text.toString().toIntOrNull()?.coerceIn(1, 120) ?: 70)
@@ -355,6 +360,17 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
         val ids = am.getAppWidgetIds(ComponentName(requireContext(), NasWidgetProvider::class.java))
         if (ids.isNotEmpty()) {
             NasWidgetProvider.updateAll(requireContext(), am, ids)
+        }
+
+        // 状态栏常驻监控：开启则调度定时器并立即刷新一次通知，关闭则取消
+        if (Prefs.showMonitorNotif(requireContext())) {
+            AlarmScheduler.schedule(requireContext())
+            Thread {
+                val r = NasDataFetcher.fetch(Prefs.url(requireContext()))
+                MonitorNotifier.updateFromStats(requireContext(), r)
+            }.start()
+        } else {
+            MonitorNotifier.cancel(requireContext())
         }
     }
 

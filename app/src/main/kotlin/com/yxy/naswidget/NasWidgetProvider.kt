@@ -50,6 +50,7 @@ class NasWidgetProvider : AppWidgetProvider() {
                 }.onFailure {
                     AlertNotifier.markOffline(context)
                 }
+                MonitorNotifier.updateFromStats(context, result)
                 // 容器停止检测（仅在桌面组件开启 Docker 显示时会拉取容器列表）
                 docker?.onSuccess { containers ->
                     AlertNotifier.checkContainerStops(context, containers)

@@ -14,6 +14,12 @@ class UpdateReceiver : BroadcastReceiver() {
         val ids = am.getAppWidgetIds(ComponentName(context, NasWidgetProvider::class.java))
         if (ids.isNotEmpty()) {
             NasWidgetProvider.updateAll(context, am, ids)
+        } else if (Prefs.showMonitorNotif(context)) {
+            // 无桌面组件但开启了常驻监控：单独拉取并更新通知
+            Thread {
+                val result = NasDataFetcher.fetch(Prefs.url(context))
+                MonitorNotifier.updateFromStats(context, result)
+            }.start()
         }
     }
 }
