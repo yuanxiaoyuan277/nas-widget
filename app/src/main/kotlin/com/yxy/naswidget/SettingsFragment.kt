@@ -80,6 +80,8 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
     private lateinit var cbSilent: CheckBox
     private lateinit var etSilentStart: EditText
     private lateinit var etSilentEnd: EditText
+    private lateinit var btnTempSilent: Button
+    private lateinit var tvTempSilentStatus: TextView
     private lateinit var btnAlertHistory: Button
     private lateinit var btnTestNotif: Button
     private lateinit var btnReset: Button
@@ -129,6 +131,8 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
         cbSilent = view.findViewById(R.id.cb_silent)
         etSilentStart = view.findViewById(R.id.et_silent_start)
         etSilentEnd = view.findViewById(R.id.et_silent_end)
+        btnTempSilent = view.findViewById(R.id.btn_temp_silent)
+        tvTempSilentStatus = view.findViewById(R.id.tv_temp_silent_status)
         btnAlertHistory = view.findViewById(R.id.btn_alert_history)
         btnTestNotif = view.findViewById(R.id.btn_test_notif)
         btnReset = view.findViewById(R.id.btn_reset)
@@ -153,6 +157,7 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
         btnRestore.setOnClickListener { restoreConfig() }
         btnShareBackup.setOnClickListener { shareBackup() }
         btnAlertHistory.setOnClickListener { showAlertHistory() }
+        btnTempSilent.setOnClickListener { toggleTempSilent() }
         btnTestNotif.setOnClickListener {
             val ok = AlertNotifier.sendTest(requireContext())
             if (ok) Toast.makeText(requireContext(), "已发送测试通知，请下拉通知栏查看", Toast.LENGTH_SHORT).show()
@@ -273,6 +278,7 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
         tvVersion.text = "v${UpdateChecker.localVersion(requireContext())}"
         tvAboutVersion.text = "v${UpdateChecker.localVersion(requireContext())}"
         updateThemeButton()
+        updateTempSilentStatus()
         refreshBatteryStatus()
         suppressSave = false
     }
@@ -296,6 +302,36 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
         Prefs.setTheme(requireContext(), next)
         AppCompatDelegate.setDefaultNightMode(Prefs.nightMode(requireContext()))
         updateThemeButton()
+    }
+
+    /** 临时静默：一键开启 1 小时免打扰（到点自动恢复），已开启时再次点击取消 */
+    private fun toggleTempSilent() {
+        if (Prefs.isTempSilent(requireContext())) {
+            Prefs.setSilentUntil(requireContext(), 0L)
+            Toast.makeText(requireContext(), "已取消临时静默，恢复推送告警", Toast.LENGTH_SHORT).show()
+        } else {
+            Prefs.setSilentUntil(requireContext(), System.currentTimeMillis() + 3600_000L)
+            Toast.makeText(requireContext(), "已开启临时静默 1 小时，期间不推送告警", Toast.LENGTH_SHORT).show()
+        }
+        updateTempSilentStatus()
+    }
+
+    /** 刷新临时静默状态：未开启 / 静默至 HH:mm */
+    private fun updateTempSilentStatus() {
+        val until = Prefs.silentUntil(requireContext())
+        if (until <= System.currentTimeMillis()) {
+            btnTempSilent.text = "临时静默 1 小时"
+            tvTempSilentStatus.text = "未开启"
+        } else {
+            btnTempSilent.text = "取消临时静默"
+            val cal = java.util.Calendar.getInstance()
+            cal.timeInMillis = until
+            tvTempSilentStatus.text = String.format(
+                "静默至 %02d:%02d",
+                cal.get(java.util.Calendar.HOUR_OF_DAY),
+                cal.get(java.util.Calendar.MINUTE)
+            )
+        }
     }
 
     /** 是否已加入系统电池优化白名单 */

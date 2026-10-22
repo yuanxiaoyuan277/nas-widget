@@ -256,8 +256,17 @@ object Prefs {
     fun silentEnd(ctx: Context) = sp(ctx).getInt(KEY_SILENT_END, 7)
     fun setSilentEnd(ctx: Context, v: Int) = sp(ctx).edit().putInt(KEY_SILENT_END, v).apply()
 
-    /** 当前是否处于静默时段（跨天窗口，如 23:00~07:00） */
+    // === 临时静默（临时免打扰，到点自动恢复） ===
+    private const val KEY_SILENT_UNTIL = "silent_until"
+    fun silentUntil(ctx: Context): Long = sp(ctx).getLong(KEY_SILENT_UNTIL, 0L)
+    fun setSilentUntil(ctx: Context, v: Long) = sp(ctx).edit().putLong(KEY_SILENT_UNTIL, v).apply()
+
+    /** 当前是否处于临时静默（免打扰倒计时未到点） */
+    fun isTempSilent(ctx: Context): Boolean = silentUntil(ctx) > System.currentTimeMillis()
+
+    /** 当前是否处于静默时段（跨天窗口，如 23:00~07:00），临时静默优先 */
     fun isSilentNow(ctx: Context): Boolean {
+        if (isTempSilent(ctx)) return true
         if (!silentEnabled(ctx)) return false
         val start = silentStart(ctx)
         val end = silentEnd(ctx)

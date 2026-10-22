@@ -604,6 +604,33 @@
                 </LinearLayout>
             </LinearLayout>
 
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
+
+                <Button
+                    android:id="@+id/btn_temp_silent"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="临时静默 1 小时"
+                    android:textColor="@android:color/white"
+                    app:backgroundTint="@color/app_primary"
+                    app:cornerRadius="14dp" />
+
+                <TextView
+                    android:id="@+id/tv_temp_silent_status"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginStart="12dp"
+                    android:text="未开启"
+                    android:textColor="@color/app_text_hint"
+                    android:textSize="12sp" />
+            </LinearLayout>
+
             <Button
                 android:id="@+id/btn_alert_history"
                 android:layout_width="match_parent"
