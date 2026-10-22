@@ -36,6 +36,7 @@ object Prefs {
     private const val KEY_DOCKER_SIDE = "docker_side"
     private const val KEY_SHOW_NET = "show_net"
     private const val KEY_NET_SIDE = "net_side"
+    private const val KEY_SHOW_STORAGE = "show_storage"
     private const val KEY_LAST_ALERT_KEY = "last_alert_key"
     private const val KEY_LAST_ALERT_TIME = "last_alert_time"
     private const val KEY_ALERT = "show_alert"
@@ -182,6 +183,10 @@ object Prefs {
 
     fun showNet(ctx: Context) = sp(ctx).getBoolean(KEY_SHOW_NET, false)
     fun setShowNet(ctx: Context, v: Boolean) = sp(ctx).edit().putBoolean(KEY_SHOW_NET, v).apply()
+
+    // === 存储总览显示项（所有磁盘汇总） ===
+    fun showStorage(ctx: Context) = sp(ctx).getBoolean(KEY_SHOW_STORAGE, false)
+    fun setShowStorage(ctx: Context, v: Boolean) = sp(ctx).edit().putBoolean(KEY_SHOW_STORAGE, v).apply()
 
     fun lastAlertKey(ctx: Context) = sp(ctx).getString(KEY_LAST_ALERT_KEY, "") ?: ""
     fun lastAlertTime(ctx: Context) = sp(ctx).getLong(KEY_LAST_ALERT_TIME, 0L)

@@ -180,6 +180,22 @@ class NasWidgetProvider : AppWidgetProvider() {
                 addTo("disk2", R.id.item_disk2_root, item)
             }
 
+            // 存储总览（所有磁盘汇总）
+            if (Prefs.showStorage(context)) {
+                val item = RemoteViews(context.packageName, R.layout.item_storage)
+                stats?.let { s ->
+                    item.setProgressBar(R.id.pb_storage, 100, s.storagePercent.toInt().coerceIn(0, 100), false)
+                    item.setColorStateList(R.id.pb_storage, "setProgressTintList", ColorStateList.valueOf(Fmt.levelColor(s.storagePercent)))
+                    item.setTextViewText(R.id.tv_storage, s.storageText)
+                    if (s.storagePercent >= usageThr) {
+                        item.setTextColor(R.id.tv_storage, Fmt.ALERT_COLOR)
+                    }
+                } ?: item.setTextViewText(R.id.tv_storage, "--%")
+                item.setTextViewTextSize(R.id.tv_storage_label, TypedValue.COMPLEX_UNIT_PX, fs.toFloat())
+                item.setTextViewTextSize(R.id.tv_storage, TypedValue.COMPLEX_UNIT_PX, fs.toFloat())
+                addTo("storage", R.id.item_storage_root, item)
+            }
+
             // 网络
             if (Prefs.showNet(context)) {
                 val item = RemoteViews(context.packageName, R.layout.item_net)
