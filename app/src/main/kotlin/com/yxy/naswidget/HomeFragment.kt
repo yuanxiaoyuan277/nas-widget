@@ -1106,15 +1106,47 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         else -> "$sec 秒"
     }
 
-    /** 点击「刷新间隔」行：循环切换刷新间隔，即时生效并重排刷新调度 */
+    /** 点击「刷新间隔」行：循环切换 10→15→30→60→300 秒，最后一档再点进入自定义输入 */
     private fun cycleRefreshInterval() {
         val cur = Prefs.refreshSec(requireContext())
         val idx = refreshSecOptions.indexOf(cur)
-        val next = refreshSecOptions[(idx + 1 + refreshSecOptions.size) % refreshSecOptions.size]
-        Prefs.setRefresh(requireContext(), next)
-        tvSysRefresh.text = refreshSecLabel(next)
+        val next = if (idx >= 0 && idx < refreshSecOptions.size - 1) refreshSecOptions[idx + 1] else null
+        if (next != null) {
+            applyRefresh(next)
+        } else {
+            showCustomRefreshDialog()
+        }
+    }
+
+    /** 应用刷新间隔：保存、更新显示、重排刷新调度 */
+    private fun applyRefresh(sec: Int) {
+        Prefs.setRefresh(requireContext(), sec)
+        tvSysRefresh.text = refreshSecLabel(sec)
         AlarmScheduler.schedule(requireContext())
-        Toast.makeText(requireContext(), "刷新间隔已设为 ${refreshSecLabel(next)}", Toast.LENGTH_SHORT).show()
+        Toast.makeText(requireContext(), "刷新间隔已设为 ${refreshSecLabel(sec)}", Toast.LENGTH_SHORT).show()
+    }
+
+    /** 自定义刷新间隔：输入 5~3600 秒，即时生效 */
+    private fun showCustomRefreshDialog() {
+        val input = EditText(requireContext()).apply {
+            hint = "5~3600 秒"
+            inputType = android.text.InputType.TYPE_CLASS_NUMBER
+            setText(Prefs.refreshSec(requireContext()).toString())
+        }
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle("自定义刷新间隔")
+            .setMessage("输入 5~3600 之间的秒数（桌面组件与主页刷新按此间隔）")
+            .setView(input)
+            .setPositiveButton("确定") { _, _ ->
+                val v = input.text.toString().trim().toIntOrNull()
+                if (v == null || v < 5 || v > 3600) {
+                    Toast.makeText(requireContext(), "请输入 5~3600 之间的整数", Toast.LENGTH_SHORT).show()
+                } else {
+                    applyRefresh(v)
+                }
+            }
+            .setNegativeButton("取消", null)
+            .show()
     }
 
     /** 分享当前监控摘要（走系统分享，可发到微信/QQ 等） */

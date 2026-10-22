@@ -46,6 +46,7 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
     private val repeatOptions = listOf(15 to "15 分钟", 30 to "30 分钟", 60 to "60 分钟", 120 to "2 小时")
     private lateinit var spRefresh: Spinner
     private lateinit var spAlertRepeat: Spinner
+    private var currentRefreshSec = 30
     private lateinit var etFontSize: EditText
     private lateinit var scrollRoot: ScrollView
     private lateinit var tvLoginStatus: TextView
@@ -217,12 +218,15 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
         watchEditText(etAlertNvmeTemp)
         watchEditText(etSilentStart)
         watchEditText(etSilentEnd)
-        val adapter = ArrayAdapter(requireContext(), R.layout.spinner_item, refreshOptions.map { it.second })
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        spRefresh.adapter = adapter
         spRefresh.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-                if (!suppressSave) scheduleSave()
+                if (suppressSave) return
+                if (position == refreshOptions.size) {
+                    showCustomRefreshDialog()
+                } else {
+                    currentRefreshSec = refreshOptions[position].first
+                    scheduleSave()
+                }
             }
             override fun onNothingSelected(parent: AdapterView<*>?) {}
         }
@@ -290,8 +294,8 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
         updateLoginStatus()
         etUrl.setText(Prefs.url(requireContext()))
         val cur = Prefs.refreshSec(requireContext())
-        val idx = refreshOptions.indexOfFirst { it.first == cur }
-        spRefresh.setSelection(if (idx >= 0) idx else 2)
+        currentRefreshSec = cur
+        rebuildRefreshSpinner()
         val repIdx = repeatOptions.indexOfFirst { it.first == Prefs.alertRepeatMin(requireContext()) }
         spAlertRepeat.setSelection(if (repIdx >= 0) repIdx else 1)
         etFontSize.setText(Prefs.fontSize(requireContext()).toString())
@@ -322,6 +326,55 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
         updateTempSilentStatus()
         refreshBatteryStatus()
         suppressSave = false
+    }
+
+    /** 重建刷新间隔下拉：标准档 + 末尾「自定义…」（或「自定义 X 秒」），并选中当前值 */
+    private fun rebuildRefreshSpinner() {
+        val labels = refreshOptions.map { it.second }.toMutableList()
+        val customLabel = if (refreshOptions.none { it.first == currentRefreshSec })
+            "自定义 $currentRefreshSec 秒" else "自定义…"
+        labels.add(customLabel)
+        val adapter = spRefresh.adapter as? ArrayAdapter<String>
+        if (adapter == null) {
+            val a = ArrayAdapter(requireContext(), R.layout.spinner_item, labels)
+            a.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+            spRefresh.adapter = a
+        } else {
+            adapter.clear()
+            adapter.addAll(labels)
+            adapter.notifyDataSetChanged()
+        }
+        val prev = suppressSave
+        suppressSave = true
+        val idx = refreshOptions.indexOfFirst { it.first == currentRefreshSec }
+        spRefresh.setSelection(if (idx >= 0) idx else refreshOptions.size)
+        suppressSave = prev
+    }
+
+    /** 自定义刷新间隔：输入 5~3600 秒，保存后刷新下拉显示 */
+    private fun showCustomRefreshDialog() {
+        val input = EditText(requireContext()).apply {
+            hint = "5~3600 秒"
+            inputType = android.text.InputType.TYPE_CLASS_NUMBER
+            setText(currentRefreshSec.toString())
+        }
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle("自定义刷新间隔")
+            .setMessage("输入 5~3600 之间的秒数（桌面组件与主页刷新按此间隔）")
+            .setView(input)
+            .setPositiveButton("确定") { _, _ ->
+                val v = input.text.toString().trim().toIntOrNull()
+                if (v == null || v < 5 || v > 3600) {
+                    Toast.makeText(requireContext(), "请输入 5~3600 之间的整数", Toast.LENGTH_SHORT).show()
+                    rebuildRefreshSpinner()
+                } else {
+                    currentRefreshSec = v
+                    rebuildRefreshSpinner()
+                    scheduleSave()
+                }
+            }
+            .setNegativeButton("取消") { _, _ -> rebuildRefreshSpinner() }
+            .show()
     }
 
     private fun themeLabel(mode: String): String = when (mode) {
@@ -595,8 +648,7 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
         Prefs.setSilentEnabled(requireContext(), cbSilent.isChecked)
         Prefs.setSilentStart(requireContext(), etSilentStart.text.toString().toIntOrNull()?.coerceIn(0, 23) ?: 23)
         Prefs.setSilentEnd(requireContext(), etSilentEnd.text.toString().toIntOrNull()?.coerceIn(0, 23) ?: 7)
-        val sel = spRefresh.selectedItemPosition
-        Prefs.setRefresh(requireContext(), refreshOptions.getOrElse(sel) { 30 to "30 秒" }.first)
+        Prefs.setRefresh(requireContext(), currentRefreshSec)
         val repSel = spAlertRepeat.selectedItemPosition
         Prefs.setAlertRepeatMin(requireContext(), repeatOptions.getOrElse(repSel) { 30 to "30 分钟" }.first)
         val fs = etFontSize.text.toString().toIntOrNull()?.coerceIn(8, 200) ?: 16
