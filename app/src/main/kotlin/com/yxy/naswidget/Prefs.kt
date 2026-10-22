@@ -352,4 +352,7 @@ object Prefs {
         .remove(KEY_PEAK_CPU_TEMP).remove(KEY_PEAK_NVME_TEMP)
         .remove(KEY_PEAK_NET_DATE).remove(KEY_PEAK_NET_DOWN).remove(KEY_PEAK_NET_UP)
         .apply()
+
+    /** 恢复默认设置：清空全部配置（含飞牛登录 token、NAS 地址、告警阈值、主题等），回到初始状态 */
+    fun clearAll(ctx: Context) = sp(ctx).edit().clear().apply()
 }

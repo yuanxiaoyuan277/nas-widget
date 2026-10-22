@@ -73,6 +73,7 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
     private lateinit var etSilentEnd: EditText
     private lateinit var btnAlertHistory: Button
     private lateinit var btnTestNotif: Button
+    private lateinit var btnReset: Button
     private var suppressSave = false
     private val saveHandler = Handler(Looper.getMainLooper())
     private val saveRunnable = Runnable { persist() }
@@ -112,6 +113,7 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
         etSilentEnd = view.findViewById(R.id.et_silent_end)
         btnAlertHistory = view.findViewById(R.id.btn_alert_history)
         btnTestNotif = view.findViewById(R.id.btn_test_notif)
+        btnReset = view.findViewById(R.id.btn_reset)
 
         btnLogin.setOnClickListener {
             requireActivity().startActivityForResult(Intent(requireContext(), LoginActivity::class.java), REQ_LOGIN)
@@ -129,6 +131,7 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
             if (ok) Toast.makeText(requireContext(), "已发送测试通知，请下拉通知栏查看", Toast.LENGTH_SHORT).show()
             else Toast.makeText(requireContext(), "通知权限未开启，请在系统设置中允许通知", Toast.LENGTH_LONG).show()
         }
+        btnReset.setOnClickListener { confirmReset() }
         tvAboutRepo.setOnClickListener {
             try {
                 startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/yuanxiaoyuan277/nas-widget")))
@@ -453,6 +456,25 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
                 Toast.makeText(requireContext(), "告警历史已清空", Toast.LENGTH_SHORT).show()
             }
             .setNegativeButton("关闭", null)
+            .show()
+    }
+
+    /** 「恢复默认设置」：二次确认后清空全部配置并重启 App */
+    private fun confirmReset() {
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle("恢复默认设置")
+            .setMessage("将清除所有配置（含飞牛登录、NAS 地址、告警阈值、主题、Docker 勾选等），恢复为初始状态。此操作不可撤销，确定继续？")
+            .setPositiveButton("恢复默认") { _, _ ->
+                Prefs.clearAll(requireContext())
+                MonitorNotifier.cancel(requireContext())
+                AlarmScheduler.cancel(requireContext())
+                val restart = Intent.makeRestartActivityTask(
+                    requireContext().packageManager.getLaunchIntentForPackage(requireContext().packageName)?.component
+                )
+                requireContext().startActivity(restart)
+                Runtime.getRuntime().exit(0)
+            }
+            .setNegativeButton("取消", null)
             .show()
     }
 
