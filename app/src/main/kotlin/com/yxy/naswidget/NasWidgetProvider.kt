@@ -188,7 +188,7 @@ class NasWidgetProvider : AppWidgetProvider() {
                             group.setTextViewText(R.id.tv_docker_summary, "$running 运行 / ${containers.size} 总计")
                             group.setTextViewTextSize(R.id.tv_docker_summary, TypedValue.COMPLEX_UNIT_PX, (fs - 2).toFloat())
                             group.setViewVisibility(R.id.tv_docker_summary, View.VISIBLE)
-                            val filtered = containers.filter { it.name in selected }.sortedBy { it.name }
+                            val filtered = containers.filter { it.name in selected }.sortedWith(dockerContainerOrder)
                             if (filtered.isEmpty()) {
                                 group.addView(R.id.docker_list, makeDockerItem(context, "无容器", false, "", fs))
                             } else {

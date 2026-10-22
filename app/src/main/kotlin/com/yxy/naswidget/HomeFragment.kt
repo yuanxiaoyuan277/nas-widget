@@ -432,7 +432,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
                             setTextSize(TypedValue.COMPLEX_UNIT_PX, (fs - 2).toFloat())
                         }
                         group.addView(summary)
-                        val filtered = list.filter { it.name in selected }.sortedBy { it.name }
+                        val filtered = list.filter { it.name in selected }.sortedWith(dockerContainerOrder)
                         if (filtered.isEmpty()) {
                             group.addView(makeDockerItem("无容器", false, ""))
                         } else {
@@ -539,7 +539,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         dockerListContainer.removeAllViews()
         dockerCheckboxes.clear()
         val selected = Prefs.dockerContainers(requireContext())
-        val sorted = containers.sortedBy { it.name }
+        val sorted = containers.sortedWith(dockerContainerOrder)
         for (c in sorted) {
             val item = layoutInflater.inflate(R.layout.item_docker_config, dockerListContainer, false)
             item.findViewById<TextView>(R.id.tv_dot).text = if (c.running) "●" else "○"

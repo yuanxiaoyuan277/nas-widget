@@ -144,6 +144,12 @@ data class NasStats(
     }
 }
 
+/** Docker 容器排序：运行中优先，其次按名称（组件/预览/配置列表统一顺序） */
+val dockerContainerOrder = Comparator<DockerContainer> { a, b ->
+    val r = b.running.compareTo(a.running)
+    if (r != 0) r else a.name.compareTo(b.name)
+}
+
 /** 工具：字节转可读、秒转时长 */
 object Fmt {
     fun bytes(b: Long): String {
