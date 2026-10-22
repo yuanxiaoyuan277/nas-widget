@@ -1032,6 +1032,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         val lines = mutableListOf<String>()
         lines.add("状态：${c.stateLabel}")
         if (c.image.isNotEmpty()) lines.add("镜像：${c.image}")
+        if (c.portText.isNotEmpty()) lines.add("端口：${c.portText}")
         if (c.status.isNotEmpty()) lines.add("详情：${c.status}")
         lines.add("CPU：${c.cpuText.ifEmpty { "--" }}")
         lines.add("内存：${c.memText.ifEmpty { "--" }}")

@@ -29,9 +29,13 @@ data class DockerContainer(
     val status: String,
     val memBytes: Long? = null,
     val cpuPercent: Double? = null,
-    val image: String = ""
+    val image: String = "",
+    val ports: List<String> = emptyList()
 ) {
     val running: Boolean get() = state.equals("running", ignoreCase = true)
+
+    /** 端口映射可读文本（如 "8080→80/tcp, 8443→443/tcp"），无端口则为空串 */
+    val portText: String get() = ports.joinToString(", ").ifEmpty { "" }
 
     /** 精确状态标签（飞牛 State 字段可能为 running/exited/stopped/error/created/paused/restarting 等） */
     val stateLabel: String get() = when (state.lowercase()) {

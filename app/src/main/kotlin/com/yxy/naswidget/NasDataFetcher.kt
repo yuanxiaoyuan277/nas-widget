@@ -96,8 +96,9 @@ object NasDataFetcher {
                     val status = c.optString("Status", c.optString("status", ""))
                     val id = c.optString("Id", c.optString("id", ""))
                     val image = c.optString("Image", c.optString("image", ""))
+                    val ports = parsePorts(c)
                     if (name.isNotEmpty()) {
-                        list.add(DockerContainer(id, name, state, status, null, image = image))
+                        list.add(DockerContainer(id, name, state, status, null, image = image, ports = ports))
                     }
                 }
             }
@@ -163,6 +164,22 @@ object NasDataFetcher {
             }
         }
         return null
+    }
+
+    /** 解析容器端口映射（Docker 标准 "Ports" 数组：{IP, PrivatePort, PublicPort, Type} → "公网→私网/协议"） */
+    private fun parsePorts(c: JSONObject): List<String> {
+        val portsArr = c.optJSONArray("Ports") ?: c.optJSONArray("ports") ?: return emptyList()
+        val out = mutableListOf<String>()
+        for (j in 0 until portsArr.length()) {
+            val p = portsArr.optJSONObject(j) ?: continue
+            val private = p.optInt("PrivatePort", 0)
+            val public = p.optInt("PublicPort", 0)
+            val type = p.optString("Type", "").ifEmpty { p.optString("type", "") }
+            if (private <= 0) continue
+            val suffix = if (type.isNotEmpty()) "/$type" else ""
+            out.add(if (public > 0) "$public→$private$suffix" else "$private$suffix")
+        }
+        return out
     }
 
     /** 容器生命周期操作：启动 / 停止 / 重启（appcgi.dockermgr.containerStart/Stop/Restart，containerId 标识） */
