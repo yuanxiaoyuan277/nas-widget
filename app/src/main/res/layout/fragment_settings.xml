@@ -885,6 +885,17 @@
                 android:textColor="@color/app_primary"
                 android:textSize="13sp" />
 
+            <TextView
+                android:id="@+id/tv_about_feedback"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:paddingTop="4dp"
+                android:paddingBottom="4dp"
+                android:text="反馈问题：github.com/yuanxiaoyuan277/nas-widget/issues"
+                android:textColor="@color/app_primary"
+                android:textSize="13sp" />
+
             <Button
                 android:id="@+id/btn_about_check_update"
                 android:layout_width="match_parent"

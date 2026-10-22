@@ -69,6 +69,7 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
     private lateinit var tvBackupStatus: TextView
     private lateinit var tvAboutVersion: TextView
     private lateinit var tvAboutRepo: TextView
+    private lateinit var tvAboutFeedback: TextView
     private lateinit var cbAlert: CheckBox
     private lateinit var cbAlertSound: CheckBox
     private lateinit var cbMonitorNotif: CheckBox
@@ -123,6 +124,7 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
         tvBackupStatus = view.findViewById(R.id.tv_backup_status)
         tvAboutVersion = view.findViewById(R.id.tv_about_version)
         tvAboutRepo = view.findViewById(R.id.tv_about_repo)
+        tvAboutFeedback = view.findViewById(R.id.tv_about_feedback)
         cbAlert = view.findViewById(R.id.cb_alert)
         cbAlertSound = view.findViewById(R.id.cb_alert_sound)
         cbMonitorNotif = view.findViewById(R.id.cb_monitor_notif)
@@ -176,6 +178,13 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
         tvAboutRepo.setOnClickListener {
             try {
                 startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/yuanxiaoyuan277/nas-widget")))
+            } catch (_: Exception) {
+                Toast.makeText(requireContext(), "无法打开浏览器", Toast.LENGTH_SHORT).show()
+            }
+        }
+        tvAboutFeedback.setOnClickListener {
+            try {
+                startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/yuanxiaoyuan277/nas-widget/issues")))
             } catch (_: Exception) {
                 Toast.makeText(requireContext(), "无法打开浏览器", Toast.LENGTH_SHORT).show()
             }
