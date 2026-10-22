@@ -56,6 +56,8 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
     private lateinit var btnSelectAll: Button
     private lateinit var btnSelectNone: Button
     private lateinit var btnDockerSort: Button
+    private lateinit var btnDockerStartAll: Button
+    private lateinit var btnDockerStopAll: Button
     private lateinit var etDockerSearch: EditText
     private lateinit var cbRunningOnly: CheckBox
     private lateinit var sbCpuX: SeekBar
@@ -150,6 +152,8 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         btnSelectAll = view.findViewById(R.id.btn_select_all)
         btnSelectNone = view.findViewById(R.id.btn_select_none)
         btnDockerSort = view.findViewById(R.id.btn_docker_sort)
+        btnDockerStartAll = view.findViewById(R.id.btn_docker_start_all)
+        btnDockerStopAll = view.findViewById(R.id.btn_docker_stop_all)
         etDockerSearch = view.findViewById(R.id.et_docker_search)
         cbRunningOnly = view.findViewById(R.id.cb_docker_running_only)
         sbCpuX = view.findViewById(R.id.sb_cpu_x)
@@ -274,6 +278,8 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
             buildDockerCheckboxes(dockerContainers)
             schedulePreviewRefresh()
         }
+        btnDockerStartAll.setOnClickListener { batchContainerAction(ContainerAction.START) }
+        btnDockerStopAll.setOnClickListener { batchContainerAction(ContainerAction.STOP) }
 
         // 强制登录门
         if (!Prefs.isLoggedIn(requireContext())) {
@@ -1026,6 +1032,57 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
                 }.onFailure { e ->
                     Toast.makeText(requireContext(), "${label}失败：${e.message}", Toast.LENGTH_SHORT).show()
                 }
+            }
+        }.start()
+    }
+
+    /** 批量操作：全部启动 / 全部停止（二次确认后顺序执行） */
+    private fun batchContainerAction(action: ContainerAction) {
+        if (!Prefs.isLoggedIn(requireContext())) {
+            Toast.makeText(requireContext(), "请先登录飞牛账号", Toast.LENGTH_SHORT).show()
+            return
+        }
+        val targets = when (action) {
+            ContainerAction.START -> dockerContainers.filter { !it.running && it.id.isNotEmpty() }
+            ContainerAction.STOP -> dockerContainers.filter { it.running && it.id.isNotEmpty() }
+            else -> emptyList()
+        }
+        if (targets.isEmpty()) {
+            val label = if (action == ContainerAction.START) "没有需要启动的容器" else "没有运行中的容器"
+            Toast.makeText(requireContext(), label, Toast.LENGTH_SHORT).show()
+            return
+        }
+        val verb = if (action == ContainerAction.START) "启动" else "停止"
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle("批量$verb")
+            .setMessage("将对以下 ${targets.size} 个容器执行「$verb」：\n${targets.joinToString("、") { it.name }}")
+            .setPositiveButton("确定$verb") { _, _ -> runBatch(action, targets) }
+            .setNegativeButton("取消", null)
+            .show()
+    }
+
+    /** 执行批量操作：顺序对每个容器调飞牛 API，完成后刷新列表与预览 */
+    private fun runBatch(action: ContainerAction, targets: List<DockerContainer>) {
+        val verb = if (action == ContainerAction.START) "启动" else "停止"
+        Toast.makeText(requireContext(), "正在批量$verb…", Toast.LENGTH_SHORT).show()
+        Thread {
+            val token = OAuthClient.getValidAccessToken(requireContext()).getOrNull()
+            var ok = 0
+            var fail = 0
+            if (token != null) {
+                for (c in targets) {
+                    val r = NasDataFetcher.containerAction(Prefs.nasBase(requireContext()), token, c.id, action)
+                    if (r.isSuccess) ok++ else fail++
+                }
+            } else {
+                fail = targets.size
+            }
+            val finalOk = ok
+            val finalFail = fail
+            requireActivity().runOnUiThread {
+                Toast.makeText(requireContext(), "批量$verb完成：成功 $finalOk，失败 $finalFail", Toast.LENGTH_LONG).show()
+                loadDockerContainers()
+                schedulePreviewRefresh()
             }
         }.start()
     }
