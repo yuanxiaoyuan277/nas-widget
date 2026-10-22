@@ -121,6 +121,7 @@ object AlertNotifier {
             .setContentTitle(title)
             .setContentText(text)
             .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .setSilent(!Prefs.alertSound(context))
             .setAutoCancel(true)
             .setContentIntent(
                 PendingIntent.getActivity(

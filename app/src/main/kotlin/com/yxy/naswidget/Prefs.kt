@@ -45,6 +45,7 @@ object Prefs {
     private const val KEY_ALERT_USAGE = "alert_usage_threshold"
     private const val KEY_ALERT_CPU_TEMP = "alert_cpu_temp_threshold"
     private const val KEY_ALERT_NVME_TEMP = "alert_nvme_temp_threshold"
+    private const val KEY_ALERT_SOUND = "alert_sound"
     private const val KEY_SILENT_ENABLED = "silent_enabled"
     private const val KEY_SILENT_START = "silent_start"
     private const val KEY_SILENT_END = "silent_end"
@@ -225,6 +226,10 @@ object Prefs {
     // === 资源告警通知开关 ===
     fun showAlert(ctx: Context) = sp(ctx).getBoolean(KEY_ALERT, true)
     fun setShowAlert(ctx: Context, v: Boolean) = sp(ctx).edit().putBoolean(KEY_ALERT, v).apply()
+
+    // === 告警推送提示音（关闭后告警通知静音，但保留通知与历史） ===
+    fun alertSound(ctx: Context) = sp(ctx).getBoolean(KEY_ALERT_SOUND, true)
+    fun setAlertSound(ctx: Context, v: Boolean) = sp(ctx).edit().putBoolean(KEY_ALERT_SOUND, v).apply()
 
     // === 状态栏常驻监控通知开关 ===
     private const val KEY_MONITOR_NOTIF = "monitor_notif"

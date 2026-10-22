@@ -353,6 +353,15 @@
                 android:textSize="14sp" />
 
             <CheckBox
+                android:id="@+id/cb_alert_sound"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:text="推送提示音（关闭后告警/离线/容器停止通知静音，保留通知）"
+                android:textColor="@color/app_text_primary"
+                android:textSize="14sp" />
+
+            <CheckBox
                 android:id="@+id/cb_monitor_notif"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
