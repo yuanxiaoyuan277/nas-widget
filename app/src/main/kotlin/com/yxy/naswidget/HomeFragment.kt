@@ -52,6 +52,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
     private lateinit var btnRefreshDocker: Button
     private lateinit var btnSelectAll: Button
     private lateinit var btnSelectNone: Button
+    private lateinit var btnDockerSort: Button
     private lateinit var etDockerSearch: EditText
     private lateinit var cbRunningOnly: CheckBox
     private lateinit var sbCpuX: SeekBar
@@ -134,6 +135,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         btnRefreshDocker = view.findViewById(R.id.btn_refresh_docker)
         btnSelectAll = view.findViewById(R.id.btn_select_all)
         btnSelectNone = view.findViewById(R.id.btn_select_none)
+        btnDockerSort = view.findViewById(R.id.btn_docker_sort)
         etDockerSearch = view.findViewById(R.id.et_docker_search)
         cbRunningOnly = view.findViewById(R.id.cb_docker_running_only)
         sbCpuX = view.findViewById(R.id.sb_cpu_x)
@@ -225,6 +227,17 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
             override fun afterTextChanged(s: Editable?) { applyDockerFilter() }
         })
         cbRunningOnly.setOnCheckedChangeListener { _, _ -> applyDockerFilter() }
+        btnDockerSort.text = dockerSortLabel(Prefs.dockerSort(requireContext()))
+        btnDockerSort.setOnClickListener {
+            val modes = listOf("status", "name", "cpu", "mem")
+            val cur = Prefs.dockerSort(requireContext())
+            val idx = modes.indexOf(cur)
+            val next = modes[(idx + 1 + modes.size) % modes.size]
+            Prefs.setDockerSort(requireContext(), next)
+            btnDockerSort.text = dockerSortLabel(next)
+            buildDockerCheckboxes(dockerContainers)
+            schedulePreviewRefresh()
+        }
 
         // 强制登录门
         if (!Prefs.isLoggedIn(requireContext())) {
@@ -610,7 +623,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
                             setTextSize(TypedValue.COMPLEX_UNIT_PX, (fs - 2).toFloat())
                         }
                         group.addView(summary)
-                        val filtered = list.filter { it.name in selected }.sortedWith(dockerContainerOrder)
+                        val filtered = list.filter { it.name in selected }.sortedWith(dockerComparator(Prefs.dockerSort(requireContext())))
                         if (filtered.isEmpty()) {
                             group.addView(makeDockerItem("无容器", false, ""))
                         } else {
@@ -754,11 +767,18 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         }.start()
     }
 
+    private fun dockerSortLabel(mode: String): String = when (mode) {
+        "name" -> "名称"
+        "cpu" -> "CPU"
+        "mem" -> "内存"
+        else -> "运行中优先"
+    }
+
     private fun buildDockerCheckboxes(containers: List<DockerContainer>) {
         dockerListContainer.removeAllViews()
         dockerCheckboxes.clear()
         val selected = Prefs.dockerContainers(requireContext())
-        val sorted = containers.sortedWith(dockerContainerOrder)
+        val sorted = containers.sortedWith(dockerComparator(Prefs.dockerSort(requireContext())))
         for (c in sorted) {
             val item = layoutInflater.inflate(R.layout.item_docker_config, dockerListContainer, false)
             item.findViewById<TextView>(R.id.tv_dot).text = if (c.running) "●" else "○"

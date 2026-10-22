@@ -169,6 +169,14 @@ val dockerContainerOrder = Comparator<DockerContainer> { a, b ->
     if (r != 0) r else a.name.compareTo(b.name)
 }
 
+/** Docker 容器排序比较器：status=运行中优先(默认)/name=名称/cpu=CPU降序/mem=内存降序 */
+fun dockerComparator(sort: String): Comparator<DockerContainer> = when (sort) {
+    "name" -> compareBy { it.name }
+    "cpu" -> compareByDescending { it.cpuPercent ?: -1.0 }
+    "mem" -> compareByDescending { it.memBytes ?: -1L }
+    else -> dockerContainerOrder
+}
+
 /** 工具：字节转可读、秒转时长 */
 object Fmt {
     /** 超阈值警示色（亮红，玻璃/深色底上均可见） */

@@ -103,6 +103,11 @@ object Prefs {
     fun setDockerContainers(ctx: Context, names: Set<String>) =
         sp(ctx).edit().putString(KEY_DOCKER_CONTAINERS, names.joinToString(",")).apply()
 
+    // === Docker 容器排序方式（status=运行中优先/name=名称/cpu=CPU降序/mem=内存降序） ===
+    private const val KEY_DOCKER_SORT = "docker_sort"
+    fun dockerSort(ctx: Context): String = sp(ctx).getString(KEY_DOCKER_SORT, "status") ?: "status"
+    fun setDockerSort(ctx: Context, v: String) = sp(ctx).edit().putString(KEY_DOCKER_SORT, v).apply()
+
     // === 飞牛 NAS Web 地址（登录用） ===
     fun nasBase(ctx: Context) = sp(ctx).getString(KEY_NAS_BASE, DEFAULT_NAS_BASE) ?: DEFAULT_NAS_BASE
     fun setNasBase(ctx: Context, v: String) = sp(ctx).edit().putString(KEY_NAS_BASE, v).apply()
