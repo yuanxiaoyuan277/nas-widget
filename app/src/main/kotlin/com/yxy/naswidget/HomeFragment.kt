@@ -73,6 +73,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
     private lateinit var tvSysUptime: TextView
     private lateinit var tvSysTime: TextView
     private lateinit var tvSysNet: TextView
+    private lateinit var tvSysTemp: TextView
 
     private val handler = Handler(Looper.getMainLooper())
     private var dockerContainers: List<DockerContainer> = emptyList()
@@ -133,6 +134,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         tvSysUptime = view.findViewById(R.id.tv_sys_uptime)
         tvSysTime = view.findViewById(R.id.tv_sys_time)
         tvSysNet = view.findViewById(R.id.tv_sys_net)
+        tvSysTemp = view.findViewById(R.id.tv_sys_temp)
 
         widgetId = requireActivity().intent.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, AppWidgetManager.INVALID_APPWIDGET_ID)
         if (widgetId != AppWidgetManager.INVALID_APPWIDGET_ID) {
@@ -361,12 +363,19 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
             root.findViewById<TextView>(R.id.tv_uptime).text = "连接失败"
         }
 
-        // 系统信息卡片（CPU 型号 / 系统版本 / 运行时长）
-        tvSysCpu.text = stats?.cpuModel?.takeIf { it.isNotEmpty() } ?: "--"
+        // 系统信息卡片（CPU 型号+核心数 / 系统版本 / 运行时长 / 温度）
+        tvSysCpu.text = stats?.let { s ->
+            s.cpuModel.takeIf { it.isNotEmpty() }?.let { "$it · ${s.cores}核" } ?: "--"
+        } ?: "--"
         tvSysOs.text = stats?.osVersion?.takeIf { it.isNotEmpty() } ?: "--"
         tvSysUptime.text = stats?.let { Fmt.uptime(it.uptimeSec) } ?: "--"
         tvSysTime.text = stats?.let { Fmt.time(it.fetchTime) } ?: "--"
         tvSysNet.text = stats?.let { "↓${Fmt.speed(it.netDown)} ↑${Fmt.speed(it.netUp)}" } ?: "--"
+        tvSysTemp.text = stats?.let { s ->
+            val cpuT = s.tempCpu?.let { String.format("%.0f°", it) } ?: "--°"
+            val nvmeT = s.tempNvme?.let { String.format("%.0f°", it) } ?: "--°"
+            "CPU $cpuT · NVMe $nvmeT"
+        } ?: "--"
 
         fun addTo(comp: String, v: View) {
             contentArea.addView(v)
