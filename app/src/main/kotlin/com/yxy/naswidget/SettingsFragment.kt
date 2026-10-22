@@ -66,6 +66,9 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
     private lateinit var etAlertUsage: EditText
     private lateinit var etAlertCpuTemp: EditText
     private lateinit var etAlertNvmeTemp: EditText
+    private lateinit var cbSilent: CheckBox
+    private lateinit var etSilentStart: EditText
+    private lateinit var etSilentEnd: EditText
     private var suppressSave = false
     private val saveHandler = Handler(Looper.getMainLooper())
     private val saveRunnable = Runnable { persist() }
@@ -99,6 +102,9 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
         etAlertUsage = view.findViewById(R.id.et_alert_usage)
         etAlertCpuTemp = view.findViewById(R.id.et_alert_cpu_temp)
         etAlertNvmeTemp = view.findViewById(R.id.et_alert_nvme_temp)
+        cbSilent = view.findViewById(R.id.cb_silent)
+        etSilentStart = view.findViewById(R.id.et_silent_start)
+        etSilentEnd = view.findViewById(R.id.et_silent_end)
 
         btnLogin.setOnClickListener {
             requireActivity().startActivityForResult(Intent(requireContext(), LoginActivity::class.java), REQ_LOGIN)
@@ -119,12 +125,15 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
         }
         cbWb2api.setOnCheckedChangeListener { _, _ -> if (!suppressSave) scheduleSave() }
         cbAlert.setOnCheckedChangeListener { _, _ -> if (!suppressSave) scheduleSave() }
+        cbSilent.setOnCheckedChangeListener { _, _ -> if (!suppressSave) scheduleSave() }
         watchEditText(etUrl)
         watchEditText(etWb2apiBase)
         watchEditText(etWb2apiKey)
         watchEditText(etAlertUsage)
         watchEditText(etAlertCpuTemp)
         watchEditText(etAlertNvmeTemp)
+        watchEditText(etSilentStart)
+        watchEditText(etSilentEnd)
         val adapter = ArrayAdapter(requireContext(), R.layout.spinner_item, refreshOptions.map { it.second })
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         spRefresh.adapter = adapter
@@ -152,6 +161,8 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
         setupAutoScroll(etAlertUsage)
         setupAutoScroll(etAlertCpuTemp)
         setupAutoScroll(etAlertNvmeTemp)
+        setupAutoScroll(etSilentStart)
+        setupAutoScroll(etSilentEnd)
 
         loadPrefs()
 
@@ -189,6 +200,9 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
         etAlertUsage.setText(Prefs.alertUsageThreshold(requireContext()).toString())
         etAlertCpuTemp.setText(Prefs.alertCpuTempThreshold(requireContext()).toString())
         etAlertNvmeTemp.setText(Prefs.alertNvmeTempThreshold(requireContext()).toString())
+        cbSilent.isChecked = Prefs.silentEnabled(requireContext())
+        etSilentStart.setText(Prefs.silentStart(requireContext()).toString())
+        etSilentEnd.setText(Prefs.silentEnd(requireContext()).toString())
         etWb2apiBase.setText(Prefs.wb2apiBase(requireContext()))
         etWb2apiKey.setText(Prefs.wb2apiKey(requireContext()))
         tvVersion.text = "v${UpdateChecker.localVersion(requireContext())}"
@@ -323,6 +337,9 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
         Prefs.setAlertUsageThreshold(requireContext(), etAlertUsage.text.toString().toIntOrNull()?.coerceIn(1, 100) ?: 90)
         Prefs.setAlertCpuTempThreshold(requireContext(), etAlertCpuTemp.text.toString().toIntOrNull()?.coerceIn(1, 120) ?: 85)
         Prefs.setAlertNvmeTempThreshold(requireContext(), etAlertNvmeTemp.text.toString().toIntOrNull()?.coerceIn(1, 120) ?: 70)
+        Prefs.setSilentEnabled(requireContext(), cbSilent.isChecked)
+        Prefs.setSilentStart(requireContext(), etSilentStart.text.toString().toIntOrNull()?.coerceIn(0, 23) ?: 23)
+        Prefs.setSilentEnd(requireContext(), etSilentEnd.text.toString().toIntOrNull()?.coerceIn(0, 23) ?: 7)
         val sel = spRefresh.selectedItemPosition
         Prefs.setRefresh(requireContext(), refreshOptions.getOrElse(sel) { 30 to "30 秒" }.first)
         val fs = etFontSize.text.toString().toIntOrNull()?.coerceIn(8, 200) ?: 16

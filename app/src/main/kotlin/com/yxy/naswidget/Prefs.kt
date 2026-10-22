@@ -43,6 +43,9 @@ object Prefs {
     private const val KEY_ALERT_USAGE = "alert_usage_threshold"
     private const val KEY_ALERT_CPU_TEMP = "alert_cpu_temp_threshold"
     private const val KEY_ALERT_NVME_TEMP = "alert_nvme_temp_threshold"
+    private const val KEY_SILENT_ENABLED = "silent_enabled"
+    private const val KEY_SILENT_START = "silent_start"
+    private const val KEY_SILENT_END = "silent_end"
 
     const val DEFAULT_URL = "http://192.168.2.3:19254/nas"
     const val DEFAULT_NAS_BASE = "http://192.168.2.3:1223"
@@ -206,4 +209,23 @@ object Prefs {
     fun setAlertCpuTempThreshold(ctx: Context, v: Int) = sp(ctx).edit().putInt(KEY_ALERT_CPU_TEMP, v).apply()
     fun alertNvmeTempThreshold(ctx: Context) = sp(ctx).getInt(KEY_ALERT_NVME_TEMP, 70)
     fun setAlertNvmeTempThreshold(ctx: Context, v: Int) = sp(ctx).edit().putInt(KEY_ALERT_NVME_TEMP, v).apply()
+
+    // === 告警静默时段（夜间免打扰） ===
+    fun silentEnabled(ctx: Context) = sp(ctx).getBoolean(KEY_SILENT_ENABLED, false)
+    fun setSilentEnabled(ctx: Context, v: Boolean) = sp(ctx).edit().putBoolean(KEY_SILENT_ENABLED, v).apply()
+    fun silentStart(ctx: Context) = sp(ctx).getInt(KEY_SILENT_START, 23)
+    fun setSilentStart(ctx: Context, v: Int) = sp(ctx).edit().putInt(KEY_SILENT_START, v).apply()
+    fun silentEnd(ctx: Context) = sp(ctx).getInt(KEY_SILENT_END, 7)
+    fun setSilentEnd(ctx: Context, v: Int) = sp(ctx).edit().putInt(KEY_SILENT_END, v).apply()
+
+    /** 当前是否处于静默时段（跨天窗口，如 23:00~07:00） */
+    fun isSilentNow(ctx: Context): Boolean {
+        if (!silentEnabled(ctx)) return false
+        val start = silentStart(ctx)
+        val end = silentEnd(ctx)
+        if (start == end) return false
+        val hour = java.util.Calendar.getInstance().get(java.util.Calendar.HOUR_OF_DAY)
+        return if (start < end) hour in start until end
+        else hour >= start || hour < end
+    }
 }

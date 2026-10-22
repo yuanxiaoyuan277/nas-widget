@@ -17,6 +17,7 @@ object AlertNotifier {
 
     fun checkAndNotify(context: Context, stats: NasStats) {
         if (!Prefs.showAlert(context)) return
+        if (Prefs.isSilentNow(context)) return
         val usageThreshold = Prefs.alertUsageThreshold(context).coerceIn(1, 100).toDouble()
         val cpuTempThreshold = Prefs.alertCpuTempThreshold(context).coerceIn(1, 120).toDouble()
         val nvmeTempThreshold = Prefs.alertNvmeTempThreshold(context).coerceIn(1, 120).toDouble()
