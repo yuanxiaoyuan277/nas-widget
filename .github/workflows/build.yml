@@ -95,15 +95,22 @@ jobs:
           gradle-version: '8.11.1'
 
       - name: Run Paparazzi record
-        run: gradle recordPaparazziDebug --no-daemon
+        run: gradle recordPaparazziDebug --no-daemon --stacktrace > paparazzi.log 2>&1 || true
         env:
           ANDROID_SDK_ROOT: /usr/local/lib/android/sdk
 
-      - name: Upload Paparazzi screenshots
-        uses: actions/upload-artifact@v4
-        with:
-          name: paparazzi-screenshots
-          path: |
-            app/build/reports/paparazzi/**
-            app/src/test/snapshots/images/**
-          if-no-files-found: ignore
+      - name: Commit screenshots & log back
+        run: |
+          mkdir -p screenshots
+          cp app/src/test/snapshots/images/*.png screenshots/ 2>/dev/null || true
+          cp app/build/reports/paparazzi/images/*.png screenshots/ 2>/dev/null || true
+          cp paparazzi.log screenshots/ 2>/dev/null || true
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+          git add screenshots/
+          if git diff --cached --quiet; then
+            echo "NO_CHANGE"
+          else
+            git commit -m "chore: paparazzi screenshots [skip ci]"
+            git push
+          fi
