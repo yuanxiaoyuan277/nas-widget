@@ -74,6 +74,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
     private lateinit var tvSysTime: TextView
     private lateinit var tvSysNet: TextView
     private lateinit var tvSysTemp: TextView
+    private lateinit var tvSysStorage: TextView
 
     private val handler = Handler(Looper.getMainLooper())
     private var dockerContainers: List<DockerContainer> = emptyList()
@@ -135,6 +136,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         tvSysTime = view.findViewById(R.id.tv_sys_time)
         tvSysNet = view.findViewById(R.id.tv_sys_net)
         tvSysTemp = view.findViewById(R.id.tv_sys_temp)
+        tvSysStorage = view.findViewById(R.id.tv_sys_storage)
 
         widgetId = requireActivity().intent.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, AppWidgetManager.INVALID_APPWIDGET_ID)
         if (widgetId != AppWidgetManager.INVALID_APPWIDGET_ID) {
@@ -379,6 +381,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
             val nvmeT = s.tempNvme?.let { String.format("%.0f°", it) } ?: "--°"
             "CPU $cpuT · NVMe $nvmeT"
         } ?: "--"
+        tvSysStorage.text = stats?.storageText ?: "--"
 
         fun addTo(comp: String, v: View) {
             contentArea.addView(v)

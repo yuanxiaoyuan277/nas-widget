@@ -90,6 +90,20 @@ data class NasStats(
     val osVersion: String,
     val fetchTime: Long
 ) {
+    /** 存储总览：所有磁盘汇总已用字节 */
+    val storageUsed: Long get() = disks.sumOf { it.used }
+    /** 存储总览：所有磁盘汇总总容量字节 */
+    val storageTotal: Long get() = disks.sumOf { it.total }
+    /** 存储总览：所有磁盘汇总可用字节 */
+    val storageFree: Long get() = (storageTotal - storageUsed).coerceAtLeast(0)
+    /** 存储总使用率（0-100） */
+    val storagePercent: Double get() =
+        if (storageTotal > 0) storageUsed * 100.0 / storageTotal else 0.0
+    /** 存储总览可读文本（可用/总量 使用率），无磁盘时返回 "--" */
+    val storageText: String get() =
+        if (disks.isEmpty()) "--"
+        else String.format("%s/%s %.0f%%", Fmt.bytes(storageFree), Fmt.bytes(storageTotal), storagePercent)
+
     companion object {
         fun parse(json: String): NasStats {
             val root = JSONObject(json)
