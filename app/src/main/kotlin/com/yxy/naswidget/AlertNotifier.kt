@@ -13,7 +13,6 @@ import androidx.core.app.NotificationManagerCompat
 object AlertNotifier {
 
     private const val CHANNEL_ID = "nas_alert"
-    private const val REPEAT_MS = 30 * 60 * 1000L  // 同一组告警 30 分钟内不重复
     private const val OFFLINE_DELAY_MS = 2 * 60 * 1000L  // 连续拉取失败 2 分钟后才判定离线
 
     fun checkAndNotify(context: Context, stats: NasStats) {
@@ -37,7 +36,7 @@ object AlertNotifier {
         val key = alerts.joinToString("|")
         val last = Prefs.lastAlertKey(context)
         val lastTime = Prefs.lastAlertTime(context)
-        if (key == last && System.currentTimeMillis() - lastTime < REPEAT_MS) return
+        if (key == last && System.currentTimeMillis() - lastTime < Prefs.alertRepeatMs(context)) return
         Prefs.setLastAlert(context, key)
         send(context, "NAS 告警", alerts.joinToString("、"))
     }

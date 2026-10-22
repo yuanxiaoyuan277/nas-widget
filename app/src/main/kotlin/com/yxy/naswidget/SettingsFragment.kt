@@ -43,7 +43,9 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
     }
 
     private val refreshOptions = listOf(10 to "10 秒", 15 to "15 秒", 30 to "30 秒", 60 to "60 秒", 300 to "5 分钟")
+    private val repeatOptions = listOf(15 to "15 分钟", 30 to "30 分钟", 60 to "60 分钟", 120 to "2 小时")
     private lateinit var spRefresh: Spinner
+    private lateinit var spAlertRepeat: Spinner
     private lateinit var etFontSize: EditText
     private lateinit var scrollRoot: ScrollView
     private lateinit var tvLoginStatus: TextView
@@ -97,6 +99,7 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
 
         scrollRoot = view.findViewById(R.id.settings_scroll)
         spRefresh = view.findViewById(R.id.sp_refresh)
+        spAlertRepeat = view.findViewById(R.id.sp_alert_repeat)
         etFontSize = view.findViewById(R.id.et_font_size)
         tvLoginStatus = view.findViewById(R.id.tv_login_status)
         btnLogin = view.findViewById(R.id.btn_login)
@@ -202,6 +205,15 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
             }
             override fun onNothingSelected(parent: AdapterView<*>?) {}
         }
+        val repeatAdapter = ArrayAdapter(requireContext(), R.layout.spinner_item, repeatOptions.map { it.second })
+        repeatAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        spAlertRepeat.adapter = repeatAdapter
+        spAlertRepeat.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                if (!suppressSave) scheduleSave()
+            }
+            override fun onNothingSelected(parent: AdapterView<*>?) {}
+        }
         etFontSize.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
@@ -259,6 +271,8 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
         val cur = Prefs.refreshSec(requireContext())
         val idx = refreshOptions.indexOfFirst { it.first == cur }
         spRefresh.setSelection(if (idx >= 0) idx else 2)
+        val repIdx = repeatOptions.indexOfFirst { it.first == Prefs.alertRepeatMin(requireContext()) }
+        spAlertRepeat.setSelection(if (repIdx >= 0) repIdx else 1)
         etFontSize.setText(Prefs.fontSize(requireContext()).toString())
         cbWb2api.isChecked = Prefs.showWb2api(requireContext())
         cbAlert.isChecked = Prefs.showAlert(requireContext())
@@ -493,6 +507,8 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
         Prefs.setSilentEnd(requireContext(), etSilentEnd.text.toString().toIntOrNull()?.coerceIn(0, 23) ?: 7)
         val sel = spRefresh.selectedItemPosition
         Prefs.setRefresh(requireContext(), refreshOptions.getOrElse(sel) { 30 to "30 秒" }.first)
+        val repSel = spAlertRepeat.selectedItemPosition
+        Prefs.setAlertRepeatMin(requireContext(), repeatOptions.getOrElse(repSel) { 30 to "30 分钟" }.first)
         val fs = etFontSize.text.toString().toIntOrNull()?.coerceIn(8, 200) ?: 16
         Prefs.setFontSize(requireContext(), fs)
         Prefs.setWb2apiBase(requireContext(), etWb2apiBase.text.toString().trim().ifEmpty { Prefs.DEFAULT_WB2API_BASE })

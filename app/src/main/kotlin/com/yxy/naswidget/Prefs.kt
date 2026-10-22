@@ -46,6 +46,7 @@ object Prefs {
     private const val KEY_ALERT_CPU_TEMP = "alert_cpu_temp_threshold"
     private const val KEY_ALERT_NVME_TEMP = "alert_nvme_temp_threshold"
     private const val KEY_ALERT_SOUND = "alert_sound"
+    private const val KEY_ALERT_REPEAT = "alert_repeat_min"
     private const val KEY_SILENT_ENABLED = "silent_enabled"
     private const val KEY_SILENT_START = "silent_start"
     private const val KEY_SILENT_END = "silent_end"
@@ -230,6 +231,11 @@ object Prefs {
     // === 告警推送提示音（关闭后告警通知静音，但保留通知与历史） ===
     fun alertSound(ctx: Context) = sp(ctx).getBoolean(KEY_ALERT_SOUND, true)
     fun setAlertSound(ctx: Context, v: Boolean) = sp(ctx).edit().putBoolean(KEY_ALERT_SOUND, v).apply()
+
+    // === 同一组告警重复提醒间隔（分钟，默认 30） ===
+    fun alertRepeatMin(ctx: Context) = sp(ctx).getInt(KEY_ALERT_REPEAT, 30)
+    fun setAlertRepeatMin(ctx: Context, v: Int) = sp(ctx).edit().putInt(KEY_ALERT_REPEAT, v).apply()
+    fun alertRepeatMs(ctx: Context) = alertRepeatMin(ctx).coerceIn(1, 1440) * 60_000L
 
     // === 状态栏常驻监控通知开关 ===
     private const val KEY_MONITOR_NOTIF = "monitor_notif"

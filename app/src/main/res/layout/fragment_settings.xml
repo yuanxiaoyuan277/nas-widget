@@ -538,6 +538,32 @@
                 </LinearLayout>
             </LinearLayout>
 
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="重复提醒间隔（同一组告警多久后再次提醒）"
+                    android:textColor="@color/app_text_hint"
+                    android:textSize="12sp" />
+
+                <Spinner
+                    android:id="@+id/sp_alert_repeat"
+                    android:layout_width="match_parent"
+                    android:layout_height="40dp"
+                    android:minHeight="0dp"
+                    android:gravity="center_vertical"
+                    android:paddingTop="0dp"
+                    android:paddingBottom="0dp"
+                    android:paddingStart="10dp"
+                    android:paddingEnd="10dp"
+                    android:background="@drawable/spinner_bg" />
+            </LinearLayout>
+
             <CheckBox
                 android:id="@+id/cb_silent"
                 android:layout_width="wrap_content"
