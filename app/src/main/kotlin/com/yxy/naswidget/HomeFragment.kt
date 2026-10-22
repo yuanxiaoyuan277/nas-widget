@@ -49,6 +49,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
     private lateinit var previewContainer: FrameLayout
     private lateinit var btnRefreshPreview: Button
     private lateinit var btnCopySummary: Button
+    private lateinit var btnShareSummary: Button
     private lateinit var cbDocker: SwitchCompat
     private lateinit var dockerListContainer: LinearLayout
     private lateinit var btnRefreshDocker: Button
@@ -139,6 +140,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         previewContainer = view.findViewById(R.id.preview_container)
         btnRefreshPreview = view.findViewById(R.id.btn_refresh_preview)
         btnCopySummary = view.findViewById(R.id.btn_copy_summary)
+        btnShareSummary = view.findViewById(R.id.btn_share_summary)
         cbDocker = view.findViewById(R.id.cb_docker)
         dockerListContainer = view.findViewById(R.id.docker_list_container)
         btnRefreshDocker = view.findViewById(R.id.btn_refresh_docker)
@@ -202,6 +204,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         layoutInflater.inflate(R.layout.nas_widget_preview, previewContainer, true)
         btnRefreshPreview.setOnClickListener { refreshPreview() }
         btnCopySummary.setOnClickListener { copySummary() }
+        btnShareSummary.setOnClickListener { shareSummary() }
         // 预览顶部的刷新图标与桌面组件一致，点击同样立即刷新
         previewContainer.findViewById<View>(R.id.btn_refresh)?.setOnClickListener { refreshPreview() }
 
@@ -659,13 +662,9 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         root.findViewById<TextView>(R.id.tv_wb2api).setTextSize(TypedValue.COMPLEX_UNIT_PX, (fs + 3).toFloat())
     }
 
-    /** 复制当前监控摘要到剪贴板（CPU/内存/存储/温度/网络/运行时长） */
-    private fun copySummary() {
-        val s = lastStats
-        if (s == null) {
-            Toast.makeText(requireContext(), "暂无数据，请稍候刷新", Toast.LENGTH_SHORT).show()
-            return
-        }
+    /** 生成当前监控摘要文本（CPU/内存/存储/温度/网络/运行时长），无数据返回 null */
+    private fun summaryText(): String? {
+        val s = lastStats ?: return null
         val lines = mutableListOf<String>()
         lines.add("NAS 监控")
         lines.add("CPU ${s.cpuPercent.toInt()}% · ${s.cores}核${s.cpuModel.takeIf { it.isNotEmpty() }?.let { " · $it" } ?: ""}")
@@ -680,10 +679,33 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         tempLine?.let { lines.add(it) }
         lines.add("网络 ↓${Fmt.speed(s.netDown)} ↑${Fmt.speed(s.netUp)}")
         lines.add("运行 ${Fmt.uptime(s.uptimeSec)}")
-        val text = lines.joinToString("\n")
+        return lines.joinToString("\n")
+    }
+
+    /** 复制当前监控摘要到剪贴板 */
+    private fun copySummary() {
+        val text = summaryText()
+        if (text == null) {
+            Toast.makeText(requireContext(), "暂无数据，请稍候刷新", Toast.LENGTH_SHORT).show()
+            return
+        }
         val cm = requireContext().getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
         cm.setPrimaryClip(ClipData.newPlainText("nas-summary", text))
         Toast.makeText(requireContext(), "监控摘要已复制", Toast.LENGTH_SHORT).show()
+    }
+
+    /** 分享当前监控摘要（走系统分享，可发到微信/QQ 等） */
+    private fun shareSummary() {
+        val text = summaryText()
+        if (text == null) {
+            Toast.makeText(requireContext(), "暂无数据，请稍候刷新", Toast.LENGTH_SHORT).show()
+            return
+        }
+        val send = Intent(Intent.ACTION_SEND).apply {
+            type = "text/plain"
+            putExtra(Intent.EXTRA_TEXT, text)
+        }
+        requireContext().startActivity(Intent.createChooser(send, "分享监控摘要"))
     }
 
     private fun peakText(): String {
