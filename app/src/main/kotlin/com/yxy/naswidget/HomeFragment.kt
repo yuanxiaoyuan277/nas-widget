@@ -215,11 +215,12 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
             "系统" to tvSysOs,
             "运行" to tvSysUptime,
             "温度" to tvSysTemp,
-            "存储" to tvSysStorage,
             "更新" to tvSysTime,
             "网络" to tvSysNet,
             "峰值" to tvSysPeak
         )
+        // 「存储」行点击弹出各磁盘明细
+        tvSysStorage.setOnClickListener { showDiskDetail() }
 
         // 控件改动即自动保存
         setupAutoSaveListeners()
@@ -729,6 +730,23 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
                 Toast.makeText(requireContext(), "已复制 $label", Toast.LENGTH_SHORT).show()
             }
         }
+    }
+
+    /** 查看各磁盘明细：点「存储」行弹出每块盘的已用/总量/使用率 */
+    private fun showDiskDetail() {
+        val s = lastStats
+        if (s == null || s.disks.isEmpty()) {
+            Toast.makeText(requireContext(), "暂无磁盘数据，请稍候刷新", Toast.LENGTH_SHORT).show()
+            return
+        }
+        val lines = s.disks.map { d ->
+            String.format("%s：%s / %s（已用 %.0f%%）", d.name, Fmt.bytes(d.used), Fmt.bytes(d.total), d.usePercent)
+        }
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle("磁盘明细")
+            .setMessage(lines.joinToString("\n"))
+            .setPositiveButton("关闭", null)
+            .show()
     }
 
     /** 分享当前监控摘要（走系统分享，可发到微信/QQ 等） */
