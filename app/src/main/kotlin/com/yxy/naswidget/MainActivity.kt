@@ -77,8 +77,8 @@ class MainActivity : AppCompatActivity() {
         }
         val exitView = exitFrag.view
 
-        // show enter（立即）
-        supportFragmentManager.beginTransaction().show(enterFrag).commit()
+        // show enter（同步，确保 view 立即 VISIBLE，避免 hidden 状态下宽度为 0 导致动画失效）
+        supportFragmentManager.beginTransaction().show(enterFrag).commitNow()
 
         // exit 滑出：用 exitView 自身宽度（exit 已 layout，宽度正常）
         exitView?.let { v ->
