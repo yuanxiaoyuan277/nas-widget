@@ -70,6 +70,16 @@
                 android:textColor="@android:color/white"
                 app:backgroundTint="@color/app_primary"
                 app:cornerRadius="14dp" />
+
+            <Button
+                android:id="@+id/btn_open_nas_web"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="打开飞牛管理网页"
+                android:textColor="@android:color/white"
+                app:backgroundTint="@color/app_secondary"
+                app:cornerRadius="14dp" />
         </LinearLayout>
 
         <!-- NAS 地址卡片 -->

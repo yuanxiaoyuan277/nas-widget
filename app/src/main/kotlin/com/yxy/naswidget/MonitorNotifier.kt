@@ -5,6 +5,7 @@ import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import android.net.Uri
 import android.os.Build
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
@@ -57,6 +58,13 @@ object MonitorNotifier {
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
+        // 「飞牛管理」快捷操作：打开飞牛 NAS 网页管理界面
+        val nasPi = PendingIntent.getActivity(
+            context, 102,
+            Intent(Intent.ACTION_VIEW, Uri.parse(Prefs.nasBase(context))),
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+
         val notif = NotificationCompat.Builder(context, CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_launcher)
             .setContentTitle("NAS 监控")
@@ -65,6 +73,7 @@ object MonitorNotifier {
             .setOngoing(true)
             .setOnlyAlertOnce(true)
             .addAction(R.drawable.ic_launcher, "刷新", refreshPi)
+            .addAction(R.drawable.ic_launcher, "飞牛管理", nasPi)
             .setContentIntent(
                 PendingIntent.getActivity(
                     context, 0,

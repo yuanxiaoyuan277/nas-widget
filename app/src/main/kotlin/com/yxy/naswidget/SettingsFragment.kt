@@ -48,6 +48,7 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
     private lateinit var scrollRoot: ScrollView
     private lateinit var tvLoginStatus: TextView
     private lateinit var btnLogin: Button
+    private lateinit var btnOpenNasWeb: Button
     private lateinit var etUrl: EditText
     private lateinit var btnTestUrl: Button
     private lateinit var cbWb2api: CheckBox
@@ -95,6 +96,7 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
         etFontSize = view.findViewById(R.id.et_font_size)
         tvLoginStatus = view.findViewById(R.id.tv_login_status)
         btnLogin = view.findViewById(R.id.btn_login)
+        btnOpenNasWeb = view.findViewById(R.id.btn_open_nas_web)
         etUrl = view.findViewById(R.id.et_url)
         btnTestUrl = view.findViewById(R.id.btn_test_url)
         cbWb2api = view.findViewById(R.id.cb_wb2api)
@@ -133,6 +135,13 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
 
         btnLogin.setOnClickListener {
             requireActivity().startActivityForResult(Intent(requireContext(), LoginActivity::class.java), REQ_LOGIN)
+        }
+        btnOpenNasWeb.setOnClickListener {
+            try {
+                startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(Prefs.nasBase(requireContext()))))
+            } catch (_: Exception) {
+                Toast.makeText(requireContext(), "无法打开浏览器，请检查飞牛地址配置", Toast.LENGTH_SHORT).show()
+            }
         }
         btnTestUrl.setOnClickListener { testUrl() }
         btnToggleTheme.setOnClickListener { toggleTheme() }
