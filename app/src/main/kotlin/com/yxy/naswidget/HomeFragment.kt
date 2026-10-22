@@ -223,14 +223,13 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
             "系统" to tvSysOs,
             "运行" to tvSysUptime,
             "更新" to tvSysTime,
-            "网络" to tvSysNet,
-            "峰值" to tvSysPeak
+            "网络" to tvSysNet
         )
-        // 「内存」「温度」行点击弹出明细
+        // 「内存」「温度」「存储」「峰值」行点击弹出明细
         tvSysMem.setOnClickListener { showMemDetail() }
         tvSysTemp.setOnClickListener { showTempDetail() }
-        // 「存储」行点击弹出各磁盘明细
         tvSysStorage.setOnClickListener { showDiskDetail() }
+        tvSysPeak.setOnClickListener { showPeakDetail() }
         // 「清零」按钮：一键清零今日峰值记录
         btnClearPeak.setOnClickListener { clearPeaks() }
         // 「刷新间隔」行点击循环切换
@@ -803,6 +802,30 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         }
         MaterialAlertDialogBuilder(requireContext())
             .setTitle("磁盘明细")
+            .setMessage(lines.joinToString("\n"))
+            .setPositiveButton("关闭", null)
+            .show()
+    }
+
+    /** 查看今日峰值明细：点「峰值」行弹出各指标峰值 + 告警阈值参考 */
+    private fun showPeakDetail() {
+        val cpu = Prefs.peakCpu(requireContext())
+        val mem = Prefs.peakMem(requireContext())
+        val cpuT = Prefs.peakCpuTemp(requireContext())
+        val nvmeT = Prefs.peakNvmeTemp(requireContext())
+        val netDown = Prefs.peakNetDown(requireContext())
+        val netUp = Prefs.peakNetUp(requireContext())
+        val usageThr = Prefs.alertUsageThreshold(requireContext())
+        val cpuTempThr = Prefs.alertCpuTempThreshold(requireContext())
+        val nvmeTempThr = Prefs.alertNvmeTempThreshold(requireContext())
+        val lines = mutableListOf<String>()
+        lines.add(if (cpu > 0f) String.format("CPU：%.0f%%（阈值 %d%%）", cpu, usageThr) else "CPU：暂无")
+        lines.add(if (mem > 0f) String.format("内存：%.0f%%（阈值 %d%%）", mem, usageThr) else "内存：暂无")
+        lines.add(if (cpuT != null) String.format("CPU 温度：%.0f°（阈值 %d°）", cpuT, cpuTempThr) else "CPU 温度：暂无")
+        lines.add(if (nvmeT != null) String.format("NVMe 温度：%.0f°（阈值 %d°）", nvmeT, nvmeTempThr) else "NVMe 温度：暂无")
+        lines.add(if (netDown > 0L || netUp > 0L) String.format("网络：↓%s ↑%s", Fmt.speed(netDown), Fmt.speed(netUp)) else "网络：暂无")
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle("今日峰值")
             .setMessage(lines.joinToString("\n"))
             .setPositiveButton("关闭", null)
             .show()
