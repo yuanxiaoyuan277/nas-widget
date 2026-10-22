@@ -45,6 +45,7 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
     private lateinit var tvLoginStatus: TextView
     private lateinit var btnLogin: Button
     private lateinit var etUrl: EditText
+    private lateinit var btnTestUrl: Button
     private lateinit var cbWb2api: CheckBox
     private lateinit var etWb2apiBase: EditText
     private lateinit var etWb2apiKey: EditText
@@ -74,6 +75,7 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
         tvLoginStatus = view.findViewById(R.id.tv_login_status)
         btnLogin = view.findViewById(R.id.btn_login)
         etUrl = view.findViewById(R.id.et_url)
+        btnTestUrl = view.findViewById(R.id.btn_test_url)
         cbWb2api = view.findViewById(R.id.cb_wb2api)
         etWb2apiBase = view.findViewById(R.id.et_wb2api_base)
         etWb2apiKey = view.findViewById(R.id.et_wb2api_key)
@@ -94,6 +96,7 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
         btnLogin.setOnClickListener {
             requireActivity().startActivityForResult(Intent(requireContext(), LoginActivity::class.java), REQ_LOGIN)
         }
+        btnTestUrl.setOnClickListener { testUrl() }
         btnToggleTheme.setOnClickListener { toggleTheme() }
         btnCheckUpdate.setOnClickListener { checkUpdate() }
         btnBackup.setOnClickListener { backupConfig() }
@@ -204,6 +207,29 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
         Prefs.setTheme(requireContext(), next)
         AppCompatDelegate.setDefaultNightMode(Prefs.nightMode(requireContext()))
         updateThemeButton()
+    }
+
+    /** 测试 NAS 监控接口连通性（用当前输入框里的地址，失败提示错误信息） */
+    private fun testUrl() {
+        btnTestUrl.isEnabled = false
+        btnTestUrl.text = "测试中…"
+        val url = etUrl.text.toString().trim().ifEmpty { Prefs.DEFAULT_URL }
+        Thread {
+            val result = NasDataFetcher.fetch(url)
+            requireActivity().runOnUiThread {
+                btnTestUrl.isEnabled = true
+                btnTestUrl.text = "测试连接"
+                result.onSuccess { s ->
+                    Toast.makeText(
+                        requireContext(),
+                        "连接成功 · CPU ${s.cpuPercent.toInt()}% · 内存 ${s.memPercent.toInt()}%",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }.onFailure { e ->
+                    Toast.makeText(requireContext(), "连接失败：${e.message}", Toast.LENGTH_LONG).show()
+                }
+            }
+        }.start()
     }
 
     /** 输入框内容明文/密文切换（默认隐藏） */

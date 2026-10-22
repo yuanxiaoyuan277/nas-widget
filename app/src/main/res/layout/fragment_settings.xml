@@ -118,6 +118,16 @@
                     android:textColor="@color/app_text_secondary"
                     android:textSize="13sp" />
             </FrameLayout>
+
+            <Button
+                android:id="@+id/btn_test_url"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="测试连接"
+                android:textColor="@android:color/white"
+                app:backgroundTint="@color/app_primary"
+                app:cornerRadius="14dp" />
         </LinearLayout>
 
         <!-- wb2api 积分卡片 -->
