@@ -226,6 +226,15 @@ object Prefs {
     fun showMonitorNotif(ctx: Context) = sp(ctx).getBoolean(KEY_MONITOR_NOTIF, false)
     fun setShowMonitorNotif(ctx: Context, v: Boolean) = sp(ctx).edit().putBoolean(KEY_MONITOR_NOTIF, v).apply()
 
+    // === 常驻监控通知显示项（cpu/mem/storage/temp/net 子集） ===
+    private const val KEY_MON_ITEMS = "mon_notif_items"
+    private val MON_ITEM_DEFAULTS = listOf("cpu", "mem", "storage", "temp")
+    fun monNotifItems(ctx: Context): Set<String> =
+        sp(ctx).getString(KEY_MON_ITEMS, MON_ITEM_DEFAULTS.joinToString(","))?.split(",")
+            ?.map { it.trim() }?.filter { it.isNotEmpty() }?.toSet() ?: MON_ITEM_DEFAULTS.toSet()
+    fun setMonNotifItems(ctx: Context, items: Set<String>) =
+        sp(ctx).edit().putString(KEY_MON_ITEMS, items.joinToString(",")).apply()
+
     // === 资源告警阈值（可配置，默认：使用率 90%、CPU 温度 85°、NVMe 温度 70°） ===
     fun alertUsageThreshold(ctx: Context) = sp(ctx).getInt(KEY_ALERT_USAGE, 90)
     fun setAlertUsageThreshold(ctx: Context, v: Int) = sp(ctx).edit().putInt(KEY_ALERT_USAGE, v).apply()

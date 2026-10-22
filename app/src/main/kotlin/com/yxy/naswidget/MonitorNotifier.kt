@@ -35,14 +35,17 @@ object MonitorNotifier {
 
         val text = result.fold(
             onSuccess = { s ->
-                val parts = mutableListOf(
-                    "CPU ${s.cpuPercent.toInt()}%",
-                    "内存 ${s.memPercent.toInt()}%",
-                    "存储 ${s.storagePercent.toInt()}%"
-                )
-                if (s.tempCpu != null) parts.add("CPU ${s.tempCpu.toInt()}°")
-                if (s.tempNvme != null) parts.add("NVMe ${s.tempNvme.toInt()}°")
-                parts.joinToString(" · ")
+                val items = Prefs.monNotifItems(context)
+                val parts = mutableListOf<String>()
+                if ("cpu" in items) parts.add("CPU ${s.cpuPercent.toInt()}%")
+                if ("mem" in items) parts.add("内存 ${s.memPercent.toInt()}%")
+                if ("storage" in items) parts.add("存储 ${s.storagePercent.toInt()}%")
+                if ("temp" in items) {
+                    if (s.tempCpu != null) parts.add("CPU ${s.tempCpu.toInt()}°")
+                    if (s.tempNvme != null) parts.add("NVMe ${s.tempNvme.toInt()}°")
+                }
+                if ("net" in items) parts.add("↓${Fmt.speed(s.netDown)} ↑${Fmt.speed(s.netUp)}")
+                if (parts.isEmpty()) "NAS 在线" else parts.joinToString(" · ")
             },
             onFailure = { "NAS 离线，无法连接监控数据源" }
         )

@@ -67,6 +67,11 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
     private lateinit var tvAboutRepo: TextView
     private lateinit var cbAlert: CheckBox
     private lateinit var cbMonitorNotif: CheckBox
+    private lateinit var cbMonCpu: CheckBox
+    private lateinit var cbMonMem: CheckBox
+    private lateinit var cbMonStorage: CheckBox
+    private lateinit var cbMonTemp: CheckBox
+    private lateinit var cbMonNet: CheckBox
     private lateinit var etAlertUsage: EditText
     private lateinit var etAlertCpuTemp: EditText
     private lateinit var etAlertNvmeTemp: EditText
@@ -109,6 +114,11 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
         tvAboutRepo = view.findViewById(R.id.tv_about_repo)
         cbAlert = view.findViewById(R.id.cb_alert)
         cbMonitorNotif = view.findViewById(R.id.cb_monitor_notif)
+        cbMonCpu = view.findViewById(R.id.cb_mon_cpu)
+        cbMonMem = view.findViewById(R.id.cb_mon_mem)
+        cbMonStorage = view.findViewById(R.id.cb_mon_storage)
+        cbMonTemp = view.findViewById(R.id.cb_mon_temp)
+        cbMonNet = view.findViewById(R.id.cb_mon_net)
         etAlertUsage = view.findViewById(R.id.et_alert_usage)
         etAlertCpuTemp = view.findViewById(R.id.et_alert_cpu_temp)
         etAlertNvmeTemp = view.findViewById(R.id.et_alert_nvme_temp)
@@ -149,6 +159,11 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
         cbWb2api.setOnCheckedChangeListener { _, _ -> if (!suppressSave) scheduleSave() }
         cbAlert.setOnCheckedChangeListener { _, _ -> if (!suppressSave) scheduleSave() }
         cbMonitorNotif.setOnCheckedChangeListener { _, _ -> if (!suppressSave) scheduleSave() }
+        cbMonCpu.setOnCheckedChangeListener { _, _ -> if (!suppressSave) scheduleSave() }
+        cbMonMem.setOnCheckedChangeListener { _, _ -> if (!suppressSave) scheduleSave() }
+        cbMonStorage.setOnCheckedChangeListener { _, _ -> if (!suppressSave) scheduleSave() }
+        cbMonTemp.setOnCheckedChangeListener { _, _ -> if (!suppressSave) scheduleSave() }
+        cbMonNet.setOnCheckedChangeListener { _, _ -> if (!suppressSave) scheduleSave() }
         cbSilent.setOnCheckedChangeListener { _, _ -> if (!suppressSave) scheduleSave() }
         watchEditText(etUrl)
         watchEditText(etWb2apiBase)
@@ -228,6 +243,12 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
         cbWb2api.isChecked = Prefs.showWb2api(requireContext())
         cbAlert.isChecked = Prefs.showAlert(requireContext())
         cbMonitorNotif.isChecked = Prefs.showMonitorNotif(requireContext())
+        val monItems = Prefs.monNotifItems(requireContext())
+        cbMonCpu.isChecked = "cpu" in monItems
+        cbMonMem.isChecked = "mem" in monItems
+        cbMonStorage.isChecked = "storage" in monItems
+        cbMonTemp.isChecked = "temp" in monItems
+        cbMonNet.isChecked = "net" in monItems
         etAlertUsage.setText(Prefs.alertUsageThreshold(requireContext()).toString())
         etAlertCpuTemp.setText(Prefs.alertCpuTempThreshold(requireContext()).toString())
         etAlertNvmeTemp.setText(Prefs.alertNvmeTempThreshold(requireContext()).toString())
@@ -402,6 +423,13 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
         Prefs.setShowWb2api(requireContext(), cbWb2api.isChecked)
         Prefs.setShowAlert(requireContext(), cbAlert.isChecked)
         Prefs.setShowMonitorNotif(requireContext(), cbMonitorNotif.isChecked)
+        val monItems = mutableSetOf<String>()
+        if (cbMonCpu.isChecked) monItems.add("cpu")
+        if (cbMonMem.isChecked) monItems.add("mem")
+        if (cbMonStorage.isChecked) monItems.add("storage")
+        if (cbMonTemp.isChecked) monItems.add("temp")
+        if (cbMonNet.isChecked) monItems.add("net")
+        Prefs.setMonNotifItems(requireContext(), monItems)
         Prefs.setAlertUsageThreshold(requireContext(), etAlertUsage.text.toString().toIntOrNull()?.coerceIn(1, 100) ?: 90)
         Prefs.setAlertCpuTempThreshold(requireContext(), etAlertCpuTemp.text.toString().toIntOrNull()?.coerceIn(1, 120) ?: 85)
         Prefs.setAlertNvmeTempThreshold(requireContext(), etAlertNvmeTemp.text.toString().toIntOrNull()?.coerceIn(1, 120) ?: 70)
