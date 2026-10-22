@@ -1,5 +1,6 @@
 package com.yxy.naswidget
 
+import android.view.View
 import android.widget.ArrayAdapter
 import android.widget.EditText
 import android.widget.Spinner
@@ -23,7 +24,7 @@ class LayoutSnapshotTest {
 
     @Test
     fun settingsLight() {
-        val view = paparazzi.inflate(R.layout.fragment_settings)
+        val view: View = paparazzi.inflate(R.layout.fragment_settings)
         // 填充动态内容，让截图接近真实
         val spinner = view.findViewById<Spinner>(R.id.sp_refresh)
         spinner.adapter = ArrayAdapter(
@@ -38,13 +39,13 @@ class LayoutSnapshotTest {
 
     @Test
     fun homeLight() {
-        val view = paparazzi.inflate(R.layout.fragment_home)
+        val view: View = paparazzi.inflate(R.layout.fragment_home)
         paparazzi.snapshot(view, "home-light")
     }
 
     @Test
     fun updateDialogLight() {
-        val view = paparazzi.inflate(R.layout.dialog_update)
+        val view: View = paparazzi.inflate(R.layout.dialog_update)
         view.findViewById<TextView>(R.id.tv_update_version).text = "v1.11.19"
         view.findViewById<TextView>(R.id.tv_update_notes).text = "•  刷新间隔下拉框加箭头指示\n•  修复切换主题后首次切主页动画"
         paparazzi.snapshot(view, "update-dialog-light")
