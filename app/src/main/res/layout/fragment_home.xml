@@ -1051,14 +1051,38 @@
                         android:textSize="13sp" />
 
                     <Button
+                        android:id="@+id/btn_select_all"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="全选"
+                        android:textSize="13sp"
+                        android:minWidth="0dp"
+                        android:minHeight="0dp"
+                        android:paddingHorizontal="10dp"
+                        android:paddingVertical="6dp" />
+
+                    <Button
+                        android:id="@+id/btn_select_none"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="6dp"
+                        android:text="全不选"
+                        android:textSize="13sp"
+                        android:minWidth="0dp"
+                        android:minHeight="0dp"
+                        android:paddingHorizontal="10dp"
+                        android:paddingVertical="6dp" />
+
+                    <Button
                         android:id="@+id/btn_refresh_docker"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:layout_marginStart="6dp"
                         android:text="刷新"
                         android:textSize="13sp"
                         android:minWidth="0dp"
                         android:minHeight="0dp"
-                        android:paddingHorizontal="12dp"
+                        android:paddingHorizontal="10dp"
                         android:paddingVertical="6dp" />
                 </LinearLayout>
 

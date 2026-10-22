@@ -40,6 +40,8 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
     private lateinit var cbDocker: SwitchCompat
     private lateinit var dockerListContainer: LinearLayout
     private lateinit var btnRefreshDocker: Button
+    private lateinit var btnSelectAll: Button
+    private lateinit var btnSelectNone: Button
     private lateinit var etDockerSearch: EditText
     private lateinit var sbCpuX: SeekBar
     private lateinit var sbCpuY: SeekBar
@@ -98,6 +100,8 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         cbDocker = view.findViewById(R.id.cb_docker)
         dockerListContainer = view.findViewById(R.id.docker_list_container)
         btnRefreshDocker = view.findViewById(R.id.btn_refresh_docker)
+        btnSelectAll = view.findViewById(R.id.btn_select_all)
+        btnSelectNone = view.findViewById(R.id.btn_select_none)
         etDockerSearch = view.findViewById(R.id.et_docker_search)
         sbCpuX = view.findViewById(R.id.sb_cpu_x)
         sbCpuY = view.findViewById(R.id.sb_cpu_y)
@@ -145,6 +149,26 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
 
         // Docker 配置
         btnRefreshDocker.setOnClickListener { loadDockerContainers() }
+        btnSelectAll.setOnClickListener {
+            if (dockerCheckboxes.isEmpty()) {
+                Toast.makeText(requireContext(), "请先加载容器列表", Toast.LENGTH_SHORT).show()
+            } else {
+                suppressSave = true
+                for (cb in dockerCheckboxes) cb.isChecked = true
+                suppressSave = false
+                persist()
+            }
+        }
+        btnSelectNone.setOnClickListener {
+            if (dockerCheckboxes.isEmpty()) {
+                Toast.makeText(requireContext(), "请先加载容器列表", Toast.LENGTH_SHORT).show()
+            } else {
+                suppressSave = true
+                for (cb in dockerCheckboxes) cb.isChecked = false
+                suppressSave = false
+                persist()
+            }
+        }
         etDockerSearch.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
