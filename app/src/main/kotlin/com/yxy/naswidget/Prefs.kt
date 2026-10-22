@@ -322,4 +322,27 @@ object Prefs {
     fun peakMem(ctx: Context) = sp(ctx).getFloat(KEY_PEAK_MEM, 0f)
     fun peakCpuTemp(ctx: Context): Float? = sp(ctx).getFloat(KEY_PEAK_CPU_TEMP, -1f).takeIf { it >= 0 }
     fun peakNvmeTemp(ctx: Context): Float? = sp(ctx).getFloat(KEY_PEAK_NVME_TEMP, -1f).takeIf { it >= 0 }
+
+    // === 今日网络峰值（下行/上行速率最高值，跨天自动重置） ===
+    private const val KEY_PEAK_NET_DATE = "peak_net_date"
+    private const val KEY_PEAK_NET_DOWN = "peak_net_down"
+    private const val KEY_PEAK_NET_UP = "peak_net_up"
+
+    fun recordNetPeak(ctx: Context, down: Long, up: Long) {
+        val today = todayKey()
+        val sp = sp(ctx)
+        val e = sp.edit()
+        if (sp.getString(KEY_PEAK_NET_DATE, "") != today) {
+            e.putString(KEY_PEAK_NET_DATE, today)
+            e.putLong(KEY_PEAK_NET_DOWN, down)
+            e.putLong(KEY_PEAK_NET_UP, up)
+        } else {
+            if (down > sp.getLong(KEY_PEAK_NET_DOWN, 0L)) e.putLong(KEY_PEAK_NET_DOWN, down)
+            if (up > sp.getLong(KEY_PEAK_NET_UP, 0L)) e.putLong(KEY_PEAK_NET_UP, up)
+        }
+        e.apply()
+    }
+
+    fun peakNetDown(ctx: Context): Long = sp(ctx).getLong(KEY_PEAK_NET_DOWN, 0L)
+    fun peakNetUp(ctx: Context): Long = sp(ctx).getLong(KEY_PEAK_NET_UP, 0L)
 }

@@ -451,6 +451,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
             stats = s
             lastStats = s
             Prefs.recordPeaks(requireContext(), s.cpuPercent, s.memPercent, s.tempCpu, s.tempNvme)
+            Prefs.recordNetPeak(requireContext(), s.netDown, s.netUp)
             root.findViewById<TextView>(R.id.tv_uptime).text = "运行 " + Fmt.uptime(s.uptimeSec) + " · " + Fmt.time(s.fetchTime)
         }.onFailure {
             root.findViewById<TextView>(R.id.tv_uptime).text = "连接失败"
@@ -713,12 +714,15 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         val mem = Prefs.peakMem(requireContext())
         val cpuT = Prefs.peakCpuTemp(requireContext())
         val nvmeT = Prefs.peakNvmeTemp(requireContext())
-        if (cpu <= 0f && mem <= 0f && cpuT == null && nvmeT == null) return "--"
+        val netDown = Prefs.peakNetDown(requireContext())
+        val netUp = Prefs.peakNetUp(requireContext())
+        if (cpu <= 0f && mem <= 0f && cpuT == null && nvmeT == null && netDown <= 0L && netUp <= 0L) return "--"
         val parts = mutableListOf<String>()
         if (cpu > 0f) parts.add(String.format("CPU %.0f%%", cpu))
         if (mem > 0f) parts.add(String.format("内存 %.0f%%", mem))
         val tempMax = listOfNotNull(cpuT, nvmeT).maxOrNull()
         if (tempMax != null) parts.add(String.format("温度 %.0f°", tempMax))
+        if (netDown > 0L || netUp > 0L) parts.add(String.format("网络 ↓%s ↑%s", Fmt.speed(netDown), Fmt.speed(netUp)))
         return parts.joinToString(" · ")
     }
 
