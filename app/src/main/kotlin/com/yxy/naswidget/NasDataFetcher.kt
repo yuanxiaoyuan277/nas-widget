@@ -95,8 +95,9 @@ object NasDataFetcher {
                     val state = c.optString("State", c.optString("state", ""))
                     val status = c.optString("Status", c.optString("status", ""))
                     val id = c.optString("Id", c.optString("id", ""))
+                    val image = c.optString("Image", c.optString("image", ""))
                     if (name.isNotEmpty()) {
-                        list.add(DockerContainer(id, name, state, status, null))
+                        list.add(DockerContainer(id, name, state, status, null, image = image))
                     }
                 }
             }

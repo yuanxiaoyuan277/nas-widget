@@ -28,7 +28,8 @@ data class DockerContainer(
     val state: String,
     val status: String,
     val memBytes: Long? = null,
-    val cpuPercent: Double? = null
+    val cpuPercent: Double? = null,
+    val image: String = ""
 ) {
     val running: Boolean get() = state.equals("running", ignoreCase = true)
 

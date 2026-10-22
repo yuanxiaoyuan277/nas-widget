@@ -815,7 +815,9 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
             item.findViewById<TextView>(R.id.tv_dot).text = if (c.running) "●" else "○"
             item.findViewById<TextView>(R.id.tv_dot).setTextColor(if (c.running) 0xFF4CAF50.toInt() else 0xFF888888.toInt())
             item.findViewById<TextView>(R.id.tv_name).text = c.name
-            item.findViewById<TextView>(R.id.tv_detail).text = c.detailText
+            item.findViewById<TextView>(R.id.tv_detail).text =
+                listOfNotNull(c.image.takeIf { it.isNotEmpty() }, c.detailText.takeIf { it.isNotEmpty() })
+                    .joinToString(" · ").ifEmpty { "--" }
             item.findViewById<View>(R.id.ll_info).setOnClickListener { showContainerDetail(c) }
             val cb = item.findViewById<SwitchCompat>(R.id.cb_select)
             cb.isChecked = c.name in selected
@@ -845,6 +847,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
     private fun showContainerDetail(c: DockerContainer) {
         val lines = mutableListOf<String>()
         lines.add("状态：${c.stateLabel}")
+        if (c.image.isNotEmpty()) lines.add("镜像：${c.image}")
         if (c.status.isNotEmpty()) lines.add("详情：${c.status}")
         lines.add("CPU：${c.cpuText.ifEmpty { "--" }}")
         lines.add("内存：${c.memText.ifEmpty { "--" }}")
