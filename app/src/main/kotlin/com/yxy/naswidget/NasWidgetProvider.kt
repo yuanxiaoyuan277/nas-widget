@@ -106,8 +106,21 @@ class NasWidgetProvider : AppWidgetProvider() {
             result.onSuccess { s ->
                 stats = s
                 views.setTextViewText(R.id.tv_uptime, "运行 " + Fmt.uptime(s.uptimeSec) + " · " + Fmt.time(s.fetchTime))
+                // 状态徽标：任一指标超阈值 → 告警
+                val overUsage = s.cpuPercent >= usageThr || s.memPercent >= usageThr ||
+                    s.disks.any { it.usePercent >= usageThr }
+                val overTemp = (s.tempCpu?.let { it >= cpuTempThr } == true) ||
+                    (s.tempNvme?.let { it >= nvmeTempThr } == true)
+                if (overUsage || overTemp) {
+                    views.setTextViewText(R.id.tv_status_badge, "告警")
+                    views.setViewVisibility(R.id.tv_status_badge, View.VISIBLE)
+                } else {
+                    views.setViewVisibility(R.id.tv_status_badge, View.GONE)
+                }
             }.onFailure {
                 views.setTextViewText(R.id.tv_uptime, Fmt.offlineDuration(Prefs.offlineSince(context)))
+                views.setTextViewText(R.id.tv_status_badge, "离线")
+                views.setViewVisibility(R.id.tv_status_badge, View.VISIBLE)
             }
 
             fun addTo(comp: String, rootId: Int, item: RemoteViews) {

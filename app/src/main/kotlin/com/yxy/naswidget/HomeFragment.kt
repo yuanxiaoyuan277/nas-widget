@@ -492,9 +492,24 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
             Prefs.recordPeaks(requireContext(), s.cpuPercent, s.memPercent, s.tempCpu, s.tempNvme)
             Prefs.recordNetPeak(requireContext(), s.netDown, s.netUp)
             root.findViewById<TextView>(R.id.tv_uptime).text = "运行 " + Fmt.uptime(s.uptimeSec) + " · " + Fmt.time(s.fetchTime)
+            // 状态徽标：任一指标超阈值 → 告警
+            val overUsage = s.cpuPercent >= usageThr || s.memPercent >= usageThr ||
+                s.disks.any { it.usePercent >= usageThr }
+            val overTemp = (s.tempCpu?.let { it >= cpuTempThr } == true) ||
+                (s.tempNvme?.let { it >= nvmeTempThr } == true)
+            val badge = root.findViewById<TextView>(R.id.tv_status_badge)
+            if (overUsage || overTemp) {
+                badge.text = "告警"
+                badge.visibility = View.VISIBLE
+            } else {
+                badge.visibility = View.GONE
+            }
         }.onFailure {
             AlertNotifier.markOffline(requireContext())
             root.findViewById<TextView>(R.id.tv_uptime).text = Fmt.offlineDuration(Prefs.offlineSince(requireContext()))
+            val badge = root.findViewById<TextView>(R.id.tv_status_badge)
+            badge.text = "离线"
+            badge.visibility = View.VISIBLE
         }
 
         // 系统信息卡片（CPU 型号+核心数 / 系统版本 / 运行时长 / 温度）
