@@ -28,6 +28,7 @@ import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
+import androidx.core.content.FileProvider
 import androidx.fragment.app.Fragment
 import java.io.File
 
@@ -55,6 +56,7 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
     private lateinit var tvUpdateStatus: TextView
     private lateinit var btnBackup: Button
     private lateinit var btnRestore: Button
+    private lateinit var btnShareBackup: Button
     private lateinit var tvBackupStatus: TextView
     private lateinit var tvAboutVersion: TextView
     private lateinit var tvAboutRepo: TextView
@@ -85,6 +87,7 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
         tvUpdateStatus = view.findViewById(R.id.tv_update_status)
         btnBackup = view.findViewById(R.id.btn_backup)
         btnRestore = view.findViewById(R.id.btn_restore)
+        btnShareBackup = view.findViewById(R.id.btn_share_backup)
         tvBackupStatus = view.findViewById(R.id.tv_backup_status)
         tvAboutVersion = view.findViewById(R.id.tv_about_version)
         tvAboutRepo = view.findViewById(R.id.tv_about_repo)
@@ -101,6 +104,7 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
         btnCheckUpdate.setOnClickListener { checkUpdate() }
         btnBackup.setOnClickListener { backupConfig() }
         btnRestore.setOnClickListener { restoreConfig() }
+        btnShareBackup.setOnClickListener { shareBackup() }
         tvAboutRepo.setOnClickListener {
             try {
                 startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/yuanxiaoyuan277/nas-widget")))
@@ -335,6 +339,29 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
             loadPrefs()
         } else {
             tvBackupStatus.text = "恢复失败：配置格式无效"
+        }
+    }
+
+    /** 导出配置为 JSON 文件并分享（走 FileProvider + ACTION_SEND） */
+    private fun shareBackup() {
+        try {
+            val json = BackupHelper.export(requireContext())
+            val file = File(requireContext().cacheDir, "nas-widget-config.json")
+            file.writeText(json)
+            val uri = FileProvider.getUriForFile(
+                requireContext(),
+                "${requireContext().packageName}.fileprovider",
+                file
+            )
+            val share = Intent(Intent.ACTION_SEND).apply {
+                type = "application/json"
+                putExtra(Intent.EXTRA_STREAM, uri)
+                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            }
+            startActivity(Intent.createChooser(share, "分享配置"))
+            tvBackupStatus.text = "已生成配置文件，选择应用保存/发送"
+        } catch (e: Exception) {
+            tvBackupStatus.text = "导出失败：${e.message}"
         }
     }
 

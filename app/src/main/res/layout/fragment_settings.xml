@@ -519,6 +519,16 @@
                 app:backgroundTint="@color/app_primary"
                 app:cornerRadius="14dp" />
 
+            <Button
+                android:id="@+id/btn_share_backup"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="导出配置为文件（分享）"
+                android:textColor="@android:color/white"
+                app:backgroundTint="@color/app_primary"
+                app:cornerRadius="14dp" />
+
             <TextView
                 android:id="@+id/tv_backup_status"
                 android:layout_width="match_parent"
