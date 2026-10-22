@@ -39,6 +39,7 @@ object Prefs {
     private const val KEY_NET_SIDE = "net_side"
     private const val KEY_SHOW_STORAGE = "show_storage"
     private const val KEY_SHOW_TEMP_ITEM = "show_temp_item"
+    private const val KEY_SHOW_TRAFFIC_ITEM = "show_traffic_item"
     private const val KEY_LAST_ALERT_KEY = "last_alert_key"
     private const val KEY_LAST_ALERT_TIME = "last_alert_time"
     private const val KEY_ALERT = "show_alert"
@@ -269,6 +270,10 @@ object Prefs {
     // === 独立温度显示项（CPU + NVMe 温度成一行） ===
     fun showTempItem(ctx: Context) = sp(ctx).getBoolean(KEY_SHOW_TEMP_ITEM, false)
     fun setShowTempItem(ctx: Context, v: Boolean) = sp(ctx).edit().putBoolean(KEY_SHOW_TEMP_ITEM, v).apply()
+
+    // === 独立「今日流量」显示项（今日累计下行/上行数据量） ===
+    fun showTrafficItem(ctx: Context) = sp(ctx).getBoolean(KEY_SHOW_TRAFFIC_ITEM, false)
+    fun setShowTrafficItem(ctx: Context, v: Boolean) = sp(ctx).edit().putBoolean(KEY_SHOW_TRAFFIC_ITEM, v).apply()
 
     fun lastAlertKey(ctx: Context) = sp(ctx).getString(KEY_LAST_ALERT_KEY, "") ?: ""
     fun lastAlertTime(ctx: Context) = sp(ctx).getLong(KEY_LAST_ALERT_TIME, 0L)

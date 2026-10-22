@@ -268,6 +268,17 @@ class NasWidgetProvider : AppWidgetProvider() {
                 addTo("net", R.id.item_net_root, item)
             }
 
+            // 今日流量（累计下行/上行数据量）
+            if (Prefs.showTrafficItem(context)) {
+                val item = RemoteViews(context.packageName, R.layout.item_traffic)
+                val down = Prefs.trafficDown(context)
+                val up = Prefs.trafficUp(context)
+                item.setTextViewText(R.id.tv_traffic, if (down <= 0L && up <= 0L) "↓-- ↑--" else "↓" + Fmt.bytes(down) + " ↑" + Fmt.bytes(up))
+                item.setTextViewTextSize(R.id.tv_traffic_label, TypedValue.COMPLEX_UNIT_PX, fs.toFloat())
+                item.setTextViewTextSize(R.id.tv_traffic, TypedValue.COMPLEX_UNIT_PX, fs.toFloat())
+                addTo("traffic", R.id.item_traffic_root, item)
+            }
+
             // 温度（CPU + NVMe 独立成一行）
             if (showTempItem) {
                 val item = RemoteViews(context.packageName, R.layout.item_temp)
