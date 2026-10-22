@@ -125,7 +125,7 @@ class NasWidgetProvider : AppWidgetProvider() {
                         val d = s.disks[0]
                         item.setTextViewText(R.id.tv_disk1_label, d.name)
                         item.setProgressBar(R.id.pb_disk1, 100, d.usePercent.toInt().coerceIn(0, 100), false)
-                        item.setTextViewText(R.id.tv_disk1, tempPct(s.tempNvme, d.usePercent, showTemp))
+                        item.setTextViewText(R.id.tv_disk1, diskText(s.tempNvme, d.usePercent, d.total - d.used, showTemp))
                     } else {
                         item.setTextViewText(R.id.tv_disk1, "--%")
                     }
@@ -143,7 +143,7 @@ class NasWidgetProvider : AppWidgetProvider() {
                         val d = s.disks[1]
                         item.setTextViewText(R.id.tv_disk2_label, d.name)
                         item.setProgressBar(R.id.pb_disk2, 100, d.usePercent.toInt().coerceIn(0, 100), false)
-                        item.setTextViewText(R.id.tv_disk2, String.format("%.0f%%", d.usePercent))
+                        item.setTextViewText(R.id.tv_disk2, diskText(null, d.usePercent, d.total - d.used, false))
                     } else {
                         item.setTextViewText(R.id.tv_disk2, "--%")
                     }
@@ -243,6 +243,15 @@ class NasWidgetProvider : AppWidgetProvider() {
             if (!showTemp) return pctText
             val t = temp?.let { String.format("%.0f°", it) } ?: "--°"
             return "$t $pctText"
+        }
+
+        /** 磁盘值：可用空间 + 使用率（NVMe 附加温度） */
+        private fun diskText(temp: Double?, pct: Double, free: Long, showTemp: Boolean): String {
+            val freeText = Fmt.bytes(free)
+            val pctText = String.format("%.0f%%", pct)
+            if (!showTemp) return "$freeText $pctText"
+            val t = temp?.let { String.format("%.0f°", it) } ?: "--°"
+            return "$freeText $t $pctText"
         }
     }
 }

@@ -372,7 +372,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
                     val d = s.disks[0]
                     item.findViewById<TextView>(R.id.tv_disk1_label).text = d.name
                     item.findViewById<ProgressBar>(R.id.pb_disk1).progress = d.usePercent.toInt().coerceIn(0, 100)
-                    item.findViewById<TextView>(R.id.tv_disk1).text = tempPct(s.tempNvme, d.usePercent, showTemp)
+                    item.findViewById<TextView>(R.id.tv_disk1).text = diskText(s.tempNvme, d.usePercent, d.total - d.used, showTemp)
                 } else {
                     item.findViewById<TextView>(R.id.tv_disk1).text = "--%"
                 }
@@ -389,7 +389,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
                     val d = s.disks[1]
                     item.findViewById<TextView>(R.id.tv_disk2_label).text = d.name
                     item.findViewById<ProgressBar>(R.id.pb_disk2).progress = d.usePercent.toInt().coerceIn(0, 100)
-                    item.findViewById<TextView>(R.id.tv_disk2).text = String.format("%.0f%%", d.usePercent)
+                    item.findViewById<TextView>(R.id.tv_disk2).text = diskText(null, d.usePercent, d.total - d.used, false)
                 } else {
                     item.findViewById<TextView>(R.id.tv_disk2).text = "--%"
                 }
@@ -459,6 +459,15 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         if (!showTemp) return pctText
         val t = temp?.let { String.format("%.0f°", it) } ?: "--°"
         return "$t $pctText"
+    }
+
+    /** 磁盘值：可用空间 + 使用率（NVMe 附加温度） */
+    private fun diskText(temp: Double?, pct: Double, free: Long, showTemp: Boolean): String {
+        val freeText = Fmt.bytes(free)
+        val pctText = String.format("%.0f%%", pct)
+        if (!showTemp) return "$freeText $pctText"
+        val t = temp?.let { String.format("%.0f°", it) } ?: "--°"
+        return "$freeText $t $pctText"
     }
 
     private fun makeDockerItem(name: String, running: Boolean, state: String, isError: Boolean = false): View {
