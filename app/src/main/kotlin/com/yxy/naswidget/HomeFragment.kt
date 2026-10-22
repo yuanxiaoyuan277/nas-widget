@@ -208,6 +208,19 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         // 预览顶部的刷新图标与桌面组件一致，点击同样立即刷新
         previewContainer.findViewById<View>(R.id.btn_refresh)?.setOnClickListener { refreshPreview() }
 
+        // 系统信息卡片：点击单项数值复制到剪贴板
+        bindCopyRow(
+            "CPU" to tvSysCpu,
+            "内存" to tvSysMem,
+            "系统" to tvSysOs,
+            "运行" to tvSysUptime,
+            "温度" to tvSysTemp,
+            "存储" to tvSysStorage,
+            "更新" to tvSysTime,
+            "网络" to tvSysNet,
+            "峰值" to tvSysPeak
+        )
+
         // 控件改动即自动保存
         setupAutoSaveListeners()
 
@@ -693,6 +706,19 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         val cm = requireContext().getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
         cm.setPrimaryClip(ClipData.newPlainText("nas-summary", text))
         Toast.makeText(requireContext(), "监控摘要已复制", Toast.LENGTH_SHORT).show()
+    }
+
+    /** 给系统信息卡片的各项数值绑定「点击复制」：点一下把「标签: 值」复制到剪贴板 */
+    private fun bindCopyRow(vararg pairs: Pair<String, TextView>) {
+        for ((label, tv) in pairs) {
+            tv.setOnClickListener {
+                val v = tv.text.toString()
+                if (v.isEmpty() || v == "--") return@setOnClickListener
+                val cm = requireContext().getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                cm.setPrimaryClip(ClipData.newPlainText(label, "$label: $v"))
+                Toast.makeText(requireContext(), "已复制 $label", Toast.LENGTH_SHORT).show()
+            }
+        }
     }
 
     /** 分享当前监控摘要（走系统分享，可发到微信/QQ 等） */
