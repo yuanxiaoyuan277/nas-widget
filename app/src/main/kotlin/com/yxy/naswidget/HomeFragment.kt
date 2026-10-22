@@ -421,6 +421,12 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
             } else {
                 docker.onSuccess { list ->
                     if (selected.isNotEmpty()) {
+                        val summary = TextView(requireContext()).apply {
+                            text = "${list.count { it.running }} 运行 / ${list.size} 总计"
+                            setTextColor(requireContext().getColor(R.color.text_secondary))
+                            setTextSize(TypedValue.COMPLEX_UNIT_PX, (fs - 2).toFloat())
+                        }
+                        group.addView(summary)
                         val filtered = list.filter { it.name in selected }.sortedBy { it.name }
                         if (filtered.isEmpty()) {
                             group.addView(makeDockerItem("无容器", false, ""))

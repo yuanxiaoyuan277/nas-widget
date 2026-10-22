@@ -171,11 +171,16 @@ class NasWidgetProvider : AppWidgetProvider() {
                 val density = context.resources.displayMetrics.density
                 group.setFloat(R.id.docker_group_root, "setTranslationX", Prefs.compX(context, "docker") * density * 1.6f)
                 group.setFloat(R.id.docker_group_root, "setTranslationY", Prefs.compY(context, "docker") * density * 1.6f)
+                group.setViewVisibility(R.id.tv_docker_summary, View.GONE)
                 if (docker == null) {
                     group.addView(R.id.docker_list, makeDockerItem(context, "未登录飞牛", false, "", fs))
                 } else {
                     docker.onSuccess { containers ->
                         if (selected.isNotEmpty()) {
+                            val running = containers.count { it.running }
+                            group.setTextViewText(R.id.tv_docker_summary, "$running 运行 / ${containers.size} 总计")
+                            group.setTextViewTextSize(R.id.tv_docker_summary, TypedValue.COMPLEX_UNIT_PX, (fs - 2).toFloat())
+                            group.setViewVisibility(R.id.tv_docker_summary, View.VISIBLE)
                             val filtered = containers.filter { it.name in selected }.sortedBy { it.name }
                             if (filtered.isEmpty()) {
                                 group.addView(R.id.docker_list, makeDockerItem(context, "无容器", false, "", fs))
