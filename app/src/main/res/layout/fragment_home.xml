@@ -1272,20 +1272,37 @@
                         android:paddingVertical="6dp" />
                 </LinearLayout>
 
-                <EditText
-                    android:id="@+id/et_docker_search"
+                <LinearLayout
                     android:layout_width="match_parent"
-                    android:layout_height="40dp"
+                    android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
-                    android:hint="搜索容器名…"
-                    android:inputType="text"
-                    android:maxLines="1"
-                    android:paddingStart="10dp"
-                    android:paddingEnd="10dp"
-                    android:textColor="@color/app_text_primary"
-                    android:textColorHint="@color/app_text_hint"
-                    android:textSize="13sp"
-                    android:background="@drawable/edit_bg" />
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical">
+
+                    <EditText
+                        android:id="@+id/et_docker_search"
+                        android:layout_width="0dp"
+                        android:layout_height="40dp"
+                        android:layout_weight="1"
+                        android:hint="搜索容器名…"
+                        android:inputType="text"
+                        android:maxLines="1"
+                        android:paddingStart="10dp"
+                        android:paddingEnd="10dp"
+                        android:textColor="@color/app_text_primary"
+                        android:textColorHint="@color/app_text_hint"
+                        android:textSize="13sp"
+                        android:background="@drawable/edit_bg" />
+
+                    <CheckBox
+                        android:id="@+id/cb_docker_running_only"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="10dp"
+                        android:text="只看运行中"
+                        android:textColor="@color/app_text_primary"
+                        android:textSize="13sp" />
+                </LinearLayout>
 
                 <LinearLayout
                     android:id="@+id/docker_list_container"
