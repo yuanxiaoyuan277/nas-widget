@@ -1445,12 +1445,17 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
             return
         }
         val verb = actionVerb(action)
-        MaterialAlertDialogBuilder(requireContext())
+        val selected = Prefs.dockerContainers(requireContext())
+        val selectedTargets = targets.filter { it.name in selected }
+        val builder = MaterialAlertDialogBuilder(requireContext())
             .setTitle("批量$verb")
             .setMessage("将对以下 ${targets.size} 个容器执行「$verb」：\n${targets.joinToString("、") { it.name }}")
-            .setPositiveButton("确定$verb") { _, _ -> runBatch(action, targets) }
+            .setPositiveButton("全部$verb") { _, _ -> runBatch(action, targets) }
             .setNegativeButton("取消", null)
-            .show()
+        if (selectedTargets.isNotEmpty()) {
+            builder.setNeutralButton("仅已勾选(${selectedTargets.size})") { _, _ -> runBatch(action, selectedTargets) }
+        }
+        builder.show()
     }
 
     /** 容器操作动词：启动/停止/重启 */
