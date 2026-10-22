@@ -21,15 +21,24 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
 
         bottomNav = findViewById(R.id.bottom_nav)
-        bottomNav.selectedItemId = R.id.nav_home
-        currentTab = R.id.nav_home
+
+        // 恢复缓存的 Fragment 实例（recreate 后 Fragment 管理器已恢复它们）
+        homeFragment = supportFragmentManager.findFragmentByTag("home") as? HomeFragment
+        settingsFragment = supportFragmentManager.findFragmentByTag("settings") as? SettingsFragment
 
         if (savedInstanceState == null) {
+            // 首次启动：add 主页
             homeFragment = HomeFragment()
             supportFragmentManager.beginTransaction()
                 .add(R.id.fragment_container, homeFragment!!, "home")
                 .commit()
+            currentTab = R.id.nav_home
+        } else {
+            // recreate（主题切换等）：恢复之前的 tab
+            currentTab = savedInstanceState.getInt("state_current_tab", R.id.nav_home)
         }
+
+        bottomNav.selectedItemId = currentTab
 
         bottomNav.setOnItemSelectedListener { item ->
             val target = item.itemId
@@ -40,6 +49,11 @@ class MainActivity : AppCompatActivity() {
             currentTab = target
             true
         }
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        outState.putInt("state_current_tab", currentTab)
     }
 
     /** show/hide 复用实例（不重 inflate），手动做 enter 滑入 + exit 滑出动画 */
@@ -53,7 +67,7 @@ class MainActivity : AppCompatActivity() {
         // 首次 add（同步，确保 view 准备好）
         if (!enterFrag.isAdded) {
             supportFragmentManager.beginTransaction()
-                .add(R.id.fragment_container, enterFrag)
+                .add(R.id.fragment_container, enterFrag, if (tabId == R.id.nav_home) "home" else "settings")
                 .commitNow()
         }
 
@@ -82,7 +96,6 @@ class MainActivity : AppCompatActivity() {
             enterView.translationX = from
             enterView.animate()
                 .translationX(0f)
-                .setDuration(650)
                 .setInterpolator(android.view.animation.DecelerateInterpolator())
                 .start()
         }
