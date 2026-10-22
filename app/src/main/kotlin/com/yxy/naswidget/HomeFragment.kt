@@ -107,12 +107,15 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
     private lateinit var tvSysTraffic: TextView
     private lateinit var btnClearPeak: TextView
     private lateinit var tvSysRefresh: TextView
+    private lateinit var sparklineTrend: SparklineView
 
     private val handler = Handler(Looper.getMainLooper())
     private var dockerContainers: List<DockerContainer> = emptyList()
     private val dockerCheckboxes = mutableListOf<SwitchCompat>()
     private var previewBusy = false
     private var lastStats: NasStats? = null
+    private val cpuHistory = mutableListOf<Float>()
+    private val memHistory = mutableListOf<Float>()
     private var suppressSave = false
     private var autoUpdateChecked = false
     private val refreshSecOptions = listOf(10, 15, 30, 60, 300)
@@ -204,6 +207,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         tvSysTraffic = view.findViewById(R.id.tv_sys_traffic)
         btnClearPeak = view.findViewById(R.id.btn_clear_peak)
         tvSysRefresh = view.findViewById(R.id.tv_sys_refresh)
+        sparklineTrend = view.findViewById(R.id.sparkline_trend)
 
         widgetId = requireActivity().intent.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, AppWidgetManager.INVALID_APPWIDGET_ID)
         if (widgetId != AppWidgetManager.INVALID_APPWIDGET_ID) {
@@ -495,6 +499,11 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
             Prefs.recordPeaks(requireContext(), s.cpuPercent, s.memPercent, s.tempCpu, s.tempNvme)
             Prefs.recordNetPeak(requireContext(), s.netDown, s.netUp)
             Prefs.recordNetTraffic(requireContext(), s.netDown, s.netUp)
+            cpuHistory.add(s.cpuPercent.toFloat())
+            if (cpuHistory.size > 60) cpuHistory.removeAt(0)
+            memHistory.add(s.memPercent.toFloat())
+            if (memHistory.size > 60) memHistory.removeAt(0)
+            sparklineTrend.setData(cpuHistory.toList(), memHistory.toList())
             root.findViewById<TextView>(R.id.tv_uptime).text = "运行 " + Fmt.uptime(s.uptimeSec) + " · " + Fmt.time(s.fetchTime)
             // 状态徽标：任一指标超阈值 → 告警
             val overUsage = s.cpuPercent >= usageThr || s.memPercent >= usageThr ||

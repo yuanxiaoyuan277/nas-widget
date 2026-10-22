@@ -415,6 +415,21 @@
                         android:textColor="@color/app_primary"
                         android:textSize="13sp" />
                 </LinearLayout>
+
+                <TextView
+                    android:id="@+id/tv_trend_label"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="6dp"
+                    android:text="CPU / 内存趋势"
+                    android:textColor="@color/app_text_hint"
+                    android:textSize="12sp" />
+
+                <com.yxy.naswidget.SparklineView
+                    android:id="@+id/sparkline_trend"
+                    android:layout_width="match_parent"
+                    android:layout_height="44dp"
+                    android:layout_marginTop="4dp" />
             </LinearLayout>
 
             <LinearLayout
