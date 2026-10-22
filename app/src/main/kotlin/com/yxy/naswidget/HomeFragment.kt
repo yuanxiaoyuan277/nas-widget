@@ -133,6 +133,8 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         // 小组件预览
         layoutInflater.inflate(R.layout.nas_widget_preview, previewContainer, true)
         btnRefreshPreview.setOnClickListener { refreshPreview() }
+        // 预览顶部的刷新图标与桌面组件一致，点击同样立即刷新
+        previewContainer.findViewById<View>(R.id.btn_refresh)?.setOnClickListener { refreshPreview() }
 
         // 控件改动即自动保存
         setupAutoSaveListeners()

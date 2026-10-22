@@ -60,6 +60,13 @@ class NasWidgetProvider : AppWidgetProvider() {
                 PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
             )
             views.setOnClickPendingIntent(R.id.widget_root, clickPi)
+            // 顶部刷新按钮：广播到 UpdateReceiver 立即刷新（requestCode 100 避免与整卡点击冲突）
+            val refreshPi = PendingIntent.getBroadcast(
+                context, 100,
+                Intent(context, UpdateReceiver::class.java),
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            )
+            views.setOnClickPendingIntent(R.id.btn_refresh, refreshPi)
             // 关键：reapply 时旧 child 会被累积，必须每次清空两列再 addView，否则重复渲染
             views.removeAllViews(R.id.content_area)
             val showCpu = Prefs.showCpu(context)
