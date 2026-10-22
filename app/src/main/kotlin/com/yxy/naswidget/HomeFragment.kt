@@ -104,6 +104,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
     private lateinit var tvSysStorage: TextView
     private lateinit var tvSysPeak: TextView
     private lateinit var btnClearPeak: TextView
+    private lateinit var tvSysRefresh: TextView
 
     private val handler = Handler(Looper.getMainLooper())
     private var dockerContainers: List<DockerContainer> = emptyList()
@@ -112,6 +113,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
     private var lastStats: NasStats? = null
     private var suppressSave = false
     private var autoUpdateChecked = false
+    private val refreshSecOptions = listOf(10, 15, 30, 60, 300)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -196,6 +198,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         tvSysStorage = view.findViewById(R.id.tv_sys_storage)
         tvSysPeak = view.findViewById(R.id.tv_sys_peak)
         btnClearPeak = view.findViewById(R.id.btn_clear_peak)
+        tvSysRefresh = view.findViewById(R.id.tv_sys_refresh)
 
         widgetId = requireActivity().intent.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, AppWidgetManager.INVALID_APPWIDGET_ID)
         if (widgetId != AppWidgetManager.INVALID_APPWIDGET_ID) {
@@ -226,6 +229,8 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         tvSysStorage.setOnClickListener { showDiskDetail() }
         // 「清零」按钮：一键清零今日峰值记录
         btnClearPeak.setOnClickListener { clearPeaks() }
+        // 「刷新间隔」行点击循环切换
+        tvSysRefresh.setOnClickListener { cycleRefreshInterval() }
 
         // 控件改动即自动保存
         setupAutoSaveListeners()
@@ -398,6 +403,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         etStorageY.setText(Prefs.compY(requireContext(), "storage").toString())
         etTempX.setText(Prefs.compX(requireContext(), "temp").toString())
         etTempY.setText(Prefs.compY(requireContext(), "temp").toString())
+        tvSysRefresh.text = refreshSecLabel(Prefs.refreshSec(requireContext()))
         suppressSave = false
         if (Prefs.isLoggedIn(requireContext())) {
             loadDockerContainers()
@@ -801,6 +807,27 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         Prefs.clearPeaks(requireContext())
         tvSysPeak.text = peakText()
         Toast.makeText(requireContext(), "今日峰值已清零", Toast.LENGTH_SHORT).show()
+    }
+
+    /** 刷新间隔可读文本（10/15/30/60 秒、5 分钟） */
+    private fun refreshSecLabel(sec: Int): String = when (sec) {
+        10 -> "10 秒"
+        15 -> "15 秒"
+        30 -> "30 秒"
+        60 -> "60 秒"
+        300 -> "5 分钟"
+        else -> "$sec 秒"
+    }
+
+    /** 点击「刷新间隔」行：循环切换刷新间隔，即时生效并重排刷新调度 */
+    private fun cycleRefreshInterval() {
+        val cur = Prefs.refreshSec(requireContext())
+        val idx = refreshSecOptions.indexOf(cur)
+        val next = refreshSecOptions[(idx + 1 + refreshSecOptions.size) % refreshSecOptions.size]
+        Prefs.setRefresh(requireContext(), next)
+        tvSysRefresh.text = refreshSecLabel(next)
+        AlarmScheduler.schedule(requireContext())
+        Toast.makeText(requireContext(), "刷新间隔已设为 ${refreshSecLabel(next)}", Toast.LENGTH_SHORT).show()
     }
 
     /** 分享当前监控摘要（走系统分享，可发到微信/QQ 等） */
