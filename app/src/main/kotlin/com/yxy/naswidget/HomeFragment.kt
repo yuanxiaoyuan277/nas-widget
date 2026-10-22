@@ -266,7 +266,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         })
         btnDockerFilter.text = dockerFilterLabel(Prefs.dockerFilter(requireContext()))
         btnDockerFilter.setOnClickListener {
-            val modes = listOf("all", "running", "stopped")
+            val modes = listOf("all", "running", "stopped", "selected")
             val cur = Prefs.dockerFilter(requireContext())
             val idx = modes.indexOf(cur)
             val next = modes[(idx + 1 + modes.size) % modes.size]
@@ -986,6 +986,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
     private fun dockerFilterLabel(mode: String): String = when (mode) {
         "running" -> "运行中"
         "stopped" -> "已停止"
+        "selected" -> "已勾选"
         else -> "全部"
     }
 
@@ -1006,7 +1007,12 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
             val cb = item.findViewById<SwitchCompat>(R.id.cb_select)
             cb.isChecked = c.name in selected
             cb.tag = c.name
-            cb.setOnCheckedChangeListener { _, _ -> if (!suppressSave) persist() }
+            cb.setOnCheckedChangeListener { _, _ ->
+                if (!suppressSave) {
+                    persist()
+                    applyDockerFilter()
+                }
+            }
             dockerCheckboxes.add(cb)
 
             // 容器操作按钮（启动/重启/停止）：id 为空则无法操作，隐藏
@@ -1134,6 +1140,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         val matchNames = when (filter) {
             "running" -> dockerContainers.filter { it.running }.map { it.name }.toSet()
             "stopped" -> dockerContainers.filter { !it.running }.map { it.name }.toSet()
+            "selected" -> dockerCheckboxes.filter { it.isChecked }.mapNotNull { it.tag as? String }.toSet()
             else -> null
         }
         for (cb in dockerCheckboxes) {
