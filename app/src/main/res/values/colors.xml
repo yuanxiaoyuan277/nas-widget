@@ -34,6 +34,9 @@
     <color name="app_primary_variant">#FF4A86E8</color>
     <color name="app_secondary">#FF58D68D</color>
 
+    <!-- 危险操作（停止容器等） -->
+    <color name="app_danger">#FFF44336</color>
+
     <!-- 底部导航选中指示器（半透明主色，作为选中态底衬） -->
     <color name="app_primary_translucent">#335E9EFF</color>
 </resources>

@@ -52,6 +52,51 @@
             android:ellipsize="end" />
     </LinearLayout>
 
+    <!-- 启动（停止态容器显示） -->
+    <TextView
+        android:id="@+id/btn_action_start"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:paddingStart="8dp"
+        android:paddingEnd="8dp"
+        android:paddingTop="4dp"
+        android:paddingBottom="4dp"
+        android:background="?attr/selectableItemBackground"
+        android:text="启动"
+        android:textColor="@color/app_secondary"
+        android:textSize="12sp"
+        android:visibility="gone" />
+
+    <!-- 重启（运行中容器显示） -->
+    <TextView
+        android:id="@+id/btn_action_restart"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:paddingStart="8dp"
+        android:paddingEnd="8dp"
+        android:paddingTop="4dp"
+        android:paddingBottom="4dp"
+        android:background="?attr/selectableItemBackground"
+        android:text="重启"
+        android:textColor="@color/app_primary"
+        android:textSize="12sp"
+        android:visibility="gone" />
+
+    <!-- 停止（运行中容器显示） -->
+    <TextView
+        android:id="@+id/btn_action_stop"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:paddingStart="8dp"
+        android:paddingEnd="8dp"
+        android:paddingTop="4dp"
+        android:paddingBottom="4dp"
+        android:background="?attr/selectableItemBackground"
+        android:text="停止"
+        android:textColor="@color/app_danger"
+        android:textSize="12sp"
+        android:visibility="gone" />
+
     <androidx.appcompat.widget.SwitchCompat
         android:id="@+id/cb_select"
         android:layout_width="wrap_content"

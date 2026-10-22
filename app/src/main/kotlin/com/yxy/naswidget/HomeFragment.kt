@@ -551,9 +551,55 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
             cb.tag = c.name
             cb.setOnCheckedChangeListener { _, _ -> if (!suppressSave) persist() }
             dockerCheckboxes.add(cb)
+
+            // 容器操作按钮（启动/重启/停止）：id 为空则无法操作，隐藏
+            val btnStart = item.findViewById<TextView>(R.id.btn_action_start)
+            val btnRestart = item.findViewById<TextView>(R.id.btn_action_restart)
+            val btnStop = item.findViewById<TextView>(R.id.btn_action_stop)
+            val operable = c.id.isNotEmpty()
+            btnStart.visibility = if (operable && !c.running) View.VISIBLE else View.GONE
+            btnRestart.visibility = if (operable && c.running) View.VISIBLE else View.GONE
+            btnStop.visibility = if (operable && c.running) View.VISIBLE else View.GONE
+            val actionBtns = listOf(btnStart, btnRestart, btnStop)
+            btnStart.setOnClickListener { runContainerAction(c.id, c.name, ContainerAction.START, actionBtns) }
+            btnRestart.setOnClickListener { runContainerAction(c.id, c.name, ContainerAction.RESTART, actionBtns) }
+            btnStop.setOnClickListener { runContainerAction(c.id, c.name, ContainerAction.STOP, actionBtns) }
+
             dockerListContainer.addView(item)
         }
         applyDockerFilter()
+    }
+
+    /** 容器启动/停止/重启：调飞牛 API，成功后刷新列表与预览 */
+    private fun runContainerAction(id: String, name: String, action: ContainerAction, buttons: List<View>) {
+        if (!Prefs.isLoggedIn(requireContext())) {
+            Toast.makeText(requireContext(), "请先登录飞牛账号", Toast.LENGTH_SHORT).show()
+            return
+        }
+        buttons.forEach { it.isEnabled = false }
+        Thread {
+            val token = OAuthClient.getValidAccessToken(requireContext()).getOrNull()
+            val result = if (token != null) {
+                NasDataFetcher.containerAction(Prefs.nasBase(requireContext()), token, id, action)
+            } else {
+                Result.failure(Exception("未登录"))
+            }
+            requireActivity().runOnUiThread {
+                buttons.forEach { it.isEnabled = true }
+                val label = when (action) {
+                    ContainerAction.START -> "启动"
+                    ContainerAction.STOP -> "停止"
+                    ContainerAction.RESTART -> "重启"
+                }
+                result.onSuccess {
+                    Toast.makeText(requireContext(), "已$label $name", Toast.LENGTH_SHORT).show()
+                    loadDockerContainers()
+                    schedulePreviewRefresh()
+                }.onFailure { e ->
+                    Toast.makeText(requireContext(), "${label}失败：${e.message}", Toast.LENGTH_SHORT).show()
+                }
+            }
+        }.start()
     }
 
     /** 按搜索框关键字过滤容器列表（只隐藏 item，不重建，避免丢失勾选状态） */

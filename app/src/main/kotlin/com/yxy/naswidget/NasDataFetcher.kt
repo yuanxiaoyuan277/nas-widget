@@ -5,6 +5,9 @@ import java.net.URL
 import org.json.JSONArray
 import org.json.JSONObject
 
+/** 容器生命周期操作类型 */
+enum class ContainerAction { START, STOP, RESTART }
+
 /** 从 monitor_proxy / 飞牛 API 拉取 NAS 数据 */
 object NasDataFetcher {
 
@@ -134,6 +137,29 @@ object NasDataFetcher {
             rootObj.optJSONObject("rsp")?.optLong("usedMem")
         } catch (e: Exception) {
             null
+        }
+    }
+
+    /** 容器生命周期操作：启动 / 停止 / 重启（appcgi.dockermgr.containerStart/Stop/Restart，containerId 标识） */
+    fun containerAction(nasBase: String, accessToken: String, containerId: String, action: ContainerAction): Result<Unit> {
+        return try {
+            val req = when (action) {
+                ContainerAction.START -> "appcgi.dockermgr.containerStart"
+                ContainerAction.STOP -> "appcgi.dockermgr.containerStop"
+                ContainerAction.RESTART -> "appcgi.dockermgr.containerRestart"
+            }
+            val (code, resp) = postAppcgi(nasBase, accessToken, req) { it.put("containerId", containerId) }
+            if (code != 200) return Result.failure(Exception("HTTP $code: $resp"))
+            val rootObj = parseRootObj(resp)
+            val result = rootObj?.optString("result", "") ?: ""
+            val errmsg = rootObj?.optString("errmsg", "")
+            if (!result.equals("succ", true)) {
+                return Result.failure(Exception(errmsg.ifEmpty { "操作失败" }))
+            }
+            dockerCache = null  // 清缓存，下次列表拉取最新状态
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
         }
     }
 
