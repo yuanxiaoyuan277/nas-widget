@@ -17,5 +17,8 @@
     <color name="app_primary">#FF6BAAFF</color>
     <color name="app_primary_variant">#FF5E9EFF</color>
     <color name="app_secondary">#FF58D68D</color>
+
+    <!-- 底部导航选中指示器（半透明主色，作为选中态底衬） -->
+    <color name="app_primary_translucent">#336BAAFF</color>
     <color name="progress_track">#33FFFFFF</color>
 </resources>

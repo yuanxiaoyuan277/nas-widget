@@ -11,6 +11,7 @@
         <item name="shapeAppearanceSmallComponent">@style/ShapeAppearance.NasWidget.Small</item>
         <item name="shapeAppearanceMediumComponent">@style/ShapeAppearance.NasWidget.Medium</item>
         <item name="shapeAppearanceLargeComponent">@style/ShapeAppearance.NasWidget.Large</item>
+        <item name="bottomNavigationStyle">@style/NasWidget.BottomNavigation</item>
     </style>
 
     <style name="ShapeAppearance.NasWidget.Small" parent="ShapeAppearance.MaterialComponents.SmallComponent">

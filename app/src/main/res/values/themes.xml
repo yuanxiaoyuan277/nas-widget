@@ -11,6 +11,22 @@
         <item name="shapeAppearanceSmallComponent">@style/ShapeAppearance.NasWidget.Small</item>
         <item name="shapeAppearanceMediumComponent">@style/ShapeAppearance.NasWidget.Medium</item>
         <item name="shapeAppearanceLargeComponent">@style/ShapeAppearance.NasWidget.Large</item>
+        <item name="bottomNavigationStyle">@style/NasWidget.BottomNavigation</item>
+    </style>
+
+    <!-- 底部导航：选中项加半透明主色底衬（选中态动画） -->
+    <style name="NasWidget.BottomNavigation" parent="Widget.MaterialComponents.BottomNavigationView">
+        <item name="itemActiveIndicatorStyle">@style/NasWidget.BottomNavigation.ActiveIndicator</item>
+    </style>
+
+    <style name="NasWidget.BottomNavigation.ActiveIndicator" parent="Widget.MaterialComponents.BottomNavigationView.ActiveIndicator">
+        <item name="android:color">@color/app_primary_translucent</item>
+        <item name="shapeAppearance">@style/ShapeAppearance.NasWidget.ActiveIndicator</item>
+    </style>
+
+    <style name="ShapeAppearance.NasWidget.ActiveIndicator" parent="ShapeAppearance.MaterialComponents.CornerFamily">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">16dp</item>
     </style>
 
     <style name="ShapeAppearance.NasWidget.Small" parent="ShapeAppearance.MaterialComponents.SmallComponent">
