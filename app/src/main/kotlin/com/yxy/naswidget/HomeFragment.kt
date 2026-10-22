@@ -116,6 +116,9 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
     private lateinit var tvSysRefresh: TextView
     private lateinit var sparklineTrend: SparklineView
     private lateinit var tvTrendLabel: TextView
+    private lateinit var cardConfig: LinearLayout
+    private lateinit var tvConfigTitle: TextView
+    private var configCollapsed = false
 
     private val handler = Handler(Looper.getMainLooper())
     private var dockerContainers: List<DockerContainer> = emptyList()
@@ -233,6 +236,16 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         sparklineTrend.setOnClickListener {
             sparklineMode = (sparklineMode + 1) % 3
             updateSparkline()
+        }
+        // 「组件配置」卡片折叠/展开：点击标题切换滑块区显隐，减少长页面滚动
+        cardConfig = view.findViewById(R.id.card_config)
+        tvConfigTitle = view.findViewById(R.id.tv_config_title)
+        configCollapsed = Prefs.configCollapsed(requireContext())
+        applyConfigCollapsed()
+        tvConfigTitle.setOnClickListener {
+            configCollapsed = !configCollapsed
+            Prefs.setConfigCollapsed(requireContext(), configCollapsed)
+            applyConfigCollapsed()
         }
 
         widgetId = requireActivity().intent.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, AppWidgetManager.INVALID_APPWIDGET_ID)
@@ -1516,6 +1529,17 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         // Docker 配置区（勾选列表）始终显示，让用户能配置勾选哪些容器
         // showDocker 只控制桌面组件/预览是否显示 Docker 项目，不应隐藏配置列表
         dockerListContainer.visibility = View.VISIBLE
+    }
+
+    /** 折叠/展开「组件配置」区：隐藏/显示标题之外的所有滑块块，并更新标题文案 */
+    private fun applyConfigCollapsed() {
+        for (i in 0 until cardConfig.childCount) {
+            val child = cardConfig.getChildAt(i)
+            if (child !== tvConfigTitle) {
+                child.visibility = if (configCollapsed) View.GONE else View.VISIBLE
+            }
+        }
+        tvConfigTitle.text = if (configCollapsed) "组件配置（点击展开）" else "组件配置（点击折叠）"
     }
 
     private fun persist() {

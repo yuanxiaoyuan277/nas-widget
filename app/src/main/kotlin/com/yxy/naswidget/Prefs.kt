@@ -188,6 +188,11 @@ object Prefs {
     fun ignoredVersion(ctx: Context): String = sp(ctx).getString(KEY_IGNORED_VERSION, "") ?: ""
     fun setIgnoredVersion(ctx: Context, v: String) = sp(ctx).edit().putString(KEY_IGNORED_VERSION, v).apply()
 
+    // === 主页「组件配置」区折叠状态 ===
+    private const val KEY_CONFIG_COLLAPSED = "config_collapsed"
+    fun configCollapsed(ctx: Context): Boolean = sp(ctx).getBoolean(KEY_CONFIG_COLLAPSED, false)
+    fun setConfigCollapsed(ctx: Context, v: Boolean) = sp(ctx).edit().putBoolean(KEY_CONFIG_COLLAPSED, v).apply()
+
     // === wb2api 积分 ===
     fun showWb2api(ctx: Context) = sp(ctx).getBoolean(KEY_SHOW_WB2API, false)
     fun setShowWb2api(ctx: Context, v: Boolean) = sp(ctx).edit().putBoolean(KEY_SHOW_WB2API, v).apply()
