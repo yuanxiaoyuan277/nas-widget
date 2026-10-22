@@ -5,6 +5,7 @@ import android.appwidget.AppWidgetManager
 import android.appwidget.AppWidgetProvider
 import android.content.Context
 import android.content.Intent
+import android.content.res.ColorStateList
 import android.util.TypedValue
 import android.view.View
 import android.widget.RemoteViews
@@ -104,6 +105,7 @@ class NasWidgetProvider : AppWidgetProvider() {
                 val item = RemoteViews(context.packageName, R.layout.item_cpu)
                 stats?.let { s ->
                     item.setProgressBar(R.id.pb_cpu, 100, s.cpuPercent.toInt().coerceIn(0, 100), false)
+                    item.setColorStateList(R.id.pb_cpu, "setProgressTintList", ColorStateList.valueOf(Fmt.levelColor(s.cpuPercent)))
                     item.setTextViewText(R.id.tv_cpu, tempPct(s.tempCpu, s.cpuPercent, showTemp))
                 } ?: item.setTextViewText(R.id.tv_cpu, "--%")
                 item.setTextViewTextSize(R.id.tv_cpu_label, TypedValue.COMPLEX_UNIT_PX, fs.toFloat())
@@ -116,6 +118,7 @@ class NasWidgetProvider : AppWidgetProvider() {
                 val item = RemoteViews(context.packageName, R.layout.item_mem)
                 stats?.let { s ->
                     item.setProgressBar(R.id.pb_mem, 100, s.memPercent.toInt().coerceIn(0, 100), false)
+                    item.setColorStateList(R.id.pb_mem, "setProgressTintList", ColorStateList.valueOf(Fmt.levelColor(s.memPercent)))
                     val memFree = (s.memTotal - s.memUsed).coerceAtLeast(0)
                     item.setTextViewText(R.id.tv_mem, String.format("%s/%s %.0f%%", Fmt.bytes(memFree), Fmt.bytes(s.memTotal), s.memPercent))
                 } ?: item.setTextViewText(R.id.tv_mem, "--%")
@@ -132,6 +135,7 @@ class NasWidgetProvider : AppWidgetProvider() {
                         val d = s.disks[0]
                         item.setTextViewText(R.id.tv_disk1_label, d.name)
                         item.setProgressBar(R.id.pb_disk1, 100, d.usePercent.toInt().coerceIn(0, 100), false)
+                        item.setColorStateList(R.id.pb_disk1, "setProgressTintList", ColorStateList.valueOf(Fmt.levelColor(d.usePercent)))
                         item.setTextViewText(R.id.tv_disk1, diskText(s.tempNvme, d.usePercent, d.total - d.used, showTemp))
                     } else {
                         item.setTextViewText(R.id.tv_disk1, "--%")
@@ -150,6 +154,7 @@ class NasWidgetProvider : AppWidgetProvider() {
                         val d = s.disks[1]
                         item.setTextViewText(R.id.tv_disk2_label, d.name)
                         item.setProgressBar(R.id.pb_disk2, 100, d.usePercent.toInt().coerceIn(0, 100), false)
+                        item.setColorStateList(R.id.pb_disk2, "setProgressTintList", ColorStateList.valueOf(Fmt.levelColor(d.usePercent)))
                         item.setTextViewText(R.id.tv_disk2, diskText(null, d.usePercent, d.total - d.used, false))
                     } else {
                         item.setTextViewText(R.id.tv_disk2, "--%")

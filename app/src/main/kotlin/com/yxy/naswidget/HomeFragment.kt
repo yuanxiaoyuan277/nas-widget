@@ -4,6 +4,7 @@ import android.app.Activity
 import android.appwidget.AppWidgetManager
 import android.content.ComponentName
 import android.content.Intent
+import android.content.res.ColorStateList
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -378,6 +379,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
             val item = layoutInflater.inflate(R.layout.item_cpu_preview, contentArea, false)
             stats?.let { s ->
                 item.findViewById<ProgressBar>(R.id.pb_cpu).progress = s.cpuPercent.toInt().coerceIn(0, 100)
+                item.findViewById<ProgressBar>(R.id.pb_cpu).progressTintList = ColorStateList.valueOf(Fmt.levelColor(s.cpuPercent))
                 item.findViewById<TextView>(R.id.tv_cpu).text = tempPct(s.tempCpu, s.cpuPercent, showTemp)
             } ?: run { item.findViewById<TextView>(R.id.tv_cpu).text = "--%" }
             item.findViewById<TextView>(R.id.tv_cpu_label).setTextSize(TypedValue.COMPLEX_UNIT_PX, fs.toFloat())
@@ -389,6 +391,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
             val item = layoutInflater.inflate(R.layout.item_mem_preview, contentArea, false)
             stats?.let { s ->
                 item.findViewById<ProgressBar>(R.id.pb_mem).progress = s.memPercent.toInt().coerceIn(0, 100)
+                item.findViewById<ProgressBar>(R.id.pb_mem).progressTintList = ColorStateList.valueOf(Fmt.levelColor(s.memPercent))
                 val memFree = (s.memTotal - s.memUsed).coerceAtLeast(0)
                 item.findViewById<TextView>(R.id.tv_mem).text = String.format("%s/%s %.0f%%", Fmt.bytes(memFree), Fmt.bytes(s.memTotal), s.memPercent)
             } ?: run { item.findViewById<TextView>(R.id.tv_mem).text = "--%" }
@@ -404,6 +407,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
                     val d = s.disks[0]
                     item.findViewById<TextView>(R.id.tv_disk1_label).text = d.name
                     item.findViewById<ProgressBar>(R.id.pb_disk1).progress = d.usePercent.toInt().coerceIn(0, 100)
+                    item.findViewById<ProgressBar>(R.id.pb_disk1).progressTintList = ColorStateList.valueOf(Fmt.levelColor(d.usePercent))
                     item.findViewById<TextView>(R.id.tv_disk1).text = diskText(s.tempNvme, d.usePercent, d.total - d.used, showTemp)
                 } else {
                     item.findViewById<TextView>(R.id.tv_disk1).text = "--%"
@@ -421,6 +425,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
                     val d = s.disks[1]
                     item.findViewById<TextView>(R.id.tv_disk2_label).text = d.name
                     item.findViewById<ProgressBar>(R.id.pb_disk2).progress = d.usePercent.toInt().coerceIn(0, 100)
+                    item.findViewById<ProgressBar>(R.id.pb_disk2).progressTintList = ColorStateList.valueOf(Fmt.levelColor(d.usePercent))
                     item.findViewById<TextView>(R.id.tv_disk2).text = diskText(null, d.usePercent, d.total - d.used, false)
                 } else {
                     item.findViewById<TextView>(R.id.tv_disk2).text = "--%"

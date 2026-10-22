@@ -190,6 +190,13 @@ object Fmt {
         }
     }
 
+    /** 使用率分级颜色：<60% 绿、60~85% 黄、≥85% 红（监控项进度条配色） */
+    fun levelColor(pct: Double): Int = when {
+        pct >= 85 -> 0xFFF44336.toInt()
+        pct >= 60 -> 0xFFFFB74D.toInt()
+        else -> 0xFF58D68D.toInt()
+    }
+
     /** 时间戳毫秒 → 本地 HH:mm:ss（用于「最后更新时间」） */
     fun time(millis: Long): String {
         val cal = java.util.Calendar.getInstance()
