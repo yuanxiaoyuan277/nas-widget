@@ -50,9 +50,21 @@
                         android:textSize="13sp" />
 
                     <Button
+                        android:id="@+id/btn_copy_summary"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="复制摘要"
+                        android:textSize="13sp"
+                        android:minWidth="0dp"
+                        android:minHeight="0dp"
+                        android:paddingHorizontal="12dp"
+                        android:paddingVertical="6dp" />
+
+                    <Button
                         android:id="@+id/btn_refresh_preview"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:layout_marginStart="6dp"
                         android:text="手动刷新"
                         android:textSize="13sp"
                         android:minWidth="0dp"

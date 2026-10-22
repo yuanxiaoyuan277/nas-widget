@@ -2,7 +2,10 @@ package com.yxy.naswidget
 
 import android.app.Activity
 import android.appwidget.AppWidgetManager
+import android.content.ClipData
+import android.content.ClipboardManager
 import android.content.ComponentName
+import android.content.Context
 import android.content.Intent
 import android.content.res.ColorStateList
 import android.os.Bundle
@@ -40,6 +43,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
     private lateinit var cbStorage: SwitchCompat
     private lateinit var previewContainer: FrameLayout
     private lateinit var btnRefreshPreview: Button
+    private lateinit var btnCopySummary: Button
     private lateinit var cbDocker: SwitchCompat
     private lateinit var dockerListContainer: LinearLayout
     private lateinit var btnRefreshDocker: Button
@@ -87,6 +91,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
     private var dockerContainers: List<DockerContainer> = emptyList()
     private val dockerCheckboxes = mutableListOf<SwitchCompat>()
     private var previewBusy = false
+    private var lastStats: NasStats? = null
     private var suppressSave = false
     private var autoUpdateChecked = false
 
@@ -108,6 +113,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         cbStorage = view.findViewById(R.id.cb_storage)
         previewContainer = view.findViewById(R.id.preview_container)
         btnRefreshPreview = view.findViewById(R.id.btn_refresh_preview)
+        btnCopySummary = view.findViewById(R.id.btn_copy_summary)
         cbDocker = view.findViewById(R.id.cb_docker)
         dockerListContainer = view.findViewById(R.id.docker_list_container)
         btnRefreshDocker = view.findViewById(R.id.btn_refresh_docker)
@@ -159,6 +165,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         // 小组件预览
         layoutInflater.inflate(R.layout.nas_widget_preview, previewContainer, true)
         btnRefreshPreview.setOnClickListener { refreshPreview() }
+        btnCopySummary.setOnClickListener { copySummary() }
         // 预览顶部的刷新图标与桌面组件一致，点击同样立即刷新
         previewContainer.findViewById<View>(R.id.btn_refresh)?.setOnClickListener { refreshPreview() }
 
@@ -382,6 +389,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         var stats: NasStats? = null
         result.onSuccess { s ->
             stats = s
+            lastStats = s
             root.findViewById<TextView>(R.id.tv_uptime).text = "运行 " + Fmt.uptime(s.uptimeSec) + " · " + Fmt.time(s.fetchTime)
         }.onFailure {
             root.findViewById<TextView>(R.id.tv_uptime).text = "连接失败"
@@ -550,6 +558,33 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
             }
         }
         root.findViewById<TextView>(R.id.tv_wb2api).setTextSize(TypedValue.COMPLEX_UNIT_PX, (fs + 3).toFloat())
+    }
+
+    /** 复制当前监控摘要到剪贴板（CPU/内存/存储/温度/网络/运行时长） */
+    private fun copySummary() {
+        val s = lastStats
+        if (s == null) {
+            Toast.makeText(requireContext(), "暂无数据，请稍候刷新", Toast.LENGTH_SHORT).show()
+            return
+        }
+        val lines = mutableListOf<String>()
+        lines.add("NAS 监控")
+        lines.add("CPU ${s.cpuPercent.toInt()}% · ${s.cores}核${s.cpuModel.takeIf { it.isNotEmpty() }?.let { " · $it" } ?: ""}")
+        lines.add("内存 ${Fmt.bytes((s.memTotal - s.memUsed).coerceAtLeast(0))}/${Fmt.bytes(s.memTotal)} ${s.memPercent.toInt()}%")
+        if (s.disks.isNotEmpty()) lines.add("存储 ${s.storageText}")
+        val tempLine = when {
+            s.tempCpu != null && s.tempNvme != null -> "温度 CPU ${s.tempCpu.toInt()}° · NVMe ${s.tempNvme.toInt()}°"
+            s.tempCpu != null -> "温度 CPU ${s.tempCpu.toInt()}°"
+            s.tempNvme != null -> "温度 NVMe ${s.tempNvme.toInt()}°"
+            else -> null
+        }
+        tempLine?.let { lines.add(it) }
+        lines.add("网络 ↓${Fmt.speed(s.netDown)} ↑${Fmt.speed(s.netUp)}")
+        lines.add("运行 ${Fmt.uptime(s.uptimeSec)}")
+        val text = lines.joinToString("\n")
+        val cm = requireContext().getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+        cm.setPrimaryClip(ClipData.newPlainText("nas-summary", text))
+        Toast.makeText(requireContext(), "监控摘要已复制", Toast.LENGTH_SHORT).show()
     }
 
     private fun tempPct(temp: Double?, pct: Double, showTemp: Boolean): String {
