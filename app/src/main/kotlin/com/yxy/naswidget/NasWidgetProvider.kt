@@ -1,8 +1,10 @@
 package com.yxy.naswidget
 
+import android.app.PendingIntent
 import android.appwidget.AppWidgetManager
 import android.appwidget.AppWidgetProvider
 import android.content.Context
+import android.content.Intent
 import android.util.TypedValue
 import android.view.View
 import android.widget.RemoteViews
@@ -51,6 +53,13 @@ class NasWidgetProvider : AppWidgetProvider() {
             wb2api: Result<Wb2apiStats>?
         ): RemoteViews {
             val views = RemoteViews(context.packageName, R.layout.nas_widget)
+            // 点击组件任意位置打开 App 主界面
+            val clickPi = PendingIntent.getActivity(
+                context, 0,
+                Intent(context, MainActivity::class.java),
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            )
+            views.setOnClickPendingIntent(R.id.widget_root, clickPi)
             // 关键：reapply 时旧 child 会被累积，必须每次清空两列再 addView，否则重复渲染
             views.removeAllViews(R.id.content_area)
             val showCpu = Prefs.showCpu(context)
