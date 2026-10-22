@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shortcuts xmlns:android="http://schemas.android.com/apk/res/android">
+    <shortcut
+        android:shortcutId="open_home"
+        android:enabled="true"
+        android:icon="@drawable/ic_home"
+        android:shortcutShortLabel="打开主页"
+        android:shortcutLongLabel="打开 NAS 监控主页">
+        <intent
+            android:action="android.intent.action.MAIN"
+            android:targetPackage="com.yxy.naswidget"
+            android:targetClass="com.yxy.naswidget.MainActivity">
+            <extra
+                android:name="shortcut_tab"
+                android:value="home" />
+        </intent>
+    </shortcut>
+    <shortcut
+        android:shortcutId="open_settings"
+        android:enabled="true"
+        android:icon="@drawable/ic_settings"
+        android:shortcutShortLabel="打开设置"
+        android:shortcutLongLabel="打开 NAS 监控设置">
+        <intent
+            android:action="android.intent.action.MAIN"
+            android:targetPackage="com.yxy.naswidget"
+            android:targetClass="com.yxy.naswidget.MainActivity">
+            <extra
+                android:name="shortcut_tab"
+                android:value="settings" />
+        </intent>
+    </shortcut>
+</shortcuts>

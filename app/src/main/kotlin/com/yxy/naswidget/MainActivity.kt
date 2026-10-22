@@ -23,6 +23,9 @@ class MainActivity : AppCompatActivity() {
         homeFragment = supportFragmentManager.findFragmentByTag("home") as? HomeFragment
         settingsFragment = supportFragmentManager.findFragmentByTag("settings") as? SettingsFragment
 
+        // App 图标快捷方式目标 tab（open_home / open_settings）
+        val shortcutTab = intent.getStringExtra("shortcut_tab")
+
         if (savedInstanceState == null) {
             // 首次启动：add 主页
             homeFragment = HomeFragment()
@@ -30,6 +33,12 @@ class MainActivity : AppCompatActivity() {
                 .add(R.id.fragment_container, homeFragment!!, "home")
                 .commit()
             currentTab = R.id.nav_home
+            // 快捷方式直接进设置：强制提交主页事务后再切到设置，避免 add 竞态
+            if (shortcutTab == "settings") {
+                supportFragmentManager.executePendingTransactions()
+                switchFragment(R.id.nav_settings)
+                currentTab = R.id.nav_settings
+            }
         } else {
             // recreate（主题切换等）：恢复之前的 tab
             currentTab = savedInstanceState.getInt("state_current_tab", R.id.nav_home)
