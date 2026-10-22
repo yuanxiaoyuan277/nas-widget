@@ -50,6 +50,8 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
     private lateinit var cbWb2api: CheckBox
     private lateinit var etWb2apiBase: EditText
     private lateinit var etWb2apiKey: EditText
+    private lateinit var btnWb2apiDetail: Button
+    private lateinit var tvWb2apiDetail: TextView
     private lateinit var btnToggleTheme: Button
     private lateinit var tvVersion: TextView
     private lateinit var btnCheckUpdate: Button
@@ -81,6 +83,8 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
         cbWb2api = view.findViewById(R.id.cb_wb2api)
         etWb2apiBase = view.findViewById(R.id.et_wb2api_base)
         etWb2apiKey = view.findViewById(R.id.et_wb2api_key)
+        btnWb2apiDetail = view.findViewById(R.id.btn_wb2api_detail)
+        tvWb2apiDetail = view.findViewById(R.id.tv_wb2api_detail)
         btnToggleTheme = view.findViewById(R.id.btn_toggle_theme)
         tvVersion = view.findViewById(R.id.tv_version)
         btnCheckUpdate = view.findViewById(R.id.btn_check_update)
@@ -101,6 +105,7 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
         }
         btnTestUrl.setOnClickListener { testUrl() }
         btnToggleTheme.setOnClickListener { toggleTheme() }
+        btnWb2apiDetail.setOnClickListener { fetchWb2apiDetail() }
         btnCheckUpdate.setOnClickListener { checkUpdate() }
         btnBackup.setOnClickListener { backupConfig() }
         btnRestore.setOnClickListener { restoreConfig() }
@@ -231,6 +236,33 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
                     ).show()
                 }.onFailure { e ->
                     Toast.makeText(requireContext(), "连接失败：${e.message}", Toast.LENGTH_LONG).show()
+                }
+            }
+        }.start()
+    }
+
+    /** 查询 wb2api 各账号积分明细（用当前输入框的 base/key） */
+    private fun fetchWb2apiDetail() {
+        btnWb2apiDetail.isEnabled = false
+        btnWb2apiDetail.text = "查询中…"
+        val base = etWb2apiBase.text.toString().trim().ifEmpty { Prefs.DEFAULT_WB2API_BASE }
+        val key = etWb2apiKey.text.toString().trim().ifEmpty { Prefs.DEFAULT_WB2API_KEY }
+        Thread {
+            val result = NasDataFetcher.fetchWb2apiCredits(base, key)
+            requireActivity().runOnUiThread {
+                btnWb2apiDetail.isEnabled = true
+                btnWb2apiDetail.text = "查看积分明细"
+                result.onSuccess { s ->
+                    val lines = mutableListOf("总计 ${s.totalCredits} · 健康 ${s.healthyCount}/${s.accountCount}")
+                    for (a in s.accounts) {
+                        var line = "${a.nickname}: ${a.credits}"
+                        if (a.cooling) line += "（冷却中）"
+                        if (a.disabled) line += "（已禁用）"
+                        lines.add(line)
+                    }
+                    tvWb2apiDetail.text = lines.joinToString("\n")
+                }.onFailure { e ->
+                    tvWb2apiDetail.text = "查询失败：${e.message}"
                 }
             }
         }.start()

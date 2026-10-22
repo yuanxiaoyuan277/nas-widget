@@ -216,6 +216,25 @@
                     android:textColor="@color/app_text_secondary"
                     android:textSize="13sp" />
             </FrameLayout>
+
+            <Button
+                android:id="@+id/btn_wb2api_detail"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="查看积分明细"
+                android:textColor="@android:color/white"
+                app:backgroundTint="@color/app_primary"
+                app:cornerRadius="14dp" />
+
+            <TextView
+                android:id="@+id/tv_wb2api_detail"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:textColor="@color/app_text_primary"
+                android:textSize="13sp"
+                android:lineSpacingExtra="2dp" />
         </LinearLayout>
 
         <!-- 显示设置卡片 -->
