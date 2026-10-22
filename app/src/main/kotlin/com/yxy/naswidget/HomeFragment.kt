@@ -41,6 +41,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
     private lateinit var cbDisk2: SwitchCompat
     private lateinit var cbNet: SwitchCompat
     private lateinit var cbStorage: SwitchCompat
+    private lateinit var cbTempItem: SwitchCompat
     private lateinit var previewContainer: FrameLayout
     private lateinit var btnRefreshPreview: Button
     private lateinit var btnCopySummary: Button
@@ -65,6 +66,8 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
     private lateinit var sbNetY: SeekBar
     private lateinit var sbStorageX: SeekBar
     private lateinit var sbStorageY: SeekBar
+    private lateinit var sbTempX: SeekBar
+    private lateinit var sbTempY: SeekBar
     private lateinit var etCpuX: EditText
     private lateinit var etCpuY: EditText
     private lateinit var etMemX: EditText
@@ -79,6 +82,8 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
     private lateinit var etNetY: EditText
     private lateinit var etStorageX: EditText
     private lateinit var etStorageY: EditText
+    private lateinit var etTempX: EditText
+    private lateinit var etTempY: EditText
     private lateinit var tvSysCpu: TextView
     private lateinit var tvSysOs: TextView
     private lateinit var tvSysUptime: TextView
@@ -111,6 +116,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         cbDisk2 = view.findViewById(R.id.cb_disk2)
         cbNet = view.findViewById(R.id.cb_net)
         cbStorage = view.findViewById(R.id.cb_storage)
+        cbTempItem = view.findViewById(R.id.cb_temp)
         previewContainer = view.findViewById(R.id.preview_container)
         btnRefreshPreview = view.findViewById(R.id.btn_refresh_preview)
         btnCopySummary = view.findViewById(R.id.btn_copy_summary)
@@ -135,6 +141,8 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         sbNetY = view.findViewById(R.id.sb_net_y)
         sbStorageX = view.findViewById(R.id.sb_storage_x)
         sbStorageY = view.findViewById(R.id.sb_storage_y)
+        sbTempX = view.findViewById(R.id.sb_temp_x)
+        sbTempY = view.findViewById(R.id.sb_temp_y)
         etCpuX = view.findViewById(R.id.et_cpu_x)
         etCpuY = view.findViewById(R.id.et_cpu_y)
         etMemX = view.findViewById(R.id.et_mem_x)
@@ -149,6 +157,8 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         etNetY = view.findViewById(R.id.et_net_y)
         etStorageX = view.findViewById(R.id.et_storage_x)
         etStorageY = view.findViewById(R.id.et_storage_y)
+        etTempX = view.findViewById(R.id.et_temp_x)
+        etTempY = view.findViewById(R.id.et_temp_y)
         tvSysCpu = view.findViewById(R.id.tv_sys_cpu)
         tvSysOs = view.findViewById(R.id.tv_sys_os)
         tvSysUptime = view.findViewById(R.id.tv_sys_uptime)
@@ -270,7 +280,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
 
     // 清掉之前拉满的极端偏移值（±80 会把组件顶出卡片），归零归中
     private fun resetExtremeOffsets() {
-        for (comp in listOf("cpu", "mem", "disk1", "disk2", "docker", "net", "storage")) {
+        for (comp in listOf("cpu", "mem", "disk1", "disk2", "docker", "net", "storage", "temp")) {
             val x = Prefs.compX(requireContext(), comp)
             val y = Prefs.compY(requireContext(), comp)
             if (kotlin.math.abs(x) > 20) Prefs.setCompX(requireContext(), comp, 0)
@@ -290,6 +300,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         cbDisk2.isChecked = Prefs.showDisk2(requireContext())
         cbNet.isChecked = Prefs.showNet(requireContext())
         cbStorage.isChecked = Prefs.showStorage(requireContext())
+        cbTempItem.isChecked = Prefs.showTempItem(requireContext())
         cbDocker.isChecked = Prefs.showDocker(requireContext())
         sbCpuX.progress = Prefs.compX(requireContext(), "cpu") + 50
         sbCpuY.progress = Prefs.compY(requireContext(), "cpu") + 50
@@ -305,6 +316,8 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         sbNetY.progress = Prefs.compY(requireContext(), "net") + 50
         sbStorageX.progress = Prefs.compX(requireContext(), "storage") + 50
         sbStorageY.progress = Prefs.compY(requireContext(), "storage") + 50
+        sbTempX.progress = Prefs.compX(requireContext(), "temp") + 50
+        sbTempY.progress = Prefs.compY(requireContext(), "temp") + 50
         etCpuX.setText(Prefs.compX(requireContext(), "cpu").toString())
         etCpuY.setText(Prefs.compY(requireContext(), "cpu").toString())
         etMemX.setText(Prefs.compX(requireContext(), "mem").toString())
@@ -319,6 +332,8 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         etNetY.setText(Prefs.compY(requireContext(), "net").toString())
         etStorageX.setText(Prefs.compX(requireContext(), "storage").toString())
         etStorageY.setText(Prefs.compY(requireContext(), "storage").toString())
+        etTempX.setText(Prefs.compX(requireContext(), "temp").toString())
+        etTempY.setText(Prefs.compY(requireContext(), "temp").toString())
         suppressSave = false
         if (Prefs.isLoggedIn(requireContext())) {
             loadDockerContainers()
@@ -513,6 +528,21 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
             item.findViewById<TextView>(R.id.tv_net_label).setTextSize(TypedValue.COMPLEX_UNIT_PX, fs.toFloat())
             item.findViewById<TextView>(R.id.tv_net).setTextSize(TypedValue.COMPLEX_UNIT_PX, fs.toFloat())
             addTo("net", item)
+        }
+
+        if (Prefs.showTempItem(requireContext())) {
+            val item = layoutInflater.inflate(R.layout.item_temp_preview, contentArea, false)
+            stats?.let { s ->
+                val cpuT = s.tempCpu?.let { String.format("%.0f°", it) } ?: "--°"
+                val nvmeT = s.tempNvme?.let { String.format("%.0f°", it) } ?: "--°"
+                item.findViewById<TextView>(R.id.tv_temp).text = "CPU $cpuT · NVMe $nvmeT"
+                if ((s.tempCpu?.let { it >= cpuTempThr } == true) || (s.tempNvme?.let { it >= nvmeTempThr } == true)) {
+                    item.findViewById<TextView>(R.id.tv_temp).setTextColor(Fmt.ALERT_COLOR)
+                }
+            } ?: run { item.findViewById<TextView>(R.id.tv_temp).text = "CPU --° · NVMe --°" }
+            item.findViewById<TextView>(R.id.tv_temp_label).setTextSize(TypedValue.COMPLEX_UNIT_PX, fs.toFloat())
+            item.findViewById<TextView>(R.id.tv_temp).setTextSize(TypedValue.COMPLEX_UNIT_PX, fs.toFloat())
+            addTo("temp", item)
         }
 
         if (showDocker) {
@@ -757,6 +787,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         Prefs.setShowDocker(requireContext(), cbDocker.isChecked)
         Prefs.setShowNet(requireContext(), cbNet.isChecked)
         Prefs.setShowStorage(requireContext(), cbStorage.isChecked)
+        Prefs.setShowTempItem(requireContext(), cbTempItem.isChecked)
         // Docker 选中容器
         if (dockerCheckboxes.isNotEmpty()) {
             val selected = dockerCheckboxes.filter { it.isChecked }.mapNotNull { it.tag as? String }.toSet()
@@ -777,6 +808,8 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         Prefs.setCompY(requireContext(), "net", sbNetY.progress - 50)
         Prefs.setCompX(requireContext(), "storage", sbStorageX.progress - 50)
         Prefs.setCompY(requireContext(), "storage", sbStorageY.progress - 50)
+        Prefs.setCompX(requireContext(), "temp", sbTempX.progress - 50)
+        Prefs.setCompY(requireContext(), "temp", sbTempY.progress - 50)
 
         val am = AppWidgetManager.getInstance(requireContext())
         val ids = am.getAppWidgetIds(ComponentName(requireContext(), NasWidgetProvider::class.java))
@@ -828,8 +861,10 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         bindSlider(etNetY, sbNetY, "net", false)
         bindSlider(etStorageX, sbStorageX, "storage", true)
         bindSlider(etStorageY, sbStorageY, "storage", false)
+        bindSlider(etTempX, sbTempX, "temp", true)
+        bindSlider(etTempY, sbTempY, "temp", false)
 
-        for (cb in listOf(cbCpu, cbMem, cbDisk1, cbDisk2, cbDocker, cbNet, cbStorage)) {
+        for (cb in listOf(cbCpu, cbMem, cbDisk1, cbDisk2, cbDocker, cbNet, cbStorage, cbTempItem)) {
             cb.setOnCheckedChangeListener { _, _ -> if (!suppressSave) persist() }
         }
 
@@ -841,7 +876,8 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
             sbDisk2X to etDisk2X, sbDisk2Y to etDisk2Y,
             sbDockerX to etDockerX, sbDockerY to etDockerY,
             sbNetX to etNetX, sbNetY to etNetY,
-            sbStorageX to etStorageX, sbStorageY to etStorageY
+            sbStorageX to etStorageX, sbStorageY to etStorageY,
+            sbTempX to etTempX, sbTempY to etTempY
         )
         for (sb in etMap.keys) {
             sb.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {

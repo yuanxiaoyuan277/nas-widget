@@ -78,6 +78,7 @@ class NasWidgetProvider : AppWidgetProvider() {
             val showUptime = Prefs.showUptime(context)
             val showDocker = Prefs.showDocker(context)
             val showWb2api = Prefs.showWb2api(context)
+            val showTempItem = Prefs.showTempItem(context)
             val fs = Prefs.fontSize(context)
             val usageThr = Prefs.alertUsageThreshold(context).coerceIn(1, 100)
             val cpuTempThr = Prefs.alertCpuTempThreshold(context).coerceIn(1, 120)
@@ -205,6 +206,22 @@ class NasWidgetProvider : AppWidgetProvider() {
                 item.setTextViewTextSize(R.id.tv_net_label, TypedValue.COMPLEX_UNIT_PX, fs.toFloat())
                 item.setTextViewTextSize(R.id.tv_net, TypedValue.COMPLEX_UNIT_PX, fs.toFloat())
                 addTo("net", R.id.item_net_root, item)
+            }
+
+            // 温度（CPU + NVMe 独立成一行）
+            if (showTempItem) {
+                val item = RemoteViews(context.packageName, R.layout.item_temp)
+                stats?.let { s ->
+                    val cpuT = s.tempCpu?.let { String.format("%.0f°", it) } ?: "--°"
+                    val nvmeT = s.tempNvme?.let { String.format("%.0f°", it) } ?: "--°"
+                    item.setTextViewText(R.id.tv_temp, "CPU $cpuT · NVMe $nvmeT")
+                    if ((s.tempCpu?.let { it >= cpuTempThr } == true) || (s.tempNvme?.let { it >= nvmeTempThr } == true)) {
+                        item.setTextColor(R.id.tv_temp, Fmt.ALERT_COLOR)
+                    }
+                } ?: item.setTextViewText(R.id.tv_temp, "CPU --° · NVMe --°")
+                item.setTextViewTextSize(R.id.tv_temp_label, TypedValue.COMPLEX_UNIT_PX, fs.toFloat())
+                item.setTextViewTextSize(R.id.tv_temp, TypedValue.COMPLEX_UNIT_PX, fs.toFloat())
+                addTo("temp", R.id.item_temp_root, item)
             }
 
             // Docker（容器垂直排列，整体按 docker 的 x/y 定位）
