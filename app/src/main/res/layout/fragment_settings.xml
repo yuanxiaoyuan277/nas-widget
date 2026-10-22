@@ -543,6 +543,42 @@
                 app:cornerRadius="14dp" />
         </LinearLayout>
 
+        <!-- 后台保活卡片 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:orientation="vertical"
+            android:background="@drawable/app_card"
+            android:padding="16dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="后台保活"
+                android:textColor="@color/app_text_secondary"
+                android:textSize="13sp" />
+
+            <TextView
+                android:id="@+id/tv_battery_status"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:text="检查中…"
+                android:textColor="@color/app_text_primary"
+                android:textSize="14sp" />
+
+            <Button
+                android:id="@+id/btn_battery_whitelist"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="加入电池优化白名单"
+                android:textColor="@android:color/white"
+                app:backgroundTint="@color/app_primary"
+                app:cornerRadius="14dp" />
+        </LinearLayout>
+
         <!-- 外观卡片 -->
         <LinearLayout
             android:layout_width="match_parent"

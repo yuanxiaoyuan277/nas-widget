@@ -11,6 +11,8 @@ import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.os.PowerManager
+import android.provider.Settings
 import android.text.Editable
 import android.text.TextWatcher
 import android.text.method.PasswordTransformationMethod
@@ -74,6 +76,8 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
     private lateinit var btnAlertHistory: Button
     private lateinit var btnTestNotif: Button
     private lateinit var btnReset: Button
+    private lateinit var tvBatteryStatus: TextView
+    private lateinit var btnBatteryWhitelist: Button
     private var suppressSave = false
     private val saveHandler = Handler(Looper.getMainLooper())
     private val saveRunnable = Runnable { persist() }
@@ -114,6 +118,8 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
         btnAlertHistory = view.findViewById(R.id.btn_alert_history)
         btnTestNotif = view.findViewById(R.id.btn_test_notif)
         btnReset = view.findViewById(R.id.btn_reset)
+        tvBatteryStatus = view.findViewById(R.id.tv_battery_status)
+        btnBatteryWhitelist = view.findViewById(R.id.btn_battery_whitelist)
 
         btnLogin.setOnClickListener {
             requireActivity().startActivityForResult(Intent(requireContext(), LoginActivity::class.java), REQ_LOGIN)
@@ -132,6 +138,7 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
             else Toast.makeText(requireContext(), "通知权限未开启，请在系统设置中允许通知", Toast.LENGTH_LONG).show()
         }
         btnReset.setOnClickListener { confirmReset() }
+        btnBatteryWhitelist.setOnClickListener { openBatteryWhitelist() }
         tvAboutRepo.setOnClickListener {
             try {
                 startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/yuanxiaoyuan277/nas-widget")))
@@ -198,6 +205,12 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
         }
     }
 
+    override fun onResume() {
+        super.onResume()
+        // 从系统白名单设置返回后刷新状态
+        if (::tvBatteryStatus.isInitialized) refreshBatteryStatus()
+    }
+
     private fun updateLoginStatus() {
         val logged = Prefs.isLoggedIn(requireContext())
         tvLoginStatus.text = if (logged) "已登录飞牛账号" else "未登录"
@@ -226,6 +239,7 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
         tvVersion.text = "v${UpdateChecker.localVersion(requireContext())}"
         tvAboutVersion.text = "v${UpdateChecker.localVersion(requireContext())}"
         updateThemeButton()
+        refreshBatteryStatus()
         suppressSave = false
     }
 
@@ -248,6 +262,41 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
         Prefs.setTheme(requireContext(), next)
         AppCompatDelegate.setDefaultNightMode(Prefs.nightMode(requireContext()))
         updateThemeButton()
+    }
+
+    /** 是否已加入系统电池优化白名单 */
+    private fun isBatteryWhitelisted(): Boolean {
+        val pm = requireContext().getSystemService(Context.POWER_SERVICE) as PowerManager
+        return pm.isIgnoringBatteryOptimizations(requireContext().packageName)
+    }
+
+    /** 刷新后台保活状态提示（从系统设置返回后调用） */
+    private fun refreshBatteryStatus() {
+        if (isBatteryWhitelisted()) {
+            tvBatteryStatus.text = "已加入白名单，后台定时刷新与告警不受省电限制"
+            btnBatteryWhitelist.isEnabled = false
+            btnBatteryWhitelist.text = "已在白名单中"
+        } else {
+            tvBatteryStatus.text = "未加入白名单，省电策略可能延迟后台刷新与告警"
+            btnBatteryWhitelist.isEnabled = true
+            btnBatteryWhitelist.text = "加入电池优化白名单"
+        }
+    }
+
+    /** 跳转系统电池优化白名单：优先直接弹授权对话框，失败则打开白名单列表 */
+    private fun openBatteryWhitelist() {
+        val ctx = requireContext()
+        val pkg = ctx.packageName
+        val direct = Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS, Uri.parse("package:$pkg"))
+        try {
+            startActivity(direct)
+        } catch (_: Exception) {
+            try {
+                startActivity(Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS))
+            } catch (_: Exception) {
+                Toast.makeText(ctx, "无法打开系统设置，请手动在「设置 - 电池」中添加白名单", Toast.LENGTH_LONG).show()
+            }
+        }
     }
 
     /** 测试 NAS 监控接口连通性（用当前输入框里的地址，失败提示错误信息） */
