@@ -186,7 +186,9 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
             requireActivity().runOnUiThread {
                 result.onSuccess { info ->
                     val local = UpdateChecker.localVersion(requireContext())
-                    if (UpdateChecker.isNewer(info.version, local)) {
+                    if (UpdateChecker.isNewer(info.version, local) &&
+                        !UpdateChecker.isIgnored(requireContext(), info.version)
+                    ) {
                         UpdateChecker.showUpdateDialog(requireActivity() as AppCompatActivity, info)
                     }
                 }

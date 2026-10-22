@@ -298,7 +298,9 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
                 btnCheckUpdate.isEnabled = true
                 result.onSuccess { info ->
                     val local = UpdateChecker.localVersion(requireContext())
-                    if (UpdateChecker.isNewer(info.version, local)) {
+                    if (UpdateChecker.isNewer(info.version, local) &&
+                        !UpdateChecker.isIgnored(requireContext(), info.version)
+                    ) {
                         tvUpdateStatus.text = ""
                         UpdateChecker.showUpdateDialog(requireActivity() as AppCompatActivity, info)
                     } else {

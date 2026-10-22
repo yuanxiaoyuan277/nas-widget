@@ -63,6 +63,10 @@ object UpdateChecker {
         }
     }
 
+    /** 是否已「忽略此版本」 */
+    fun isIgnored(context: Context, version: String): Boolean =
+        Prefs.ignoredVersion(context) == version
+
     /** 版本比较：newVer > oldVer 返回 true */
     fun isNewer(newVer: String, oldVer: String): Boolean {
         fun toInts(v: String): List<Int> =
@@ -134,6 +138,7 @@ object UpdateChecker {
         val tvProgress = view.findViewById<TextView>(R.id.tv_download_progress)
         val btnNow = view.findViewById<Button>(R.id.btn_update_now)
         val btnLater = view.findViewById<TextView>(R.id.btn_update_later)
+        val btnIgnore = view.findViewById<TextView>(R.id.btn_ignore_version)
 
         tvVersion.text = "v${info.version}"
         tvNotes.text = formatNotes(info.notes)
@@ -144,6 +149,12 @@ object UpdateChecker {
             .show()
 
         btnLater.setOnClickListener { dialog.dismiss() }
+
+        btnIgnore.setOnClickListener {
+            Prefs.setIgnoredVersion(activity, info.version)
+            dialog.dismiss()
+            Toast.makeText(activity, "已忽略 v${info.version}，不再提醒", Toast.LENGTH_SHORT).show()
+        }
 
         btnNow.setOnClickListener {
             btnNow.isEnabled = false

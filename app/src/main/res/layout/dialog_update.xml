@@ -106,4 +106,15 @@
         android:text="暂不更新"
         android:textColor="@color/app_text_secondary"
         android:textSize="14sp" />
+
+    <!-- 忽略此版本（文字按钮） -->
+    <TextView
+        android:id="@+id/btn_ignore_version"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:padding="10dp"
+        android:text="忽略此版本"
+        android:textColor="@color/app_text_hint"
+        android:textSize="13sp" />
 </LinearLayout>

@@ -24,6 +24,7 @@ object Prefs {
     private const val KEY_REFRESH_TOKEN = "refresh_token"
     private const val KEY_TOKEN_EXPIRES = "token_expires_at"
     private const val KEY_THEME = "theme"
+    private const val KEY_IGNORED_VERSION = "ignored_version"
     private const val KEY_SHOW_WB2API = "show_wb2api"
     private const val KEY_WB2API_BASE = "wb2api_base"
     private const val KEY_WB2API_KEY = "wb2api_key"
@@ -152,6 +153,10 @@ object Prefs {
         "system" -> androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
         else -> androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_YES
     }
+
+    // === 更新弹窗「忽略此版本」 ===
+    fun ignoredVersion(ctx: Context): String = sp(ctx).getString(KEY_IGNORED_VERSION, "") ?: ""
+    fun setIgnoredVersion(ctx: Context, v: String) = sp(ctx).edit().putString(KEY_IGNORED_VERSION, v).apply()
 
     // === wb2api 积分 ===
     fun showWb2api(ctx: Context) = sp(ctx).getBoolean(KEY_SHOW_WB2API, false)
