@@ -103,6 +103,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
     private lateinit var tvSysTemp: TextView
     private lateinit var tvSysStorage: TextView
     private lateinit var tvSysPeak: TextView
+    private lateinit var btnClearPeak: TextView
 
     private val handler = Handler(Looper.getMainLooper())
     private var dockerContainers: List<DockerContainer> = emptyList()
@@ -194,6 +195,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         tvSysTemp = view.findViewById(R.id.tv_sys_temp)
         tvSysStorage = view.findViewById(R.id.tv_sys_storage)
         tvSysPeak = view.findViewById(R.id.tv_sys_peak)
+        btnClearPeak = view.findViewById(R.id.btn_clear_peak)
 
         widgetId = requireActivity().intent.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, AppWidgetManager.INVALID_APPWIDGET_ID)
         if (widgetId != AppWidgetManager.INVALID_APPWIDGET_ID) {
@@ -221,6 +223,8 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         )
         // 「存储」行点击弹出各磁盘明细
         tvSysStorage.setOnClickListener { showDiskDetail() }
+        // 「清零」按钮：一键清零今日峰值记录
+        btnClearPeak.setOnClickListener { clearPeaks() }
 
         // 控件改动即自动保存
         setupAutoSaveListeners()
@@ -747,6 +751,13 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
             .setMessage(lines.joinToString("\n"))
             .setPositiveButton("关闭", null)
             .show()
+    }
+
+    /** 清零今日峰值记录（CPU/内存/温度/网络），并立即刷新显示 */
+    private fun clearPeaks() {
+        Prefs.clearPeaks(requireContext())
+        tvSysPeak.text = peakText()
+        Toast.makeText(requireContext(), "今日峰值已清零", Toast.LENGTH_SHORT).show()
     }
 
     /** 分享当前监控摘要（走系统分享，可发到微信/QQ 等） */

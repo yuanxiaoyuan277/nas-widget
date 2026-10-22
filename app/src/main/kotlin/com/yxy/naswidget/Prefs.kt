@@ -345,4 +345,11 @@ object Prefs {
 
     fun peakNetDown(ctx: Context): Long = sp(ctx).getLong(KEY_PEAK_NET_DOWN, 0L)
     fun peakNetUp(ctx: Context): Long = sp(ctx).getLong(KEY_PEAK_NET_UP, 0L)
+
+    /** 清零今日所有峰值记录（CPU/内存/温度/网络），下次刷新重新累积 */
+    fun clearPeaks(ctx: Context) = sp(ctx).edit()
+        .remove(KEY_PEAK_DATE).remove(KEY_PEAK_CPU).remove(KEY_PEAK_MEM)
+        .remove(KEY_PEAK_CPU_TEMP).remove(KEY_PEAK_NVME_TEMP)
+        .remove(KEY_PEAK_NET_DATE).remove(KEY_PEAK_NET_DOWN).remove(KEY_PEAK_NET_UP)
+        .apply()
 }
