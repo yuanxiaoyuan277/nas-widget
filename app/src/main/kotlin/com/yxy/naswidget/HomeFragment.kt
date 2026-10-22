@@ -928,10 +928,16 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         for (d in s.disks.sortedByDescending { it.usePercent }) {
             lines.add(String.format("%s：可用 %s / %s（已用 %.0f%%）", d.name, Fmt.bytes(d.total - d.used), Fmt.bytes(d.total), d.usePercent))
         }
+        val text = lines.joinToString("\n")
         MaterialAlertDialogBuilder(requireContext())
             .setTitle("磁盘明细")
-            .setMessage(lines.joinToString("\n"))
-            .setPositiveButton("关闭", null)
+            .setMessage(text)
+            .setPositiveButton("复制") { _, _ ->
+                val cm = requireContext().getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                cm.setPrimaryClip(ClipData.newPlainText("磁盘明细", text))
+                Toast.makeText(requireContext(), "磁盘明细已复制", Toast.LENGTH_SHORT).show()
+            }
+            .setNegativeButton("关闭", null)
             .show()
     }
 
