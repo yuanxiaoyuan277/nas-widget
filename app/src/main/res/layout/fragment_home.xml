@@ -1741,14 +1741,17 @@
                         android:textSize="13sp"
                         android:background="@drawable/edit_bg" />
 
-                    <CheckBox
-                        android:id="@+id/cb_docker_running_only"
+                    <Button
+                        android:id="@+id/btn_docker_filter"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="10dp"
-                        android:text="只看运行中"
-                        android:textColor="@color/app_text_primary"
-                        android:textSize="13sp" />
+                        android:text="全部"
+                        android:textSize="13sp"
+                        android:minWidth="0dp"
+                        android:minHeight="0dp"
+                        android:paddingHorizontal="12dp"
+                        android:paddingVertical="6dp" />
                 </LinearLayout>
 
                 <LinearLayout

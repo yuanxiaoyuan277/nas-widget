@@ -16,7 +16,6 @@ import android.text.Editable
 import android.text.TextWatcher
 import android.view.View
 import android.widget.Button
-import android.widget.CheckBox
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.widget.SwitchCompat
 import android.widget.EditText
@@ -59,7 +58,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
     private lateinit var btnDockerStartAll: Button
     private lateinit var btnDockerStopAll: Button
     private lateinit var etDockerSearch: EditText
-    private lateinit var cbRunningOnly: CheckBox
+    private lateinit var btnDockerFilter: Button
     private lateinit var sbCpuX: SeekBar
     private lateinit var sbCpuY: SeekBar
     private lateinit var sbMemX: SeekBar
@@ -155,7 +154,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         btnDockerStartAll = view.findViewById(R.id.btn_docker_start_all)
         btnDockerStopAll = view.findViewById(R.id.btn_docker_stop_all)
         etDockerSearch = view.findViewById(R.id.et_docker_search)
-        cbRunningOnly = view.findViewById(R.id.cb_docker_running_only)
+        btnDockerFilter = view.findViewById(R.id.btn_docker_filter)
         sbCpuX = view.findViewById(R.id.sb_cpu_x)
         sbCpuY = view.findViewById(R.id.sb_cpu_y)
         sbMemX = view.findViewById(R.id.sb_mem_x)
@@ -265,7 +264,16 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
             override fun afterTextChanged(s: Editable?) { applyDockerFilter() }
         })
-        cbRunningOnly.setOnCheckedChangeListener { _, _ -> applyDockerFilter() }
+        btnDockerFilter.text = dockerFilterLabel(Prefs.dockerFilter(requireContext()))
+        btnDockerFilter.setOnClickListener {
+            val modes = listOf("all", "running", "stopped")
+            val cur = Prefs.dockerFilter(requireContext())
+            val idx = modes.indexOf(cur)
+            val next = modes[(idx + 1 + modes.size) % modes.size]
+            Prefs.setDockerFilter(requireContext(), next)
+            btnDockerFilter.text = dockerFilterLabel(next)
+            applyDockerFilter()
+        }
         btnDockerSort.text = dockerSortLabel(Prefs.dockerSort(requireContext()))
         btnDockerSort.setOnClickListener {
             val modes = listOf("status", "name", "cpu", "mem")
@@ -973,6 +981,12 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         else -> "运行中优先"
     }
 
+    private fun dockerFilterLabel(mode: String): String = when (mode) {
+        "running" -> "运行中"
+        "stopped" -> "已停止"
+        else -> "全部"
+    }
+
     private fun buildDockerCheckboxes(containers: List<DockerContainer>) {
         dockerListContainer.removeAllViews()
         dockerCheckboxes.clear()
@@ -1110,16 +1124,20 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         }.start()
     }
 
-    /** 按搜索框关键字 + 「只看运行中」过滤容器列表（只隐藏 item，不重建，避免丢失勾选状态） */
+    /** 按搜索框关键字 + 状态筛选（全部/运行中/已停止）过滤容器列表（只隐藏 item，不重建，避免丢失勾选状态） */
     private fun applyDockerFilter() {
         val query = etDockerSearch.text.toString().trim().lowercase()
-        val runningOnly = cbRunningOnly.isChecked
-        val runningNames = if (runningOnly) dockerContainers.filter { it.running }.map { it.name }.toSet() else null
+        val filter = Prefs.dockerFilter(requireContext())
+        val matchNames = when (filter) {
+            "running" -> dockerContainers.filter { it.running }.map { it.name }.toSet()
+            "stopped" -> dockerContainers.filter { !it.running }.map { it.name }.toSet()
+            else -> null
+        }
         for (cb in dockerCheckboxes) {
             val name = cb.tag as? String ?: ""
             val nameMatch = query.isEmpty() || name.lowercase().contains(query)
-            val runningMatch = runningNames == null || name in runningNames
-            (cb.parent as? View)?.visibility = if (nameMatch && runningMatch) View.VISIBLE else View.GONE
+            val filterMatch = matchNames == null || name in matchNames
+            (cb.parent as? View)?.visibility = if (nameMatch && filterMatch) View.VISIBLE else View.GONE
         }
     }
 
