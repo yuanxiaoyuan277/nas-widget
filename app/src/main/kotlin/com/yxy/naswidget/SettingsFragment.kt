@@ -153,17 +153,25 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
         suppressSave = false
     }
 
+    private fun themeLabel(mode: String): String = when (mode) {
+        "light" -> "浅色"
+        "system" -> "跟随系统"
+        else -> "深色"
+    }
+
     private fun updateThemeButton() {
-        btnToggleTheme.text = if (Prefs.isDarkTheme(requireContext())) "深色" else "浅色"
+        btnToggleTheme.text = "${themeLabel(Prefs.theme(requireContext()))}（点击切换）"
     }
 
     private fun toggleTheme() {
-        val newTheme = if (Prefs.isDarkTheme(requireContext())) "light" else "dark"
-        Prefs.setTheme(requireContext(), newTheme)
-        AppCompatDelegate.setDefaultNightMode(
-            if (newTheme == "dark") AppCompatDelegate.MODE_NIGHT_YES
-            else AppCompatDelegate.MODE_NIGHT_NO
-        )
+        val next = when (Prefs.theme(requireContext())) {
+            "dark" -> "light"
+            "light" -> "system"
+            else -> "dark"
+        }
+        Prefs.setTheme(requireContext(), next)
+        AppCompatDelegate.setDefaultNightMode(Prefs.nightMode(requireContext()))
+        updateThemeButton()
     }
 
     /** 输入框内容明文/密文切换（默认隐藏） */

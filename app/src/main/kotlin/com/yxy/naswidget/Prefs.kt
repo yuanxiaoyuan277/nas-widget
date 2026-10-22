@@ -133,10 +133,25 @@ object Prefs {
     fun clearToken(ctx: Context) = sp(ctx).edit()
         .remove(KEY_ACCESS_TOKEN).remove(KEY_REFRESH_TOKEN).remove(KEY_TOKEN_EXPIRES).apply()
 
-    // === 主题（浅色/深色） ===
+    // === 主题（浅色/深色/跟随系统） ===
     fun theme(ctx: Context): String = sp(ctx).getString(KEY_THEME, "dark") ?: "dark"
     fun setTheme(ctx: Context, v: String) = sp(ctx).edit().putString(KEY_THEME, v).apply()
-    fun isDarkTheme(ctx: Context): Boolean = theme(ctx) != "light"
+
+    /** 当前是否深色（「跟随系统」时按系统实际深浅解析） */
+    fun isDarkTheme(ctx: Context): Boolean = when (theme(ctx)) {
+        "light" -> false
+        "system" -> (ctx.resources.configuration.uiMode and
+            android.content.res.Configuration.UI_MODE_NIGHT_MASK) ==
+            android.content.res.Configuration.UI_MODE_NIGHT_YES
+        else -> true
+    }
+
+    /** AppCompat 夜间模式常量（「跟随系统」交给系统决定） */
+    fun nightMode(ctx: Context): Int = when (theme(ctx)) {
+        "light" -> androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_NO
+        "system" -> androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
+        else -> androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_YES
+    }
 
     // === wb2api 积分 ===
     fun showWb2api(ctx: Context) = sp(ctx).getBoolean(KEY_SHOW_WB2API, false)

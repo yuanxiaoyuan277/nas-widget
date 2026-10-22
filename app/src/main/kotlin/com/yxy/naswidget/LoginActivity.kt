@@ -19,10 +19,7 @@ class LoginActivity : AppCompatActivity() {
     private var handled = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        AppCompatDelegate.setDefaultNightMode(
-            if (Prefs.isDarkTheme(this)) AppCompatDelegate.MODE_NIGHT_YES
-            else AppCompatDelegate.MODE_NIGHT_NO
-        )
+        AppCompatDelegate.setDefaultNightMode(Prefs.nightMode(this))
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_login)
 
