@@ -213,14 +213,15 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         // 系统信息卡片：点击单项数值复制到剪贴板
         bindCopyRow(
             "CPU" to tvSysCpu,
-            "内存" to tvSysMem,
             "系统" to tvSysOs,
             "运行" to tvSysUptime,
-            "温度" to tvSysTemp,
             "更新" to tvSysTime,
             "网络" to tvSysNet,
             "峰值" to tvSysPeak
         )
+        // 「内存」「温度」行点击弹出明细
+        tvSysMem.setOnClickListener { showMemDetail() }
+        tvSysTemp.setOnClickListener { showTempDetail() }
         // 「存储」行点击弹出各磁盘明细
         tvSysStorage.setOnClickListener { showDiskDetail() }
         // 「清零」按钮：一键清零今日峰值记录
@@ -734,6 +735,48 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
                 Toast.makeText(requireContext(), "已复制 $label", Toast.LENGTH_SHORT).show()
             }
         }
+    }
+
+    /** 查看内存明细：点「内存」行弹出已用/可用/总量/使用率/告警阈值 */
+    private fun showMemDetail() {
+        val s = lastStats
+        if (s == null) {
+            Toast.makeText(requireContext(), "暂无数据，请稍候刷新", Toast.LENGTH_SHORT).show()
+            return
+        }
+        val used = s.memUsed
+        val total = s.memTotal
+        val free = (total - used).coerceAtLeast(0)
+        val thr = Prefs.alertUsageThreshold(requireContext())
+        val lines = mutableListOf(
+            String.format("已用：%s", Fmt.bytes(used)),
+            String.format("可用：%s", Fmt.bytes(free)),
+            String.format("总量：%s", Fmt.bytes(total)),
+            String.format("使用率：%.0f%%（告警阈值 %d%%）", s.memPercent, thr)
+        )
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle("内存明细")
+            .setMessage(lines.joinToString("\n"))
+            .setPositiveButton("关闭", null)
+            .show()
+    }
+
+    /** 查看温度明细：点「温度」行弹出 CPU / NVMe 温度与各自告警阈值 */
+    private fun showTempDetail() {
+        val s = lastStats
+        if (s == null) {
+            Toast.makeText(requireContext(), "暂无数据，请稍候刷新", Toast.LENGTH_SHORT).show()
+            return
+        }
+        val cpuThr = Prefs.alertCpuTempThreshold(requireContext())
+        val nvmeThr = Prefs.alertNvmeTempThreshold(requireContext())
+        val cpuT = s.tempCpu?.let { String.format("%.0f°C（阈值 %d°C）", it, cpuThr) } ?: "未获取"
+        val nvmeT = s.tempNvme?.let { String.format("%.0f°C（阈值 %d°C）", it, nvmeThr) } ?: "未获取"
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle("温度明细")
+            .setMessage("CPU 温度：$cpuT\nNVMe 温度：$nvmeT")
+            .setPositiveButton("关闭", null)
+            .show()
     }
 
     /** 查看各磁盘明细：点「存储」行弹出每块盘的已用/总量/使用率 */
