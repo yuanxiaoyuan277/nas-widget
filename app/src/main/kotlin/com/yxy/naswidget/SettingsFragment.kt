@@ -60,6 +60,7 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
     private lateinit var tvWb2apiDetail: TextView
     private lateinit var btnToggleTheme: Button
     private lateinit var btnWidgetBg: Button
+    private lateinit var btnWidgetTap: Button
     private lateinit var tvVersion: TextView
     private lateinit var btnCheckUpdate: Button
     private lateinit var btnAboutCheckUpdate: Button
@@ -117,6 +118,7 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
         tvWb2apiDetail = view.findViewById(R.id.tv_wb2api_detail)
         btnToggleTheme = view.findViewById(R.id.btn_toggle_theme)
         btnWidgetBg = view.findViewById(R.id.btn_widget_bg)
+        btnWidgetTap = view.findViewById(R.id.btn_widget_tap)
         tvVersion = view.findViewById(R.id.tv_version)
         btnCheckUpdate = view.findViewById(R.id.btn_check_update)
         btnAboutCheckUpdate = view.findViewById(R.id.btn_about_check_update)
@@ -165,6 +167,7 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
         btnTestUrl.setOnClickListener { testUrl() }
         btnToggleTheme.setOnClickListener { toggleTheme() }
         btnWidgetBg.setOnClickListener { cycleWidgetBg() }
+        btnWidgetTap.setOnClickListener { cycleWidgetTap() }
         btnWb2apiDetail.setOnClickListener { fetchWb2apiDetail() }
         btnCheckUpdate.setOnClickListener { checkUpdate() }
         btnAboutCheckUpdate.setOnClickListener { checkUpdate() }
@@ -315,6 +318,7 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
         tvAboutVersion.text = "v${UpdateChecker.localVersion(requireContext())}"
         updateThemeButton()
         updateWidgetBgButton()
+        updateWidgetTapButton()
         updateTempSilentStatus()
         refreshBatteryStatus()
         suppressSave = false
@@ -360,6 +364,22 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
         }
         Prefs.setWidgetBg(requireContext(), next)
         updateWidgetBgButton()
+        val am = AppWidgetManager.getInstance(requireContext())
+        val ids = am.getAppWidgetIds(ComponentName(requireContext(), NasWidgetProvider::class.java))
+        if (ids.isNotEmpty()) NasWidgetProvider.updateAll(requireContext(), am, ids)
+    }
+
+    private fun widgetTapLabel(mode: String): String = if (mode == "web") "飞牛管理网页" else "App"
+
+    private fun updateWidgetTapButton() {
+        btnWidgetTap.text = "点击组件：打开 ${widgetTapLabel(Prefs.widgetTap(requireContext()))}（点击切换）"
+    }
+
+    /** 循环切换组件点击行为：打开 App 主界面 / 飞牛管理网页，改完立即刷新桌面组件 */
+    private fun cycleWidgetTap() {
+        val next = if (Prefs.widgetTap(requireContext()) == "web") "app" else "web"
+        Prefs.setWidgetTap(requireContext(), next)
+        updateWidgetTapButton()
         val am = AppWidgetManager.getInstance(requireContext())
         val ids = am.getAppWidgetIds(ComponentName(requireContext(), NasWidgetProvider::class.java))
         if (ids.isNotEmpty()) NasWidgetProvider.updateAll(requireContext(), am, ids)

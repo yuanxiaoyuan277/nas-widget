@@ -6,6 +6,7 @@ import android.appwidget.AppWidgetProvider
 import android.content.Context
 import android.content.Intent
 import android.content.res.ColorStateList
+import android.net.Uri
 import android.util.TypedValue
 import android.view.View
 import android.widget.RemoteViews
@@ -69,12 +70,20 @@ class NasWidgetProvider : AppWidgetProvider() {
             val views = RemoteViews(context.packageName, R.layout.nas_widget)
             // 组件背景透明度：按用户设置的档位切换玻璃底 drawable
             views.setInt(R.id.widget_root, "setBackgroundResource", Prefs.widgetBgRes(context))
-            // 点击组件任意位置打开 App 主界面
-            val clickPi = PendingIntent.getActivity(
-                context, 0,
-                Intent(context, MainActivity::class.java),
-                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-            )
+            // 点击组件任意位置：按用户设置打开 App 主界面或飞牛管理网页
+            val clickPi = if (Prefs.widgetTap(context) == "web") {
+                PendingIntent.getActivity(
+                    context, 0,
+                    Intent(Intent.ACTION_VIEW, Uri.parse(Prefs.nasBase(context))),
+                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+                )
+            } else {
+                PendingIntent.getActivity(
+                    context, 0,
+                    Intent(context, MainActivity::class.java),
+                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+                )
+            }
             views.setOnClickPendingIntent(R.id.widget_root, clickPi)
             // 顶部刷新按钮：广播到 UpdateReceiver 立即刷新（requestCode 100 避免与整卡点击冲突）
             val refreshPi = PendingIntent.getBroadcast(

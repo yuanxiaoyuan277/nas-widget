@@ -196,6 +196,11 @@ object Prefs {
         else -> R.drawable.glass_card
     }
 
+    // === 组件点击行为（app=打开App主页/web=打开飞牛管理网页） ===
+    private const val KEY_WIDGET_TAP = "widget_tap"
+    fun widgetTap(ctx: Context): String = sp(ctx).getString(KEY_WIDGET_TAP, "app") ?: "app"
+    fun setWidgetTap(ctx: Context, v: String) = sp(ctx).edit().putString(KEY_WIDGET_TAP, v).apply()
+
     // === 更新弹窗「忽略此版本」 ===
     fun ignoredVersion(ctx: Context): String = sp(ctx).getString(KEY_IGNORED_VERSION, "") ?: ""
     fun setIgnoredVersion(ctx: Context, v: String) = sp(ctx).edit().putString(KEY_IGNORED_VERSION, v).apply()
