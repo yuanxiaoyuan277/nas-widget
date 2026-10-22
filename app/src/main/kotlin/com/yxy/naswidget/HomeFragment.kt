@@ -559,7 +559,9 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         tintSys(tvSysMem, (stats?.memPercent ?: 0.0) >= usageThr)
         tvSysOs.text = stats?.osVersion?.takeIf { it.isNotEmpty() } ?: "--"
         tvSysUptime.text = stats?.let { Fmt.uptime(it.uptimeSec) } ?: "--"
-        tvSysTime.text = stats?.let { Fmt.time(it.fetchTime) } ?: "--"
+        tvSysTime.text = stats?.let { s ->
+            if (s.latencyMs > 0) "${Fmt.time(s.fetchTime)} · ${s.latencyMs}ms" else Fmt.time(s.fetchTime)
+        } ?: "--"
         tvSysNet.text = stats?.let { "↓${Fmt.speed(it.netDown)} ↑${Fmt.speed(it.netUp)}" } ?: "--"
         tvSysTraffic.text = trafficText()
         tvSysTemp.text = stats?.let { s ->

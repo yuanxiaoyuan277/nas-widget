@@ -19,6 +19,7 @@ object NasDataFetcher {
     private const val DOCKER_CACHE_MS = 30000L
 
     fun fetch(url: String): Result<NasStats> {
+        val start = System.currentTimeMillis()
         return try {
             val conn = URL(url).openConnection() as HttpURLConnection
             conn.connectTimeout = 5000
@@ -32,7 +33,8 @@ object NasDataFetcher {
             }
             val body = conn.inputStream.bufferedReader().use { it.readText() }
             conn.disconnect()
-            Result.success(NasStats.parse(body))
+            val stats = NasStats.parse(body)
+            Result.success(stats.copy(latencyMs = System.currentTimeMillis() - start))
         } catch (e: Exception) {
             Result.failure(e)
         }

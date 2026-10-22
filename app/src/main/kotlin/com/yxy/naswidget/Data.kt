@@ -93,7 +93,8 @@ data class NasStats(
     val netUp: Long,
     val cpuModel: String,
     val osVersion: String,
-    val fetchTime: Long
+    val fetchTime: Long,
+    val latencyMs: Long = 0
 ) {
     /** 存储总览：所有磁盘汇总已用字节 */
     val storageUsed: Long get() = disks.sumOf { it.used }
