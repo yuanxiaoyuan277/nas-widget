@@ -29,6 +29,7 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 
 class HomeFragment : Fragment(R.layout.fragment_home) {
@@ -36,6 +37,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
     private var widgetId = AppWidgetManager.INVALID_APPWIDGET_ID
 
     private lateinit var scrollRoot: ScrollView
+    private lateinit var swipeRefresh: SwipeRefreshLayout
     private lateinit var cbCpu: SwitchCompat
     private lateinit var cbMem: SwitchCompat
     private lateinit var cbDisk1: SwitchCompat
@@ -119,6 +121,13 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         }
 
         scrollRoot = view.findViewById(R.id.scroll_root)
+        swipeRefresh = view.findViewById(R.id.swipe_refresh)
+        swipeRefresh.setColorSchemeColors(requireContext().getColor(R.color.app_primary))
+        swipeRefresh.setOnRefreshListener {
+            refreshPreview()
+            if (Prefs.isLoggedIn(requireContext())) loadDockerContainers()
+            handler.postDelayed({ swipeRefresh.isRefreshing = false }, 800)
+        }
         cbCpu = view.findViewById(R.id.cb_cpu)
         cbMem = view.findViewById(R.id.cb_mem)
         cbDisk1 = view.findViewById(R.id.cb_disk1)
