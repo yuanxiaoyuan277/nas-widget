@@ -74,6 +74,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Set up JDK 17
         uses: actions/setup-java@v4
@@ -112,5 +114,5 @@ jobs:
             echo "NO_CHANGE"
           else
             git commit -m "chore: paparazzi screenshots [skip ci]"
-            git push
+            (git pull --rebase origin main && git push origin main) || echo "SCREENSHOT_PUSH_SKIPPED"
           fi
