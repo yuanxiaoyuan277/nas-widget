@@ -11,19 +11,17 @@ Daemon will be stopped at the end of the build
 > Task :app:createDebugCompatibleScreenManifests
 > Task :app:extractDeepLinksDebug
 > Task :app:parseDebugLocalResources
-> Task :app:processDebugMainManifest
 > Task :app:mergeDebugResources
+> Task :app:processDebugMainManifest
 > Task :app:processDebugManifest
 > Task :app:preDebugUnitTestBuild UP-TO-DATE
 > Task :app:javaPreCompileDebug
 > Task :app:preparePaparazziDebugResources
-> Task :app:processDebugManifestForPackage
 > Task :app:javaPreCompileDebugUnitTest
+> Task :app:processDebugManifestForPackage
 > Task :app:processDebugResources
 
 > Task :app:compileDebugKotlin
-e: The daemon has terminated unexpectedly on startup attempt #1 with error code: 0. The daemon process output:
-    1. Kotlin compile daemon is ready
 w: file:///home/runner/work/nas-widget/nas-widget/app/src/main/kotlin/com/yxy/naswidget/HomeFragment.kt:81:13 'fun requestPermissions(p0: (Array<String!>..Array<out String!>), p1: Int): Unit' is deprecated. Deprecated in Java.
 w: file:///home/runner/work/nas-widget/nas-widget/app/src/main/kotlin/com/yxy/naswidget/HomeFragment.kt:135:31 'fun startActivityForResult(p0: Intent, p1: Int): Unit' is deprecated. Deprecated in Java.
 w: file:///home/runner/work/nas-widget/nas-widget/app/src/main/kotlin/com/yxy/naswidget/HomeFragment.kt:153:18 This declaration overrides a deprecated member but is not marked as deprecated itself. Please add the '@Deprecated' annotation or suppress the diagnostic.
@@ -33,8 +31,8 @@ w: file:///home/runner/work/nas-widget/nas-widget/app/src/main/kotlin/com/yxy/na
 w: file:///home/runner/work/nas-widget/nas-widget/app/src/main/kotlin/com/yxy/naswidget/SettingsFragment.kt:128:15 'fun onActivityResult(p0: Int, p1: Int, p2: Intent?): Unit' is deprecated. Deprecated in Java.
 
 > Task :app:compileDebugJavaWithJavac NO-SOURCE
-> Task :app:processDebugJavaRes
 > Task :app:bundleDebugClassesToRuntimeJar
+> Task :app:processDebugJavaRes
 > Task :app:bundleDebugClassesToCompileJar
 > Task :app:compileDebugUnitTestKotlin
 > Task :app:processDebugUnitTestJavaRes
@@ -45,7 +43,7 @@ w: file:///home/runner/work/nas-widget/nas-widget/app/src/main/kotlin/com/yxy/na
 See the Paparazzi report at: file:///home/runner/work/nas-widget/nas-widget/app/build/reports/paparazzi/debug/index.html
 
 > Task :app:recordPaparazziDebug
-gradle/actions: Writing build results to /home/runner/work/_temp/.gradle-actions/build-results/__run_2-1792658312431.json
+gradle/actions: Writing build results to /home/runner/work/_temp/.gradle-actions/build-results/__run_2-1792659330498.json
 
-BUILD SUCCESSFUL in 31s
+BUILD SUCCESSFUL in 29s
 24 actionable tasks: 24 executed
