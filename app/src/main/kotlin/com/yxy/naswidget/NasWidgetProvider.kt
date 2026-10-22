@@ -117,7 +117,7 @@ class NasWidgetProvider : AppWidgetProvider() {
                 stats?.let { s ->
                     item.setProgressBar(R.id.pb_mem, 100, s.memPercent.toInt().coerceIn(0, 100), false)
                     val memFree = (s.memTotal - s.memUsed).coerceAtLeast(0)
-                    item.setTextViewText(R.id.tv_mem, String.format("%s %.0f%%", Fmt.bytes(memFree), s.memPercent))
+                    item.setTextViewText(R.id.tv_mem, String.format("%s/%s %.0f%%", Fmt.bytes(memFree), Fmt.bytes(s.memTotal), s.memPercent))
                 } ?: item.setTextViewText(R.id.tv_mem, "--%")
                 item.setTextViewTextSize(R.id.tv_mem_label, TypedValue.COMPLEX_UNIT_PX, fs.toFloat())
                 item.setTextViewTextSize(R.id.tv_mem, TypedValue.COMPLEX_UNIT_PX, fs.toFloat())

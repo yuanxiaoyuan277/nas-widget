@@ -390,7 +390,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
             stats?.let { s ->
                 item.findViewById<ProgressBar>(R.id.pb_mem).progress = s.memPercent.toInt().coerceIn(0, 100)
                 val memFree = (s.memTotal - s.memUsed).coerceAtLeast(0)
-                item.findViewById<TextView>(R.id.tv_mem).text = String.format("%s %.0f%%", Fmt.bytes(memFree), s.memPercent)
+                item.findViewById<TextView>(R.id.tv_mem).text = String.format("%s/%s %.0f%%", Fmt.bytes(memFree), Fmt.bytes(s.memTotal), s.memPercent)
             } ?: run { item.findViewById<TextView>(R.id.tv_mem).text = "--%" }
             item.findViewById<TextView>(R.id.tv_mem_label).setTextSize(TypedValue.COMPLEX_UNIT_PX, fs.toFloat())
             item.findViewById<TextView>(R.id.tv_mem).setTextSize(TypedValue.COMPLEX_UNIT_PX, fs.toFloat())
