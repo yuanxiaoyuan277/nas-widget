@@ -66,7 +66,10 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
-                android:text="登录飞牛账号" />
+                android:text="登录飞牛账号"
+                android:textColor="@android:color/white"
+                app:backgroundTint="@color/app_primary"
+                app:cornerRadius="14dp" />
         </LinearLayout>
 
         <!-- NAS 地址卡片 -->
@@ -306,7 +309,10 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
-                android:text="深色" />
+                android:text="深色"
+                android:textColor="@android:color/white"
+                app:backgroundTint="@color/app_primary"
+                app:cornerRadius="14dp" />
         </LinearLayout>
 
         <!-- 更新卡片 -->
@@ -331,7 +337,10 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
-                android:text="检查更新" />
+                android:text="检查更新"
+                android:textColor="@android:color/white"
+                app:backgroundTint="@color/app_primary"
+                app:cornerRadius="14dp" />
 
             <TextView
                 android:id="@+id/tv_update_status"
@@ -363,14 +372,20 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
-                android:text="复制配置到剪贴板" />
+                android:text="复制配置到剪贴板"
+                android:textColor="@android:color/white"
+                app:backgroundTint="@color/app_primary"
+                app:cornerRadius="14dp" />
 
             <Button
                 android:id="@+id/btn_restore"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
-                android:text="从剪贴板恢复配置" />
+                android:text="从剪贴板恢复配置"
+                android:textColor="@android:color/white"
+                app:backgroundTint="@color/app_primary"
+                app:cornerRadius="14dp" />
 
             <TextView
                 android:id="@+id/tv_backup_status"
