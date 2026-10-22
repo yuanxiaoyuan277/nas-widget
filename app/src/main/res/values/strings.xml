@@ -8,4 +8,8 @@
     <string name="refresh_label">刷新间隔</string>
     <string name="items_label">显示的项目</string>
     <string name="save">保存</string>
+    <string name="shortcut_home">打开主页</string>
+    <string name="shortcut_home_long">打开 NAS 监控主页</string>
+    <string name="shortcut_settings">打开设置</string>
+    <string name="shortcut_settings_long">打开 NAS 监控设置</string>
 </resources>

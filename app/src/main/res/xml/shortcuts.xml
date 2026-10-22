@@ -4,8 +4,8 @@
         android:shortcutId="open_home"
         android:enabled="true"
         android:icon="@drawable/ic_home"
-        android:shortcutShortLabel="打开主页"
-        android:shortcutLongLabel="打开 NAS 监控主页">
+        android:shortcutShortLabel="@string/shortcut_home"
+        android:shortcutLongLabel="@string/shortcut_home_long">
         <intent
             android:action="android.intent.action.MAIN"
             android:targetPackage="com.yxy.naswidget"
@@ -19,8 +19,8 @@
         android:shortcutId="open_settings"
         android:enabled="true"
         android:icon="@drawable/ic_settings"
-        android:shortcutShortLabel="打开设置"
-        android:shortcutLongLabel="打开 NAS 监控设置">
+        android:shortcutShortLabel="@string/shortcut_settings"
+        android:shortcutLongLabel="@string/shortcut_settings_long">
         <intent
             android:action="android.intent.action.MAIN"
             android:targetPackage="com.yxy.naswidget"
