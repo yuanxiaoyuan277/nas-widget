@@ -91,6 +91,7 @@ object AlertNotifier {
 
     /** 发送本地通知（标题 + 内容），点击打开 App 主界面 */
     private fun send(context: Context, title: String, text: String) {
+        Prefs.addAlertHistory(context, "${Fmt.time(System.currentTimeMillis())} $title：$text")
         ensureChannel(context)
         if (!NotificationManagerCompat.from(context).areNotificationsEnabled()) return
 

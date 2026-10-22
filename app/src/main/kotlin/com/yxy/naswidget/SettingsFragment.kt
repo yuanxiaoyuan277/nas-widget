@@ -30,6 +30,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.content.FileProvider
 import androidx.fragment.app.Fragment
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import java.io.File
 
 /** 设置页：NAS 地址、wb2api 积分、外观（深色浅色）、检查更新 */
@@ -69,6 +70,7 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
     private lateinit var cbSilent: CheckBox
     private lateinit var etSilentStart: EditText
     private lateinit var etSilentEnd: EditText
+    private lateinit var btnAlertHistory: Button
     private var suppressSave = false
     private val saveHandler = Handler(Looper.getMainLooper())
     private val saveRunnable = Runnable { persist() }
@@ -105,6 +107,7 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
         cbSilent = view.findViewById(R.id.cb_silent)
         etSilentStart = view.findViewById(R.id.et_silent_start)
         etSilentEnd = view.findViewById(R.id.et_silent_end)
+        btnAlertHistory = view.findViewById(R.id.btn_alert_history)
 
         btnLogin.setOnClickListener {
             requireActivity().startActivityForResult(Intent(requireContext(), LoginActivity::class.java), REQ_LOGIN)
@@ -116,6 +119,7 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
         btnBackup.setOnClickListener { backupConfig() }
         btnRestore.setOnClickListener { restoreConfig() }
         btnShareBackup.setOnClickListener { shareBackup() }
+        btnAlertHistory.setOnClickListener { showAlertHistory() }
         tvAboutRepo.setOnClickListener {
             try {
                 startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/yuanxiaoyuan277/nas-widget")))
@@ -412,6 +416,21 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
         } catch (e: Exception) {
             tvBackupStatus.text = "导出失败：${e.message}"
         }
+    }
+
+    /** 弹出告警历史弹窗（最近 20 条，可一键清空） */
+    private fun showAlertHistory() {
+        val history = Prefs.alertHistory(requireContext())
+        val message = if (history.isEmpty()) "暂无告警记录" else history.joinToString("\n")
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle("告警历史")
+            .setMessage(message)
+            .setPositiveButton("清空") { _, _ ->
+                Prefs.clearAlertHistory(requireContext())
+                Toast.makeText(requireContext(), "告警历史已清空", Toast.LENGTH_SHORT).show()
+            }
+            .setNegativeButton("关闭", null)
+            .show()
     }
 
     private fun checkUpdate() {

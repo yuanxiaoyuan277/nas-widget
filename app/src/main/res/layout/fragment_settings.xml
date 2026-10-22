@@ -512,6 +512,16 @@
                         android:background="@drawable/edit_bg" />
                 </LinearLayout>
             </LinearLayout>
+
+            <Button
+                android:id="@+id/btn_alert_history"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:text="查看告警历史"
+                android:textColor="@android:color/white"
+                app:backgroundTint="@color/app_primary"
+                app:cornerRadius="14dp" />
         </LinearLayout>
 
         <!-- 外观卡片 -->

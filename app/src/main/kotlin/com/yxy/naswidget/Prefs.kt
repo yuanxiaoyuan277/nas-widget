@@ -52,6 +52,7 @@ object Prefs {
     private const val KEY_OFFLINE_NOTIFIED = "offline_notified"
     private const val KEY_DOCKER_RUNNING_SNAPSHOT = "docker_running_snapshot"
     private const val KEY_DOCKER_SNAPSHOT_TIME = "docker_snapshot_time"
+    private const val KEY_ALERT_HISTORY = "alert_history"
 
     const val DEFAULT_URL = "http://192.168.2.3:19254/nas"
     const val DEFAULT_NAS_BASE = "http://192.168.2.3:1223"
@@ -256,4 +257,13 @@ object Prefs {
         sp(ctx).edit().putString(KEY_DOCKER_RUNNING_SNAPSHOT, names.joinToString(",")).apply()
     fun dockerSnapshotTime(ctx: Context): Long = sp(ctx).getLong(KEY_DOCKER_SNAPSHOT_TIME, 0L)
     fun setDockerSnapshotTime(ctx: Context, t: Long) = sp(ctx).edit().putLong(KEY_DOCKER_SNAPSHOT_TIME, t).apply()
+
+    // === 告警历史（最近告警记录，最多 20 条，每条一行「HH:mm:ss 标题：内容」） ===
+    fun alertHistory(ctx: Context): List<String> =
+        sp(ctx).getString(KEY_ALERT_HISTORY, "")?.split("\n")?.filter { it.isNotEmpty() } ?: emptyList()
+    fun addAlertHistory(ctx: Context, entry: String) {
+        val updated = (listOf(entry) + alertHistory(ctx)).take(20)
+        sp(ctx).edit().putString(KEY_ALERT_HISTORY, updated.joinToString("\n")).apply()
+    }
+    fun clearAlertHistory(ctx: Context) = sp(ctx).edit().remove(KEY_ALERT_HISTORY).apply()
 }
