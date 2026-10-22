@@ -12,8 +12,8 @@ Daemon will be stopped at the end of the build
 > Task :app:extractDeepLinksDebug
 > Task :app:parseDebugLocalResources
 > Task :app:processDebugMainManifest
-> Task :app:processDebugManifest
 > Task :app:mergeDebugResources
+> Task :app:processDebugManifest
 > Task :app:preDebugUnitTestBuild UP-TO-DATE
 > Task :app:javaPreCompileDebug
 > Task :app:preparePaparazziDebugResources
@@ -22,10 +22,10 @@ Daemon will be stopped at the end of the build
 > Task :app:processDebugResources
 
 > Task :app:compileDebugKotlin
-w: file:///home/runner/work/nas-widget/nas-widget/app/src/main/kotlin/com/yxy/naswidget/HomeFragment.kt:125:13 'fun requestPermissions(p0: (Array<String!>..Array<out String!>), p1: Int): Unit' is deprecated. Deprecated in Java.
-w: file:///home/runner/work/nas-widget/nas-widget/app/src/main/kotlin/com/yxy/naswidget/HomeFragment.kt:293:31 'fun startActivityForResult(p0: Intent, p1: Int): Unit' is deprecated. Deprecated in Java.
-w: file:///home/runner/work/nas-widget/nas-widget/app/src/main/kotlin/com/yxy/naswidget/HomeFragment.kt:311:18 This declaration overrides a deprecated member but is not marked as deprecated itself. Please add the '@Deprecated' annotation or suppress the diagnostic.
-w: file:///home/runner/work/nas-widget/nas-widget/app/src/main/kotlin/com/yxy/naswidget/HomeFragment.kt:312:15 'fun onActivityResult(p0: Int, p1: Int, p2: Intent?): Unit' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/nas-widget/nas-widget/app/src/main/kotlin/com/yxy/naswidget/HomeFragment.kt:126:13 'fun requestPermissions(p0: (Array<String!>..Array<out String!>), p1: Int): Unit' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/nas-widget/nas-widget/app/src/main/kotlin/com/yxy/naswidget/HomeFragment.kt:296:31 'fun startActivityForResult(p0: Intent, p1: Int): Unit' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/nas-widget/nas-widget/app/src/main/kotlin/com/yxy/naswidget/HomeFragment.kt:314:18 This declaration overrides a deprecated member but is not marked as deprecated itself. Please add the '@Deprecated' annotation or suppress the diagnostic.
+w: file:///home/runner/work/nas-widget/nas-widget/app/src/main/kotlin/com/yxy/naswidget/HomeFragment.kt:315:15 'fun onActivityResult(p0: Int, p1: Int, p2: Intent?): Unit' is deprecated. Deprecated in Java.
 w: file:///home/runner/work/nas-widget/nas-widget/app/src/main/kotlin/com/yxy/naswidget/SettingsFragment.kt:137:31 'fun startActivityForResult(p0: Intent, p1: Int): Unit' is deprecated. Deprecated in Java.
 w: file:///home/runner/work/nas-widget/nas-widget/app/src/main/kotlin/com/yxy/naswidget/SettingsFragment.kt:225:18 This declaration overrides a deprecated member but is not marked as deprecated itself. Please add the '@Deprecated' annotation or suppress the diagnostic.
 w: file:///home/runner/work/nas-widget/nas-widget/app/src/main/kotlin/com/yxy/naswidget/SettingsFragment.kt:226:15 'fun onActivityResult(p0: Int, p1: Int, p2: Intent?): Unit' is deprecated. Deprecated in Java.
@@ -43,7 +43,7 @@ w: file:///home/runner/work/nas-widget/nas-widget/app/src/main/kotlin/com/yxy/na
 See the Paparazzi report at: file:///home/runner/work/nas-widget/nas-widget/app/build/reports/paparazzi/debug/index.html
 
 > Task :app:recordPaparazziDebug
-gradle/actions: Writing build results to /home/runner/work/_temp/.gradle-actions/build-results/__run_2-1792703886125.json
+gradle/actions: Writing build results to /home/runner/work/_temp/.gradle-actions/build-results/__run_2-1792704926228.json
 
-BUILD SUCCESSFUL in 51s
+BUILD SUCCESSFUL in 48s
 24 actionable tasks: 24 executed
