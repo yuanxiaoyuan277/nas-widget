@@ -14,7 +14,7 @@ class LayoutSnapshotTest {
     @get:Rule
     val paparazzi = Paparazzi(
         deviceConfig = DeviceConfig.PIXEL_5,
-        theme = "com.yxy.naswidget:style/Theme.NasWidget"
+        theme = "com.yxy.naswidget:Theme.NasWidget"
     )
 
     @Test
