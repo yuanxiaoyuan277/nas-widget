@@ -64,7 +64,7 @@ class NasWidgetProvider : AppWidgetProvider() {
             val fs = Prefs.fontSize(context)
 
             // 顶部
-            views.setViewVisibility(R.id.row_uptime, View.VISIBLE)
+            views.setViewVisibility(R.id.row_uptime, if (showUptime) View.VISIBLE else View.GONE)
             views.setTextViewTextSize(R.id.tv_title, TypedValue.COMPLEX_UNIT_PX, (fs + 3).toFloat())
             views.setTextViewTextSize(R.id.tv_uptime, TypedValue.COMPLEX_UNIT_PX, (fs + 2).toFloat())
 
@@ -184,7 +184,7 @@ class NasWidgetProvider : AppWidgetProvider() {
             }
 
             // 底部积分
-            views.setViewVisibility(R.id.row_wb2api, View.VISIBLE)
+            views.setViewVisibility(R.id.row_wb2api, if (showWb2api) View.VISIBLE else View.GONE)
             if (showWb2api) {
                 wb2api?.onSuccess { s ->
                     views.setTextViewText(R.id.tv_wb2api, "${s.totalCredits} · ${s.healthyCount}/${s.accountCount}")
