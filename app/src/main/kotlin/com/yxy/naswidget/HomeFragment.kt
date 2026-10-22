@@ -904,15 +904,15 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
             .show()
     }
 
-    /** 查看各磁盘明细：点「存储」行弹出每块盘的已用/总量/使用率 */
+    /** 查看各磁盘明细：点「存储」行弹出每块盘的可用/总量/使用率（按已用率降序，最满的盘排最前） */
     private fun showDiskDetail() {
         val s = lastStats
         if (s == null || s.disks.isEmpty()) {
             Toast.makeText(requireContext(), "暂无磁盘数据，请稍候刷新", Toast.LENGTH_SHORT).show()
             return
         }
-        val lines = s.disks.map { d ->
-            String.format("%s：%s / %s（已用 %.0f%%）", d.name, Fmt.bytes(d.used), Fmt.bytes(d.total), d.usePercent)
+        val lines = s.disks.sortedByDescending { it.usePercent }.map { d ->
+            String.format("%s：可用 %s / %s（已用 %.0f%%）", d.name, Fmt.bytes(d.total - d.used), Fmt.bytes(d.total), d.usePercent)
         }
         MaterialAlertDialogBuilder(requireContext())
             .setTitle("磁盘明细")
