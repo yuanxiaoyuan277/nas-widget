@@ -7,6 +7,7 @@ import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -54,6 +55,8 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
     private lateinit var btnBackup: Button
     private lateinit var btnRestore: Button
     private lateinit var tvBackupStatus: TextView
+    private lateinit var tvAboutVersion: TextView
+    private lateinit var tvAboutRepo: TextView
     private var suppressSave = false
     private val saveHandler = Handler(Looper.getMainLooper())
     private val saveRunnable = Runnable { persist() }
@@ -77,6 +80,8 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
         btnBackup = view.findViewById(R.id.btn_backup)
         btnRestore = view.findViewById(R.id.btn_restore)
         tvBackupStatus = view.findViewById(R.id.tv_backup_status)
+        tvAboutVersion = view.findViewById(R.id.tv_about_version)
+        tvAboutRepo = view.findViewById(R.id.tv_about_repo)
 
         btnLogin.setOnClickListener {
             requireActivity().startActivityForResult(Intent(requireContext(), LoginActivity::class.java), REQ_LOGIN)
@@ -85,6 +90,13 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
         btnCheckUpdate.setOnClickListener { checkUpdate() }
         btnBackup.setOnClickListener { backupConfig() }
         btnRestore.setOnClickListener { restoreConfig() }
+        tvAboutRepo.setOnClickListener {
+            try {
+                startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/yuanxiaoyuan277/nas-widget")))
+            } catch (_: Exception) {
+                Toast.makeText(requireContext(), "无法打开浏览器", Toast.LENGTH_SHORT).show()
+            }
+        }
         cbWb2api.setOnCheckedChangeListener { _, _ -> if (!suppressSave) scheduleSave() }
         watchEditText(etUrl)
         watchEditText(etWb2apiBase)
@@ -149,6 +161,7 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
         etWb2apiBase.setText(Prefs.wb2apiBase(requireContext()))
         etWb2apiKey.setText(Prefs.wb2apiKey(requireContext()))
         tvVersion.text = "v${UpdateChecker.localVersion(requireContext())}"
+        tvAboutVersion.text = "v${UpdateChecker.localVersion(requireContext())}"
         updateThemeButton()
         suppressSave = false
     }
