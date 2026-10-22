@@ -105,6 +105,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
     private lateinit var tvSysOs: TextView
     private lateinit var tvSysUptime: TextView
     private lateinit var tvSysTime: TextView
+    private lateinit var tvSysUrl: TextView
     private lateinit var tvSysNet: TextView
     private lateinit var tvSysTemp: TextView
     private lateinit var tvSysStorage: TextView
@@ -217,6 +218,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         tvSysOs = view.findViewById(R.id.tv_sys_os)
         tvSysUptime = view.findViewById(R.id.tv_sys_uptime)
         tvSysTime = view.findViewById(R.id.tv_sys_time)
+        tvSysUrl = view.findViewById(R.id.tv_sys_url)
         tvSysNet = view.findViewById(R.id.tv_sys_net)
         tvSysTemp = view.findViewById(R.id.tv_sys_temp)
         tvSysStorage = view.findViewById(R.id.tv_sys_storage)
@@ -259,6 +261,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
             "CPU" to tvSysCpu,
             "系统" to tvSysOs,
             "更新" to tvSysTime,
+            "数据源" to tvSysUrl,
             "网络" to tvSysNet
         )
         // 「内存」「温度」「存储」「峰值」行点击弹出明细
@@ -587,6 +590,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         tvSysTime.text = stats?.let { s ->
             if (s.latencyMs > 0) "${Fmt.time(s.fetchTime)} · ${s.latencyMs}ms" else Fmt.time(s.fetchTime)
         } ?: "--"
+        tvSysUrl.text = Prefs.url(requireContext())
         tvSysNet.text = stats?.let { "↓${Fmt.speed(it.netDown)} ↑${Fmt.speed(it.netUp)}" } ?: "--"
         tvSysTraffic.text = trafficText()
         tvSysAlertHistory.text = alertHistoryLabel()
