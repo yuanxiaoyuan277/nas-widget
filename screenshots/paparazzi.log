@@ -11,14 +11,14 @@ Daemon will be stopped at the end of the build
 > Task :app:createDebugCompatibleScreenManifests
 > Task :app:extractDeepLinksDebug
 > Task :app:parseDebugLocalResources
+> Task :app:mergeDebugResources
 > Task :app:processDebugMainManifest
 > Task :app:processDebugManifest
-> Task :app:processDebugManifestForPackage
-> Task :app:mergeDebugResources
-> Task :app:javaPreCompileDebug
 > Task :app:preDebugUnitTestBuild UP-TO-DATE
+> Task :app:javaPreCompileDebug
 > Task :app:preparePaparazziDebugResources
 > Task :app:javaPreCompileDebugUnitTest
+> Task :app:processDebugManifestForPackage
 > Task :app:processDebugResources
 
 > Task :app:compileDebugKotlin
@@ -31,8 +31,8 @@ w: file:///home/runner/work/nas-widget/nas-widget/app/src/main/kotlin/com/yxy/na
 w: file:///home/runner/work/nas-widget/nas-widget/app/src/main/kotlin/com/yxy/naswidget/SettingsFragment.kt:185:15 'fun onActivityResult(p0: Int, p1: Int, p2: Intent?): Unit' is deprecated. Deprecated in Java.
 
 > Task :app:compileDebugJavaWithJavac NO-SOURCE
-> Task :app:processDebugJavaRes
 > Task :app:bundleDebugClassesToRuntimeJar
+> Task :app:processDebugJavaRes
 > Task :app:bundleDebugClassesToCompileJar
 > Task :app:compileDebugUnitTestKotlin
 > Task :app:processDebugUnitTestJavaRes
@@ -43,7 +43,7 @@ w: file:///home/runner/work/nas-widget/nas-widget/app/src/main/kotlin/com/yxy/na
 See the Paparazzi report at: file:///home/runner/work/nas-widget/nas-widget/app/build/reports/paparazzi/debug/index.html
 
 > Task :app:recordPaparazziDebug
-gradle/actions: Writing build results to /home/runner/work/_temp/.gradle-actions/build-results/__run_2-1792699110706.json
+gradle/actions: Writing build results to /home/runner/work/_temp/.gradle-actions/build-results/__run_2-1792699340949.json
 
-BUILD SUCCESSFUL in 55s
+BUILD SUCCESSFUL in 43s
 24 actionable tasks: 24 executed
