@@ -157,6 +157,9 @@ val dockerContainerOrder = Comparator<DockerContainer> { a, b ->
 
 /** 工具：字节转可读、秒转时长 */
 object Fmt {
+    /** 超阈值警示色（亮红，玻璃/深色底上均可见） */
+    val ALERT_COLOR = 0xFFFF5252.toInt()
+
     fun bytes(b: Long): String {
         val gb = 1024.0 * 1024 * 1024
         val mb = 1024.0 * 1024

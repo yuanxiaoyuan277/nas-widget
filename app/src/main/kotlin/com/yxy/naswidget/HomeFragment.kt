@@ -347,6 +347,9 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         val showDocker = Prefs.showDocker(requireContext())
         val showWb2api = Prefs.showWb2api(requireContext())
         val fs = Prefs.fontSize(requireContext())
+        val usageThr = Prefs.alertUsageThreshold(requireContext()).coerceIn(1, 100)
+        val cpuTempThr = Prefs.alertCpuTempThreshold(requireContext()).coerceIn(1, 120)
+        val nvmeTempThr = Prefs.alertNvmeTempThreshold(requireContext()).coerceIn(1, 120)
 
         val contentArea = root.findViewById<FrameLayout>(R.id.content_area)
         contentArea.removeAllViews()
@@ -390,6 +393,9 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
                 item.findViewById<ProgressBar>(R.id.pb_cpu).progress = s.cpuPercent.toInt().coerceIn(0, 100)
                 item.findViewById<ProgressBar>(R.id.pb_cpu).progressTintList = ColorStateList.valueOf(Fmt.levelColor(s.cpuPercent))
                 item.findViewById<TextView>(R.id.tv_cpu).text = tempPct(s.tempCpu, s.cpuPercent, showTemp)
+                if (s.cpuPercent >= usageThr || (s.tempCpu?.let { it >= cpuTempThr } == true)) {
+                    item.findViewById<TextView>(R.id.tv_cpu).setTextColor(Fmt.ALERT_COLOR)
+                }
             } ?: run { item.findViewById<TextView>(R.id.tv_cpu).text = "--%" }
             item.findViewById<TextView>(R.id.tv_cpu_label).setTextSize(TypedValue.COMPLEX_UNIT_PX, fs.toFloat())
             item.findViewById<TextView>(R.id.tv_cpu).setTextSize(TypedValue.COMPLEX_UNIT_PX, fs.toFloat())
@@ -403,6 +409,9 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
                 item.findViewById<ProgressBar>(R.id.pb_mem).progressTintList = ColorStateList.valueOf(Fmt.levelColor(s.memPercent))
                 val memFree = (s.memTotal - s.memUsed).coerceAtLeast(0)
                 item.findViewById<TextView>(R.id.tv_mem).text = String.format("%s/%s %.0f%%", Fmt.bytes(memFree), Fmt.bytes(s.memTotal), s.memPercent)
+                if (s.memPercent >= usageThr) {
+                    item.findViewById<TextView>(R.id.tv_mem).setTextColor(Fmt.ALERT_COLOR)
+                }
             } ?: run { item.findViewById<TextView>(R.id.tv_mem).text = "--%" }
             item.findViewById<TextView>(R.id.tv_mem_label).setTextSize(TypedValue.COMPLEX_UNIT_PX, fs.toFloat())
             item.findViewById<TextView>(R.id.tv_mem).setTextSize(TypedValue.COMPLEX_UNIT_PX, fs.toFloat())
@@ -418,6 +427,9 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
                     item.findViewById<ProgressBar>(R.id.pb_disk1).progress = d.usePercent.toInt().coerceIn(0, 100)
                     item.findViewById<ProgressBar>(R.id.pb_disk1).progressTintList = ColorStateList.valueOf(Fmt.levelColor(d.usePercent))
                     item.findViewById<TextView>(R.id.tv_disk1).text = diskText(s.tempNvme, d.usePercent, d.total - d.used, showTemp)
+                    if (d.usePercent >= usageThr || (s.tempNvme?.let { it >= nvmeTempThr } == true)) {
+                        item.findViewById<TextView>(R.id.tv_disk1).setTextColor(Fmt.ALERT_COLOR)
+                    }
                 } else {
                     item.findViewById<TextView>(R.id.tv_disk1).text = "--%"
                 }
@@ -436,6 +448,9 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
                     item.findViewById<ProgressBar>(R.id.pb_disk2).progress = d.usePercent.toInt().coerceIn(0, 100)
                     item.findViewById<ProgressBar>(R.id.pb_disk2).progressTintList = ColorStateList.valueOf(Fmt.levelColor(d.usePercent))
                     item.findViewById<TextView>(R.id.tv_disk2).text = diskText(null, d.usePercent, d.total - d.used, false)
+                    if (d.usePercent >= usageThr) {
+                        item.findViewById<TextView>(R.id.tv_disk2).setTextColor(Fmt.ALERT_COLOR)
+                    }
                 } else {
                     item.findViewById<TextView>(R.id.tv_disk2).text = "--%"
                 }

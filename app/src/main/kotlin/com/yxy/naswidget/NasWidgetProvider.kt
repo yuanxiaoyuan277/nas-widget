@@ -79,6 +79,9 @@ class NasWidgetProvider : AppWidgetProvider() {
             val showDocker = Prefs.showDocker(context)
             val showWb2api = Prefs.showWb2api(context)
             val fs = Prefs.fontSize(context)
+            val usageThr = Prefs.alertUsageThreshold(context).coerceIn(1, 100)
+            val cpuTempThr = Prefs.alertCpuTempThreshold(context).coerceIn(1, 120)
+            val nvmeTempThr = Prefs.alertNvmeTempThreshold(context).coerceIn(1, 120)
 
             // 顶部
             views.setViewVisibility(R.id.row_uptime, if (showUptime) View.VISIBLE else View.GONE)
@@ -107,6 +110,9 @@ class NasWidgetProvider : AppWidgetProvider() {
                     item.setProgressBar(R.id.pb_cpu, 100, s.cpuPercent.toInt().coerceIn(0, 100), false)
                     item.setColorStateList(R.id.pb_cpu, "setProgressTintList", ColorStateList.valueOf(Fmt.levelColor(s.cpuPercent)))
                     item.setTextViewText(R.id.tv_cpu, tempPct(s.tempCpu, s.cpuPercent, showTemp))
+                    if (s.cpuPercent >= usageThr || (s.tempCpu?.let { it >= cpuTempThr } == true)) {
+                        item.setTextColor(R.id.tv_cpu, Fmt.ALERT_COLOR)
+                    }
                 } ?: item.setTextViewText(R.id.tv_cpu, "--%")
                 item.setTextViewTextSize(R.id.tv_cpu_label, TypedValue.COMPLEX_UNIT_PX, fs.toFloat())
                 item.setTextViewTextSize(R.id.tv_cpu, TypedValue.COMPLEX_UNIT_PX, fs.toFloat())
@@ -121,6 +127,9 @@ class NasWidgetProvider : AppWidgetProvider() {
                     item.setColorStateList(R.id.pb_mem, "setProgressTintList", ColorStateList.valueOf(Fmt.levelColor(s.memPercent)))
                     val memFree = (s.memTotal - s.memUsed).coerceAtLeast(0)
                     item.setTextViewText(R.id.tv_mem, String.format("%s/%s %.0f%%", Fmt.bytes(memFree), Fmt.bytes(s.memTotal), s.memPercent))
+                    if (s.memPercent >= usageThr) {
+                        item.setTextColor(R.id.tv_mem, Fmt.ALERT_COLOR)
+                    }
                 } ?: item.setTextViewText(R.id.tv_mem, "--%")
                 item.setTextViewTextSize(R.id.tv_mem_label, TypedValue.COMPLEX_UNIT_PX, fs.toFloat())
                 item.setTextViewTextSize(R.id.tv_mem, TypedValue.COMPLEX_UNIT_PX, fs.toFloat())
@@ -137,6 +146,9 @@ class NasWidgetProvider : AppWidgetProvider() {
                         item.setProgressBar(R.id.pb_disk1, 100, d.usePercent.toInt().coerceIn(0, 100), false)
                         item.setColorStateList(R.id.pb_disk1, "setProgressTintList", ColorStateList.valueOf(Fmt.levelColor(d.usePercent)))
                         item.setTextViewText(R.id.tv_disk1, diskText(s.tempNvme, d.usePercent, d.total - d.used, showTemp))
+                        if (d.usePercent >= usageThr || (s.tempNvme?.let { it >= nvmeTempThr } == true)) {
+                            item.setTextColor(R.id.tv_disk1, Fmt.ALERT_COLOR)
+                        }
                     } else {
                         item.setTextViewText(R.id.tv_disk1, "--%")
                     }
@@ -156,6 +168,9 @@ class NasWidgetProvider : AppWidgetProvider() {
                         item.setProgressBar(R.id.pb_disk2, 100, d.usePercent.toInt().coerceIn(0, 100), false)
                         item.setColorStateList(R.id.pb_disk2, "setProgressTintList", ColorStateList.valueOf(Fmt.levelColor(d.usePercent)))
                         item.setTextViewText(R.id.tv_disk2, diskText(null, d.usePercent, d.total - d.used, false))
+                        if (d.usePercent >= usageThr) {
+                            item.setTextColor(R.id.tv_disk2, Fmt.ALERT_COLOR)
+                        }
                     } else {
                         item.setTextViewText(R.id.tv_disk2, "--%")
                     }
