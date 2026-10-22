@@ -82,6 +82,7 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
     private lateinit var etAlertUsage: EditText
     private lateinit var etAlertCpuTemp: EditText
     private lateinit var etAlertNvmeTemp: EditText
+    private lateinit var btnAlertPreset: Button
     private lateinit var cbSilent: CheckBox
     private lateinit var etSilentStart: EditText
     private lateinit var etSilentEnd: EditText
@@ -137,6 +138,7 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
         etAlertUsage = view.findViewById(R.id.et_alert_usage)
         etAlertCpuTemp = view.findViewById(R.id.et_alert_cpu_temp)
         etAlertNvmeTemp = view.findViewById(R.id.et_alert_nvme_temp)
+        btnAlertPreset = view.findViewById(R.id.btn_alert_preset)
         cbSilent = view.findViewById(R.id.cb_silent)
         etSilentStart = view.findViewById(R.id.et_silent_start)
         etSilentEnd = view.findViewById(R.id.et_silent_end)
@@ -167,6 +169,7 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
         btnRestore.setOnClickListener { restoreConfig() }
         btnShareBackup.setOnClickListener { shareBackup() }
         btnAlertHistory.setOnClickListener { showAlertHistory() }
+        btnAlertPreset.setOnClickListener { showThresholdPreset() }
         btnTempSilent.setOnClickListener { toggleTempSilent() }
         btnTestNotif.setOnClickListener {
             val ok = AlertNotifier.sendTest(requireContext())
@@ -332,6 +335,33 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
         Prefs.setTheme(requireContext(), next)
         AppCompatDelegate.setDefaultNightMode(Prefs.nightMode(requireContext()))
         updateThemeButton()
+    }
+
+    /** 告警阈值三档预设：均衡（默认）/ 宽松 / 激进 */
+    private data class ThresholdPreset(val label: String, val usage: Int, val cpuTemp: Int, val nvmeTemp: Int)
+    private val thresholdPresets = listOf(
+        ThresholdPreset("均衡 · 使用率90% / CPU85° / NVMe70°", 90, 85, 70),
+        ThresholdPreset("宽松 · 使用率95% / CPU90° / NVMe80°", 95, 90, 80),
+        ThresholdPreset("激进 · 使用率80% / CPU75° / NVMe60°", 80, 75, 60)
+    )
+
+    /** 弹出阈值预设选择：一键把三个阈值切到对应档位并保存 */
+    private fun showThresholdPreset() {
+        val items = thresholdPresets.map { it.label }.toTypedArray()
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle("阈值预设")
+            .setItems(items) { _, which ->
+                val p = thresholdPresets[which]
+                suppressSave = true
+                etAlertUsage.setText(p.usage.toString())
+                etAlertCpuTemp.setText(p.cpuTemp.toString())
+                etAlertNvmeTemp.setText(p.nvmeTemp.toString())
+                suppressSave = false
+                persist()
+                Toast.makeText(requireContext(), "已应用预设：${p.label}", Toast.LENGTH_SHORT).show()
+            }
+            .setNegativeButton("取消", null)
+            .show()
     }
 
     /** 临时静默：一键开启 1 小时免打扰（到点自动恢复），已开启时再次点击取消 */

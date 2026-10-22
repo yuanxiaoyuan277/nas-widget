@@ -538,6 +538,16 @@
                 </LinearLayout>
             </LinearLayout>
 
+            <Button
+                android:id="@+id/btn_alert_preset"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:text="阈值预设：均衡 / 宽松 / 激进"
+                android:textColor="@android:color/white"
+                app:backgroundTint="@color/app_secondary"
+                app:cornerRadius="14dp" />
+
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
