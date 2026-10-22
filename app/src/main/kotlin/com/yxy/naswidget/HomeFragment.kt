@@ -1071,21 +1071,33 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         return if (n > 0) "$n 条 ›" else "无 ›"
     }
 
-    /** 弹出告警历史弹窗（最近 20 条，可清空 / 分享） */
+    /** 弹出告警历史弹窗（最近 20 条，可复制 / 分享 / 清空） */
     private fun showAlertHistory() {
         val history = Prefs.alertHistory(requireContext())
         val message = if (history.isEmpty()) "暂无告警记录" else history.joinToString("\n")
         MaterialAlertDialogBuilder(requireContext())
             .setTitle("告警历史")
             .setMessage(message)
+            .setPositiveButton("复制") { _, _ -> copyAlertHistory(history) }
             .setNeutralButton("分享") { _, _ -> shareAlertHistory(history) }
-            .setPositiveButton("清空") { _, _ ->
+            .setNegativeButton("清空") { _, _ ->
                 Prefs.clearAlertHistory(requireContext())
                 tvSysAlertHistory.text = alertHistoryLabel()
                 Toast.makeText(requireContext(), "告警历史已清空", Toast.LENGTH_SHORT).show()
             }
-            .setNegativeButton("关闭", null)
             .show()
+    }
+
+    /** 复制告警历史到剪贴板（无记录时提示） */
+    private fun copyAlertHistory(history: List<String>) {
+        if (history.isEmpty()) {
+            Toast.makeText(requireContext(), "暂无告警记录", Toast.LENGTH_SHORT).show()
+            return
+        }
+        val text = "NAS 告警历史（最近 ${history.size} 条）\n" + history.joinToString("\n")
+        val cm = requireContext().getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+        cm.setPrimaryClip(ClipData.newPlainText("nas-alert-history", text))
+        Toast.makeText(requireContext(), "告警历史已复制", Toast.LENGTH_SHORT).show()
     }
 
     /** 分享告警历史（走系统分享，可发到微信/QQ 等） */
