@@ -39,6 +39,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
     private lateinit var cbDocker: SwitchCompat
     private lateinit var dockerListContainer: LinearLayout
     private lateinit var btnRefreshDocker: Button
+    private lateinit var etDockerSearch: EditText
     private lateinit var sbCpuX: SeekBar
     private lateinit var sbCpuY: SeekBar
     private lateinit var sbMemX: SeekBar
@@ -90,6 +91,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         cbDocker = view.findViewById(R.id.cb_docker)
         dockerListContainer = view.findViewById(R.id.docker_list_container)
         btnRefreshDocker = view.findViewById(R.id.btn_refresh_docker)
+        etDockerSearch = view.findViewById(R.id.et_docker_search)
         sbCpuX = view.findViewById(R.id.sb_cpu_x)
         sbCpuY = view.findViewById(R.id.sb_cpu_y)
         sbMemX = view.findViewById(R.id.sb_mem_x)
@@ -128,6 +130,11 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
 
         // Docker 配置
         btnRefreshDocker.setOnClickListener { loadDockerContainers() }
+        etDockerSearch.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+            override fun afterTextChanged(s: Editable?) { applyDockerFilter() }
+        })
 
         // 强制登录门
         if (!Prefs.isLoggedIn(requireContext())) {
@@ -511,6 +518,17 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
             cb.setOnCheckedChangeListener { _, _ -> if (!suppressSave) persist() }
             dockerCheckboxes.add(cb)
             dockerListContainer.addView(item)
+        }
+        applyDockerFilter()
+    }
+
+    /** 按搜索框关键字过滤容器列表（只隐藏 item，不重建，避免丢失勾选状态） */
+    private fun applyDockerFilter() {
+        val query = etDockerSearch.text.toString().trim().lowercase()
+        for (cb in dockerCheckboxes) {
+            val name = cb.tag as? String ?: ""
+            val visible = query.isEmpty() || name.lowercase().contains(query)
+            (cb.parent as? View)?.visibility = if (visible) View.VISIBLE else View.GONE
         }
     }
 
