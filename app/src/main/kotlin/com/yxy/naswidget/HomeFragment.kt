@@ -63,6 +63,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
     private lateinit var btnDockerRestartAll: Button
     private lateinit var etDockerSearch: EditText
     private lateinit var btnDockerFilter: Button
+    private lateinit var btnDockerCopy: Button
     private lateinit var tvDockerCount: TextView
     private lateinit var sbCpuX: SeekBar
     private lateinit var sbCpuY: SeekBar
@@ -179,6 +180,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         btnDockerRestartAll = view.findViewById(R.id.btn_docker_restart_all)
         etDockerSearch = view.findViewById(R.id.et_docker_search)
         btnDockerFilter = view.findViewById(R.id.btn_docker_filter)
+        btnDockerCopy = view.findViewById(R.id.btn_docker_copy)
         tvDockerCount = view.findViewById(R.id.tv_docker_count)
         sbCpuX = view.findViewById(R.id.sb_cpu_x)
         sbCpuY = view.findViewById(R.id.sb_cpu_y)
@@ -342,6 +344,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
             buildDockerCheckboxes(dockerContainers)
             schedulePreviewRefresh()
         }
+        btnDockerCopy.setOnClickListener { copyDockerList() }
         btnDockerStartAll.setOnClickListener { batchContainerAction(ContainerAction.START) }
         btnDockerStopAll.setOnClickListener { batchContainerAction(ContainerAction.STOP) }
         btnDockerRestartAll.setOnClickListener { batchContainerAction(ContainerAction.RESTART) }
@@ -1340,6 +1343,26 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         val checked = dockerCheckboxes.count { it.isChecked }
         tvDockerCount.text = if (total == 0) "暂无容器，点击「刷新」加载"
         else "$running 运行 / $total 总计 · 已勾选 $checked"
+    }
+
+    /** 一键复制容器清单（名称/状态/CPU/内存/镜像）到剪贴板，方便分享或留档 */
+    private fun copyDockerList() {
+        if (dockerContainers.isEmpty()) {
+            Toast.makeText(requireContext(), "暂无容器数据，请先「刷新」加载", Toast.LENGTH_SHORT).show()
+            return
+        }
+        val running = dockerContainers.count { it.running }
+        val lines = mutableListOf<String>()
+        lines.add("Docker 容器（$running 运行 / ${dockerContainers.size} 总计）")
+        for (c in dockerContainers.sortedWith(dockerComparator(Prefs.dockerSort(requireContext())))) {
+            val detail = if (c.running) c.detailText else c.stateText
+            val image = c.image.takeIf { it.isNotEmpty() }?.let { " · $it" } ?: ""
+            lines.add("- ${c.name}：$detail$image")
+        }
+        val text = lines.joinToString("\n")
+        val cm = requireContext().getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+        cm.setPrimaryClip(ClipData.newPlainText("docker-list", text))
+        Toast.makeText(requireContext(), "容器清单已复制（${dockerContainers.size} 个）", Toast.LENGTH_SHORT).show()
     }
 
     /** 点击容器行弹出详情（状态/详情/CPU/内存/运行时长） */
