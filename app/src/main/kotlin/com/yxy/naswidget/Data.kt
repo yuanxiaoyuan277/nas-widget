@@ -81,6 +81,8 @@ data class NasStats(
     val uptimeSec: Long,
     val netDown: Long,
     val netUp: Long,
+    val cpuModel: String,
+    val osVersion: String,
     val fetchTime: Long
 ) {
     companion object {
@@ -118,6 +120,9 @@ data class NasStats(
             val net = root.optJSONObject("net")
             val netDown = net?.optLong("down", 0L) ?: 0L
             val netUp = net?.optLong("up", 0L) ?: 0L
+            val sys = root.optJSONObject("sys")
+            val cpuModel = sys?.optString("cpuModel", "") ?: ""
+            val osVersion = sys?.optString("osVersion", "") ?: ""
 
             return NasStats(
                 cpuPercent = cpuPercent,
@@ -131,6 +136,8 @@ data class NasStats(
                 uptimeSec = uptime,
                 netDown = netDown,
                 netUp = netUp,
+                cpuModel = cpuModel,
+                osVersion = osVersion,
                 fetchTime = System.currentTimeMillis()
             )
         }

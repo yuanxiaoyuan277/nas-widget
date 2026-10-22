@@ -40,6 +40,9 @@ class LayoutSnapshotTest {
     @Test
     fun homeLight() {
         val view: View = paparazzi.inflate(R.layout.fragment_home)
+        view.findViewById<TextView>(R.id.tv_sys_cpu).text = "Intel Core i5-8265U @ 1.60GHz"
+        view.findViewById<TextView>(R.id.tv_sys_os).text = "fnOS 1.2.0800"
+        view.findViewById<TextView>(R.id.tv_sys_uptime).text = "12天3时"
         paparazzi.snapshot(view, "home-light")
     }
 

@@ -65,6 +65,9 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
     private lateinit var etDockerY: EditText
     private lateinit var etNetX: EditText
     private lateinit var etNetY: EditText
+    private lateinit var tvSysCpu: TextView
+    private lateinit var tvSysOs: TextView
+    private lateinit var tvSysUptime: TextView
 
     private val handler = Handler(Looper.getMainLooper())
     private var dockerContainers: List<DockerContainer> = emptyList()
@@ -118,6 +121,9 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         etDockerY = view.findViewById(R.id.et_docker_y)
         etNetX = view.findViewById(R.id.et_net_x)
         etNetY = view.findViewById(R.id.et_net_y)
+        tvSysCpu = view.findViewById(R.id.tv_sys_cpu)
+        tvSysOs = view.findViewById(R.id.tv_sys_os)
+        tvSysUptime = view.findViewById(R.id.tv_sys_uptime)
 
         widgetId = requireActivity().intent.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, AppWidgetManager.INVALID_APPWIDGET_ID)
         if (widgetId != AppWidgetManager.INVALID_APPWIDGET_ID) {
@@ -323,6 +329,11 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         }.onFailure {
             root.findViewById<TextView>(R.id.tv_uptime).text = "连接失败"
         }
+
+        // 系统信息卡片（CPU 型号 / 系统版本 / 运行时长）
+        tvSysCpu.text = stats?.cpuModel?.takeIf { it.isNotEmpty() } ?: "--"
+        tvSysOs.text = stats?.osVersion?.takeIf { it.isNotEmpty() } ?: "--"
+        tvSysUptime.text = stats?.let { Fmt.uptime(it.uptimeSec) } ?: "--"
 
         fun addTo(comp: String, v: View) {
             contentArea.addView(v)
