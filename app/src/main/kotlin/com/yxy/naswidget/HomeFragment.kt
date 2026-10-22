@@ -917,8 +917,10 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
             Toast.makeText(requireContext(), "暂无磁盘数据，请稍候刷新", Toast.LENGTH_SHORT).show()
             return
         }
-        val lines = s.disks.sortedByDescending { it.usePercent }.map { d ->
-            String.format("%s：可用 %s / %s（已用 %.0f%%）", d.name, Fmt.bytes(d.total - d.used), Fmt.bytes(d.total), d.usePercent)
+        val lines = mutableListOf<String>()
+        lines.add(String.format("总览：已用 %s / 总量 %s（使用率 %.0f%%）", Fmt.bytes(s.storageUsed), Fmt.bytes(s.storageTotal), s.storagePercent))
+        for (d in s.disks.sortedByDescending { it.usePercent }) {
+            lines.add(String.format("%s：可用 %s / %s（已用 %.0f%%）", d.name, Fmt.bytes(d.total - d.used), Fmt.bytes(d.total), d.usePercent))
         }
         MaterialAlertDialogBuilder(requireContext())
             .setTitle("磁盘明细")
