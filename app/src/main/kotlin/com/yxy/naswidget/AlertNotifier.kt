@@ -11,23 +11,23 @@ import androidx.core.app.NotificationManagerCompat
 object AlertNotifier {
 
     private const val CHANNEL_ID = "nas_alert"
-    private const val USAGE_THRESHOLD = 90.0
-    private const val CPU_TEMP_THRESHOLD = 85.0
-    private const val NVME_TEMP_THRESHOLD = 70.0
     private const val REPEAT_MS = 30 * 60 * 1000L  // 同一组告警 30 分钟内不重复
 
     fun checkAndNotify(context: Context, stats: NasStats) {
         if (!Prefs.showAlert(context)) return
+        val usageThreshold = Prefs.alertUsageThreshold(context).coerceIn(1, 100).toDouble()
+        val cpuTempThreshold = Prefs.alertCpuTempThreshold(context).coerceIn(1, 120).toDouble()
+        val nvmeTempThreshold = Prefs.alertNvmeTempThreshold(context).coerceIn(1, 120).toDouble()
         val alerts = mutableListOf<String>()
-        if (stats.cpuPercent >= USAGE_THRESHOLD) alerts.add("CPU ${stats.cpuPercent.toInt()}%")
-        if (stats.memPercent >= USAGE_THRESHOLD) alerts.add("内存 ${stats.memPercent.toInt()}%")
+        if (stats.cpuPercent >= usageThreshold) alerts.add("CPU ${stats.cpuPercent.toInt()}%")
+        if (stats.memPercent >= usageThreshold) alerts.add("内存 ${stats.memPercent.toInt()}%")
         for (d in stats.disks) {
-            if (d.usePercent >= USAGE_THRESHOLD) alerts.add("${d.name} ${d.usePercent.toInt()}%")
+            if (d.usePercent >= usageThreshold) alerts.add("${d.name} ${d.usePercent.toInt()}%")
         }
         val cpuTemp = stats.tempCpu
-        if (cpuTemp != null && cpuTemp >= CPU_TEMP_THRESHOLD) alerts.add("CPU 温度 ${cpuTemp.toInt()}°")
+        if (cpuTemp != null && cpuTemp >= cpuTempThreshold) alerts.add("CPU 温度 ${cpuTemp.toInt()}°")
         val nvmeTemp = stats.tempNvme
-        if (nvmeTemp != null && nvmeTemp >= NVME_TEMP_THRESHOLD) alerts.add("NVMe 温度 ${nvmeTemp.toInt()}°")
+        if (nvmeTemp != null && nvmeTemp >= nvmeTempThreshold) alerts.add("NVMe 温度 ${nvmeTemp.toInt()}°")
         if (alerts.isEmpty()) return
 
         val key = alerts.joinToString("|")

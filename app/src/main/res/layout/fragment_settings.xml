@@ -309,9 +309,105 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="6dp"
-                android:text="资源告警（CPU/内存/磁盘超 90% 时提醒）"
+                android:text="资源告警（CPU/内存/磁盘超阈值时提醒）"
                 android:textColor="@color/app_text_primary"
                 android:textSize="14sp" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:orientation="horizontal">
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="使用率阈值(%)"
+                        android:textColor="@color/app_text_hint"
+                        android:textSize="12sp" />
+
+                    <EditText
+                        android:id="@+id/et_alert_usage"
+                        android:layout_width="match_parent"
+                        android:layout_height="40dp"
+                        android:gravity="center_vertical"
+                        android:inputType="number"
+                        android:singleLine="true"
+                        android:paddingTop="0dp"
+                        android:paddingBottom="0dp"
+                        android:paddingStart="10dp"
+                        android:paddingEnd="10dp"
+                        android:textColor="@color/app_text_primary"
+                        android:textColorHint="@color/app_text_hint"
+                        android:background="@drawable/edit_bg" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginStart="12dp"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="CPU 温度(°C)"
+                        android:textColor="@color/app_text_hint"
+                        android:textSize="12sp" />
+
+                    <EditText
+                        android:id="@+id/et_alert_cpu_temp"
+                        android:layout_width="match_parent"
+                        android:layout_height="40dp"
+                        android:gravity="center_vertical"
+                        android:inputType="number"
+                        android:singleLine="true"
+                        android:paddingTop="0dp"
+                        android:paddingBottom="0dp"
+                        android:paddingStart="10dp"
+                        android:paddingEnd="10dp"
+                        android:textColor="@color/app_text_primary"
+                        android:textColorHint="@color/app_text_hint"
+                        android:background="@drawable/edit_bg" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginStart="12dp"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="NVMe 温度(°C)"
+                        android:textColor="@color/app_text_hint"
+                        android:textSize="12sp" />
+
+                    <EditText
+                        android:id="@+id/et_alert_nvme_temp"
+                        android:layout_width="match_parent"
+                        android:layout_height="40dp"
+                        android:gravity="center_vertical"
+                        android:inputType="number"
+                        android:singleLine="true"
+                        android:paddingTop="0dp"
+                        android:paddingBottom="0dp"
+                        android:paddingStart="10dp"
+                        android:paddingEnd="10dp"
+                        android:textColor="@color/app_text_primary"
+                        android:textColorHint="@color/app_text_hint"
+                        android:background="@drawable/edit_bg" />
+                </LinearLayout>
+            </LinearLayout>
         </LinearLayout>
 
         <!-- 外观卡片 -->

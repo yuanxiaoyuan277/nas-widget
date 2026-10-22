@@ -39,6 +39,9 @@ object Prefs {
     private const val KEY_LAST_ALERT_KEY = "last_alert_key"
     private const val KEY_LAST_ALERT_TIME = "last_alert_time"
     private const val KEY_ALERT = "show_alert"
+    private const val KEY_ALERT_USAGE = "alert_usage_threshold"
+    private const val KEY_ALERT_CPU_TEMP = "alert_cpu_temp_threshold"
+    private const val KEY_ALERT_NVME_TEMP = "alert_nvme_temp_threshold"
 
     const val DEFAULT_URL = "http://192.168.2.3:19254/nas"
     const val DEFAULT_NAS_BASE = "http://192.168.2.3:1223"
@@ -190,4 +193,12 @@ object Prefs {
     // === 资源告警通知开关 ===
     fun showAlert(ctx: Context) = sp(ctx).getBoolean(KEY_ALERT, true)
     fun setShowAlert(ctx: Context, v: Boolean) = sp(ctx).edit().putBoolean(KEY_ALERT, v).apply()
+
+    // === 资源告警阈值（可配置，默认：使用率 90%、CPU 温度 85°、NVMe 温度 70°） ===
+    fun alertUsageThreshold(ctx: Context) = sp(ctx).getInt(KEY_ALERT_USAGE, 90)
+    fun setAlertUsageThreshold(ctx: Context, v: Int) = sp(ctx).edit().putInt(KEY_ALERT_USAGE, v).apply()
+    fun alertCpuTempThreshold(ctx: Context) = sp(ctx).getInt(KEY_ALERT_CPU_TEMP, 85)
+    fun setAlertCpuTempThreshold(ctx: Context, v: Int) = sp(ctx).edit().putInt(KEY_ALERT_CPU_TEMP, v).apply()
+    fun alertNvmeTempThreshold(ctx: Context) = sp(ctx).getInt(KEY_ALERT_NVME_TEMP, 70)
+    fun setAlertNvmeTempThreshold(ctx: Context, v: Int) = sp(ctx).edit().putInt(KEY_ALERT_NVME_TEMP, v).apply()
 }

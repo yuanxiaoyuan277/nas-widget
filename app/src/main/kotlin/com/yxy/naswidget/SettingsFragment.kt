@@ -58,6 +58,9 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
     private lateinit var tvAboutVersion: TextView
     private lateinit var tvAboutRepo: TextView
     private lateinit var cbAlert: CheckBox
+    private lateinit var etAlertUsage: EditText
+    private lateinit var etAlertCpuTemp: EditText
+    private lateinit var etAlertNvmeTemp: EditText
     private var suppressSave = false
     private val saveHandler = Handler(Looper.getMainLooper())
     private val saveRunnable = Runnable { persist() }
@@ -84,6 +87,9 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
         tvAboutVersion = view.findViewById(R.id.tv_about_version)
         tvAboutRepo = view.findViewById(R.id.tv_about_repo)
         cbAlert = view.findViewById(R.id.cb_alert)
+        etAlertUsage = view.findViewById(R.id.et_alert_usage)
+        etAlertCpuTemp = view.findViewById(R.id.et_alert_cpu_temp)
+        etAlertNvmeTemp = view.findViewById(R.id.et_alert_nvme_temp)
 
         btnLogin.setOnClickListener {
             requireActivity().startActivityForResult(Intent(requireContext(), LoginActivity::class.java), REQ_LOGIN)
@@ -104,6 +110,9 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
         watchEditText(etUrl)
         watchEditText(etWb2apiBase)
         watchEditText(etWb2apiKey)
+        watchEditText(etAlertUsage)
+        watchEditText(etAlertCpuTemp)
+        watchEditText(etAlertNvmeTemp)
         val adapter = ArrayAdapter(requireContext(), R.layout.spinner_item, refreshOptions.map { it.second })
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         spRefresh.adapter = adapter
@@ -128,6 +137,9 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
         setupAutoScroll(etUrl)
         setupAutoScroll(etWb2apiBase)
         setupAutoScroll(etWb2apiKey)
+        setupAutoScroll(etAlertUsage)
+        setupAutoScroll(etAlertCpuTemp)
+        setupAutoScroll(etAlertNvmeTemp)
 
         loadPrefs()
 
@@ -162,6 +174,9 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
         etFontSize.setText(Prefs.fontSize(requireContext()).toString())
         cbWb2api.isChecked = Prefs.showWb2api(requireContext())
         cbAlert.isChecked = Prefs.showAlert(requireContext())
+        etAlertUsage.setText(Prefs.alertUsageThreshold(requireContext()).toString())
+        etAlertCpuTemp.setText(Prefs.alertCpuTempThreshold(requireContext()).toString())
+        etAlertNvmeTemp.setText(Prefs.alertNvmeTempThreshold(requireContext()).toString())
         etWb2apiBase.setText(Prefs.wb2apiBase(requireContext()))
         etWb2apiKey.setText(Prefs.wb2apiKey(requireContext()))
         tvVersion.text = "v${UpdateChecker.localVersion(requireContext())}"
@@ -243,6 +258,9 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
         Prefs.setUrl(requireContext(), url)
         Prefs.setShowWb2api(requireContext(), cbWb2api.isChecked)
         Prefs.setShowAlert(requireContext(), cbAlert.isChecked)
+        Prefs.setAlertUsageThreshold(requireContext(), etAlertUsage.text.toString().toIntOrNull()?.coerceIn(1, 100) ?: 90)
+        Prefs.setAlertCpuTempThreshold(requireContext(), etAlertCpuTemp.text.toString().toIntOrNull()?.coerceIn(1, 120) ?: 85)
+        Prefs.setAlertNvmeTempThreshold(requireContext(), etAlertNvmeTemp.text.toString().toIntOrNull()?.coerceIn(1, 120) ?: 70)
         val sel = spRefresh.selectedItemPosition
         Prefs.setRefresh(requireContext(), refreshOptions.getOrElse(sel) { 30 to "30 秒" }.first)
         val fs = etFontSize.text.toString().toIntOrNull()?.coerceIn(8, 200) ?: 16
