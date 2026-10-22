@@ -8,6 +8,7 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.res.ColorStateList
+import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -47,6 +48,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
     private lateinit var cbTempItem: SwitchCompat
     private lateinit var previewContainer: FrameLayout
     private lateinit var btnRefreshPreview: Button
+    private lateinit var btnOpenNasWeb: Button
     private lateinit var btnCopySummary: Button
     private lateinit var btnShareSummary: Button
     private lateinit var cbDocker: SwitchCompat
@@ -156,6 +158,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         cbTempItem = view.findViewById(R.id.cb_temp)
         previewContainer = view.findViewById(R.id.preview_container)
         btnRefreshPreview = view.findViewById(R.id.btn_refresh_preview)
+        btnOpenNasWeb = view.findViewById(R.id.btn_open_nas_web)
         btnCopySummary = view.findViewById(R.id.btn_copy_summary)
         btnShareSummary = view.findViewById(R.id.btn_share_summary)
         cbDocker = view.findViewById(R.id.cb_docker)
@@ -234,6 +237,13 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         // 小组件预览
         layoutInflater.inflate(R.layout.nas_widget_preview, previewContainer, true)
         btnRefreshPreview.setOnClickListener { refreshPreview() }
+        btnOpenNasWeb.setOnClickListener {
+            try {
+                startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(Prefs.nasBase(requireContext()))))
+            } catch (_: Exception) {
+                Toast.makeText(requireContext(), "无法打开浏览器，请检查飞牛地址配置", Toast.LENGTH_SHORT).show()
+            }
+        }
         btnCopySummary.setOnClickListener { copySummary() }
         btnShareSummary.setOnClickListener { shareSummary() }
         // 预览顶部的刷新图标与桌面组件一致，点击同样立即刷新
