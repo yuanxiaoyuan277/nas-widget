@@ -51,6 +51,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
     private lateinit var btnOpenNasWeb: Button
     private lateinit var btnCopySummary: Button
     private lateinit var btnShareSummary: Button
+    private lateinit var btnReport: Button
     private lateinit var cbDocker: SwitchCompat
     private lateinit var dockerListContainer: LinearLayout
     private lateinit var btnRefreshDocker: Button
@@ -161,6 +162,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         btnOpenNasWeb = view.findViewById(R.id.btn_open_nas_web)
         btnCopySummary = view.findViewById(R.id.btn_copy_summary)
         btnShareSummary = view.findViewById(R.id.btn_share_summary)
+        btnReport = view.findViewById(R.id.btn_report)
         cbDocker = view.findViewById(R.id.cb_docker)
         dockerListContainer = view.findViewById(R.id.docker_list_container)
         btnRefreshDocker = view.findViewById(R.id.btn_refresh_docker)
@@ -246,6 +248,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         }
         btnCopySummary.setOnClickListener { copySummary() }
         btnShareSummary.setOnClickListener { shareSummary() }
+        btnReport.setOnClickListener { showReportDialog() }
         // 预览顶部的刷新图标与桌面组件一致，点击同样立即刷新
         previewContainer.findViewById<View>(R.id.btn_refresh)?.setOnClickListener { refreshPreview() }
 
@@ -1077,6 +1080,73 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
             putExtra(Intent.EXTRA_TEXT, text)
         }
         requireContext().startActivity(Intent.createChooser(send, "分享监控摘要"))
+    }
+
+    /** 生成完整诊断报告：NAS 指标 + Docker 容器状态 + 今日流量/峰值 + 告警历史 */
+    private fun reportText(): String {
+        val sb = StringBuilder()
+        sb.append("NAS 诊断报告\n")
+        sb.append("══════════════\n")
+        val s = lastStats
+        if (s != null) {
+            sb.append("【系统指标】\n")
+            sb.append("CPU：${s.cpuPercent.toInt()}% · ${s.cores}核${s.cpuModel.takeIf { it.isNotEmpty() }?.let { " · $it" } ?: ""}\n")
+            sb.append("内存：${Fmt.bytes((s.memTotal - s.memUsed).coerceAtLeast(0))}/${Fmt.bytes(s.memTotal)} ${s.memPercent.toInt()}%\n")
+            if (s.disks.isNotEmpty()) sb.append("存储：${s.storageText}\n")
+            val tempLine = when {
+                s.tempCpu != null && s.tempNvme != null -> "温度：CPU ${s.tempCpu.toInt()}° · NVMe ${s.tempNvme.toInt()}°"
+                s.tempCpu != null -> "温度：CPU ${s.tempCpu.toInt()}°"
+                s.tempNvme != null -> "温度：NVMe ${s.tempNvme.toInt()}°"
+                else -> null
+            }
+            tempLine?.let { sb.append("$it\n") }
+            sb.append("网络：↓${Fmt.speed(s.netDown)} ↑${Fmt.speed(s.netUp)}\n")
+            if (s.osVersion.isNotEmpty()) sb.append("系统：${s.osVersion}\n")
+            sb.append("运行：${Fmt.uptime(s.uptimeSec)}\n")
+            if (s.latencyMs > 0) sb.append("数据源延迟：${s.latencyMs}ms\n")
+        } else {
+            sb.append("【系统指标】暂无数据\n")
+        }
+        val tDown = Prefs.trafficDown(requireContext())
+        val tUp = Prefs.trafficUp(requireContext())
+        if (tDown > 0L || tUp > 0L) sb.append("\n【今日流量】↓${Fmt.bytes(tDown)} ↑${Fmt.bytes(tUp)}\n")
+        val peak = peakText()
+        if (peak != "--") sb.append("\n【今日峰值】$peak\n")
+        if (dockerContainers.isNotEmpty()) {
+            val running = dockerContainers.count { it.running }
+            sb.append("\n【Docker 容器】${running} 运行 / ${dockerContainers.size} 总计\n")
+            for (c in dockerContainers.sortedWith(dockerComparator(Prefs.dockerSort(requireContext())))) {
+                sb.append("- ${c.name}：${if (c.running) c.detailText else c.stateText}\n")
+            }
+        }
+        val history = Prefs.alertHistory(requireContext())
+        if (history.isNotEmpty()) {
+            sb.append("\n【告警历史】最近 ${history.size} 条\n")
+            for (h in history) sb.append("- $h\n")
+        }
+        return sb.toString().trimEnd()
+    }
+
+    /** 弹出诊断报告：完整整合 NAS 指标 + Docker + 流量/峰值 + 告警，可复制/分享 */
+    private fun showReportDialog() {
+        val report = reportText()
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle("诊断报告")
+            .setMessage(report)
+            .setPositiveButton("复制") { _, _ ->
+                val cm = requireContext().getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                cm.setPrimaryClip(ClipData.newPlainText("nas-report", report))
+                Toast.makeText(requireContext(), "诊断报告已复制", Toast.LENGTH_SHORT).show()
+            }
+            .setNeutralButton("分享") { _, _ ->
+                val send = Intent(Intent.ACTION_SEND).apply {
+                    type = "text/plain"
+                    putExtra(Intent.EXTRA_TEXT, report)
+                }
+                requireContext().startActivity(Intent.createChooser(send, "分享诊断报告"))
+            }
+            .setNegativeButton("关闭", null)
+            .show()
     }
 
     private fun peakText(): String {
