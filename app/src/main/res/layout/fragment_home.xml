@@ -168,7 +168,7 @@
                         android:layout_marginStart="16dp"
                         android:gravity="end"
                         android:text="30 秒"
-                        android:textColor="@color/app_primary"
+                        android:textColor="?attr/colorPrimary"
                         android:textSize="13sp" />
                 </LinearLayout>
 
@@ -384,7 +384,7 @@
                         android:maxLines="1"
                         android:ellipsize="middle"
                         android:text="--"
-                        android:textColor="@color/app_primary"
+                        android:textColor="?attr/colorPrimary"
                         android:textSize="13sp" />
                 </LinearLayout>
 
@@ -474,7 +474,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginStart="10dp"
                         android:text="清零"
-                        android:textColor="@color/app_primary"
+                        android:textColor="?attr/colorPrimary"
                         android:textSize="13sp" />
                 </LinearLayout>
 
@@ -501,7 +501,7 @@
                         android:maxLines="1"
                         android:ellipsize="end"
                         android:text="无"
-                        android:textColor="@color/app_primary"
+                        android:textColor="?attr/colorPrimary"
                         android:textSize="13sp" />
                 </LinearLayout>
 

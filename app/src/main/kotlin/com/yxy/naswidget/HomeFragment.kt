@@ -155,7 +155,9 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
 
         scrollRoot = view.findViewById(R.id.scroll_root)
         swipeRefresh = view.findViewById(R.id.swipe_refresh)
-        swipeRefresh.setColorSchemeColors(requireContext().getColor(R.color.app_primary))
+        val accentTa = requireContext().theme.obtainStyledAttributes(intArrayOf(androidx.appcompat.R.attr.colorPrimary))
+        swipeRefresh.setColorSchemeColors(accentTa.getColor(0, requireContext().getColor(R.color.app_primary)))
+        accentTa.recycle()
         swipeRefresh.setOnRefreshListener {
             refreshPreview()
             if (Prefs.isLoggedIn(requireContext())) loadDockerContainers()

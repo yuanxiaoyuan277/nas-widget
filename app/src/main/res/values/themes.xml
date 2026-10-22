@@ -6,6 +6,7 @@
         <item name="colorPrimaryVariant">@color/app_primary_variant</item>
         <item name="colorSecondary">@color/app_secondary</item>
         <item name="colorOnSecondary">@android:color/white</item>
+        <item name="accentTranslucent">@color/app_primary_translucent</item>
         <item name="android:statusBarColor">@android:color/transparent</item>
         <item name="android:windowLightStatusBar">true</item>
         <item name="shapeAppearanceSmallComponent">@style/ShapeAppearance.NasWidget.Small</item>
@@ -20,7 +21,7 @@
     </style>
 
     <style name="NasWidget.BottomNavigation.ActiveIndicator" parent="">
-        <item name="android:color">@color/app_primary_translucent</item>
+        <item name="android:color">?attr/accentTranslucent</item>
         <item name="shapeAppearance">@style/ShapeAppearance.NasWidget.ActiveIndicator</item>
     </style>
 
@@ -42,5 +43,37 @@
     <style name="ShapeAppearance.NasWidget.Large" parent="ShapeAppearance.MaterialComponents.LargeComponent">
         <item name="cornerFamily">rounded</item>
         <item name="cornerSize">22dp</item>
+    </style>
+
+    <!-- 强调色主题覆盖层（6 色，通过 setTheme 动态切换 colorPrimary / colorPrimaryVariant / accentTranslucent） -->
+    <style name="ThemeOverlay.NasWidget.Accent.Blue" parent="">
+        <item name="colorPrimary">#FF5E9EFF</item>
+        <item name="colorPrimaryVariant">#FF4A86E8</item>
+        <item name="accentTranslucent">#335E9EFF</item>
+    </style>
+    <style name="ThemeOverlay.NasWidget.Accent.Green" parent="">
+        <item name="colorPrimary">#FF43A047</item>
+        <item name="colorPrimaryVariant">#FF388E3C</item>
+        <item name="accentTranslucent">#3343A047</item>
+    </style>
+    <style name="ThemeOverlay.NasWidget.Accent.Orange" parent="">
+        <item name="colorPrimary">#FFFB8C00</item>
+        <item name="colorPrimaryVariant">#FFEF6C00</item>
+        <item name="accentTranslucent">#33FB8C00</item>
+    </style>
+    <style name="ThemeOverlay.NasWidget.Accent.Purple" parent="">
+        <item name="colorPrimary">#FF8E24AA</item>
+        <item name="colorPrimaryVariant">#FF6A1B9A</item>
+        <item name="accentTranslucent">#338E24AA</item>
+    </style>
+    <style name="ThemeOverlay.NasWidget.Accent.Red" parent="">
+        <item name="colorPrimary">#FFE53935</item>
+        <item name="colorPrimaryVariant">#FFC62828</item>
+        <item name="accentTranslucent">#33E53935</item>
+    </style>
+    <style name="ThemeOverlay.NasWidget.Accent.Teal" parent="">
+        <item name="colorPrimary">#FF00ACC1</item>
+        <item name="colorPrimaryVariant">#FF00838F</item>
+        <item name="accentTranslucent">#3300ACC1</item>
     </style>
 </resources>

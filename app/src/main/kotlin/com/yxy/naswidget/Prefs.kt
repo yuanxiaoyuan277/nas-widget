@@ -184,6 +184,26 @@ object Prefs {
         else -> androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_YES
     }
 
+    // === 强调色（主题色）预设：0=蓝 1=绿 2=橙 3=紫 4=红 5=青 ===
+    private const val KEY_ACCENT = "accent_index"
+    val ACCENT_LABELS = listOf("蓝", "绿", "橙", "紫", "红", "青")
+    fun accentIndex(ctx: Context): Int = sp(ctx).getInt(KEY_ACCENT, 0).coerceIn(0, ACCENT_LABELS.size - 1)
+    fun setAccentIndex(ctx: Context, v: Int) =
+        sp(ctx).edit().putInt(KEY_ACCENT, v.coerceIn(0, ACCENT_LABELS.size - 1)).apply()
+
+    /** 强调色标签（用于设置页按钮显示） */
+    fun accentLabel(ctx: Context): String = ACCENT_LABELS[accentIndex(ctx)]
+
+    /** 强调色主题覆盖层资源 id（MainActivity.onCreate 里 setTheme 切换全局主色） */
+    fun accentOverlayRes(ctx: Context): Int = when (accentIndex(ctx)) {
+        1 -> R.style.ThemeOverlay_NasWidget_Accent_Green
+        2 -> R.style.ThemeOverlay_NasWidget_Accent_Orange
+        3 -> R.style.ThemeOverlay_NasWidget_Accent_Purple
+        4 -> R.style.ThemeOverlay_NasWidget_Accent_Red
+        5 -> R.style.ThemeOverlay_NasWidget_Accent_Teal
+        else -> R.style.ThemeOverlay_NasWidget_Accent_Blue
+    }
+
     // === 组件背景透明度（standard=标准/lighter=更透明/lightest=最透明） ===
     private const val KEY_WIDGET_BG = "widget_bg"
     fun widgetBg(ctx: Context): String = sp(ctx).getString(KEY_WIDGET_BG, "standard") ?: "standard"

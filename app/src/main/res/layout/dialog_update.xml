@@ -32,7 +32,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="4dp"
         android:gravity="center"
-        android:textColor="@color/app_primary"
+        android:textColor="?attr/colorPrimary"
         android:textSize="28sp"
         android:textStyle="bold" />
 
@@ -92,7 +92,7 @@
         android:textColor="@android:color/white"
         android:textSize="16sp"
         android:textStyle="bold"
-        app:backgroundTint="@color/app_primary"
+        app:backgroundTint="?attr/colorPrimary"
         app:cornerRadius="14dp" />
 
     <!-- 暂不更新（文字按钮） -->

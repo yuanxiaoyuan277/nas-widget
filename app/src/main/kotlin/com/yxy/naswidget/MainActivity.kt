@@ -16,6 +16,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         AppCompatDelegate.setDefaultNightMode(Prefs.nightMode(this))
+        setTheme(Prefs.accentOverlayRes(this))
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 

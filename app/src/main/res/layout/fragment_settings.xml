@@ -68,7 +68,7 @@
                 android:layout_marginTop="8dp"
                 android:text="登录飞牛账号"
                 android:textColor="@android:color/white"
-                app:backgroundTint="@color/app_primary"
+                app:backgroundTint="?attr/colorPrimary"
                 app:cornerRadius="14dp" />
 
             <Button
@@ -136,7 +136,7 @@
                 android:layout_marginTop="8dp"
                 android:text="测试连接"
                 android:textColor="@android:color/white"
-                app:backgroundTint="@color/app_primary"
+                app:backgroundTint="?attr/colorPrimary"
                 app:cornerRadius="14dp" />
         </LinearLayout>
 
@@ -234,7 +234,7 @@
                 android:layout_marginTop="8dp"
                 android:text="查看积分明细"
                 android:textColor="@android:color/white"
-                app:backgroundTint="@color/app_primary"
+                app:backgroundTint="?attr/colorPrimary"
                 app:cornerRadius="14dp" />
 
             <TextView
@@ -662,7 +662,7 @@
                     android:layout_height="wrap_content"
                     android:text="临时静默 1 小时"
                     android:textColor="@android:color/white"
-                    app:backgroundTint="@color/app_primary"
+                    app:backgroundTint="?attr/colorPrimary"
                     app:cornerRadius="14dp" />
 
                 <TextView
@@ -683,7 +683,7 @@
                 android:layout_marginTop="10dp"
                 android:text="查看告警历史"
                 android:textColor="@android:color/white"
-                app:backgroundTint="@color/app_primary"
+                app:backgroundTint="?attr/colorPrimary"
                 app:cornerRadius="14dp" />
 
             <Button
@@ -693,7 +693,7 @@
                 android:layout_marginTop="8dp"
                 android:text="发送测试通知"
                 android:textColor="@android:color/white"
-                app:backgroundTint="@color/app_primary"
+                app:backgroundTint="?attr/colorPrimary"
                 app:cornerRadius="14dp" />
         </LinearLayout>
 
@@ -729,7 +729,7 @@
                 android:layout_marginTop="8dp"
                 android:text="加入电池优化白名单"
                 android:textColor="@android:color/white"
-                app:backgroundTint="@color/app_primary"
+                app:backgroundTint="?attr/colorPrimary"
                 app:cornerRadius="14dp" />
         </LinearLayout>
 
@@ -756,7 +756,7 @@
                 android:layout_marginTop="8dp"
                 android:text="深色"
                 android:textColor="@android:color/white"
-                app:backgroundTint="@color/app_primary"
+                app:backgroundTint="?attr/colorPrimary"
                 app:cornerRadius="14dp" />
 
             <Button
@@ -776,7 +776,17 @@
                 android:layout_marginTop="8dp"
                 android:text="点击组件：打开 App（点击切换）"
                 android:textColor="@android:color/white"
-                app:backgroundTint="@color/app_primary"
+                app:backgroundTint="?attr/colorPrimary"
+                app:cornerRadius="14dp" />
+
+            <Button
+                android:id="@+id/btn_accent"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="强调色：蓝（点击切换）"
+                android:textColor="@android:color/white"
+                app:backgroundTint="?attr/colorPrimary"
                 app:cornerRadius="14dp" />
         </LinearLayout>
 
@@ -804,7 +814,7 @@
                 android:layout_marginTop="8dp"
                 android:text="检查更新"
                 android:textColor="@android:color/white"
-                app:backgroundTint="@color/app_primary"
+                app:backgroundTint="?attr/colorPrimary"
                 app:cornerRadius="14dp" />
 
             <TextView
@@ -839,7 +849,7 @@
                 android:layout_marginTop="8dp"
                 android:text="复制配置到剪贴板"
                 android:textColor="@android:color/white"
-                app:backgroundTint="@color/app_primary"
+                app:backgroundTint="?attr/colorPrimary"
                 app:cornerRadius="14dp" />
 
             <Button
@@ -849,7 +859,7 @@
                 android:layout_marginTop="8dp"
                 android:text="从剪贴板恢复配置"
                 android:textColor="@android:color/white"
-                app:backgroundTint="@color/app_primary"
+                app:backgroundTint="?attr/colorPrimary"
                 app:cornerRadius="14dp" />
 
             <Button
@@ -859,7 +869,7 @@
                 android:layout_marginTop="8dp"
                 android:text="导出配置为文件（分享）"
                 android:textColor="@android:color/white"
-                app:backgroundTint="@color/app_primary"
+                app:backgroundTint="?attr/colorPrimary"
                 app:cornerRadius="14dp" />
 
             <TextView
@@ -912,7 +922,7 @@
                 android:paddingTop="4dp"
                 android:paddingBottom="4dp"
                 android:text="开源仓库：github.com/yuanxiaoyuan277/nas-widget"
-                android:textColor="@color/app_primary"
+                android:textColor="?attr/colorPrimary"
                 android:textSize="13sp" />
 
             <TextView
@@ -923,7 +933,7 @@
                 android:paddingTop="4dp"
                 android:paddingBottom="4dp"
                 android:text="反馈问题：github.com/yuanxiaoyuan277/nas-widget/issues"
-                android:textColor="@color/app_primary"
+                android:textColor="?attr/colorPrimary"
                 android:textSize="13sp" />
 
             <Button
@@ -933,7 +943,7 @@
                 android:layout_marginTop="8dp"
                 android:text="检查更新"
                 android:textColor="@android:color/white"
-                app:backgroundTint="@color/app_primary"
+                app:backgroundTint="?attr/colorPrimary"
                 app:cornerRadius="14dp" />
         </LinearLayout>
 

@@ -6,6 +6,7 @@
         <item name="colorPrimaryVariant">@color/app_primary_variant</item>
         <item name="colorSecondary">@color/app_secondary</item>
         <item name="colorOnSecondary">@android:color/white</item>
+        <item name="accentTranslucent">@color/app_primary_translucent</item>
         <item name="android:statusBarColor">@android:color/transparent</item>
         <item name="android:windowLightStatusBar">false</item>
         <item name="shapeAppearanceSmallComponent">@style/ShapeAppearance.NasWidget.Small</item>

@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- 底部导航选中指示器的半透明强调色（跟随强调色主题动态变化） -->
+    <attr name="accentTranslucent" format="color" />
+</resources>

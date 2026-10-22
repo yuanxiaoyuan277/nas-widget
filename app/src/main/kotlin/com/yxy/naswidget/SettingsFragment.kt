@@ -62,6 +62,7 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
     private lateinit var btnToggleTheme: Button
     private lateinit var btnWidgetBg: Button
     private lateinit var btnWidgetTap: Button
+    private lateinit var btnAccent: Button
     private lateinit var tvVersion: TextView
     private lateinit var btnCheckUpdate: Button
     private lateinit var btnAboutCheckUpdate: Button
@@ -120,6 +121,7 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
         btnToggleTheme = view.findViewById(R.id.btn_toggle_theme)
         btnWidgetBg = view.findViewById(R.id.btn_widget_bg)
         btnWidgetTap = view.findViewById(R.id.btn_widget_tap)
+        btnAccent = view.findViewById(R.id.btn_accent)
         tvVersion = view.findViewById(R.id.tv_version)
         btnCheckUpdate = view.findViewById(R.id.btn_check_update)
         btnAboutCheckUpdate = view.findViewById(R.id.btn_about_check_update)
@@ -169,6 +171,7 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
         btnToggleTheme.setOnClickListener { toggleTheme() }
         btnWidgetBg.setOnClickListener { cycleWidgetBg() }
         btnWidgetTap.setOnClickListener { cycleWidgetTap() }
+        btnAccent.setOnClickListener { cycleAccent() }
         btnWb2apiDetail.setOnClickListener { fetchWb2apiDetail() }
         btnCheckUpdate.setOnClickListener { checkUpdate() }
         btnAboutCheckUpdate.setOnClickListener { checkUpdate() }
@@ -323,6 +326,7 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
         updateThemeButton()
         updateWidgetBgButton()
         updateWidgetTapButton()
+        updateAccentButton()
         updateTempSilentStatus()
         refreshBatteryStatus()
         suppressSave = false
@@ -436,6 +440,18 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
         val am = AppWidgetManager.getInstance(requireContext())
         val ids = am.getAppWidgetIds(ComponentName(requireContext(), NasWidgetProvider::class.java))
         if (ids.isNotEmpty()) NasWidgetProvider.updateAll(requireContext(), am, ids)
+    }
+
+    private fun updateAccentButton() {
+        btnAccent.text = "强调色：${Prefs.accentLabel(requireContext())}（点击切换）"
+    }
+
+    /** 循环切换强调色：蓝→绿→橙→紫→红→青，切换后重建 Activity 应用新主题 */
+    private fun cycleAccent() {
+        val next = (Prefs.accentIndex(requireContext()) + 1) % Prefs.ACCENT_LABELS.size
+        Prefs.setAccentIndex(requireContext(), next)
+        updateAccentButton()
+        requireActivity().recreate()
     }
 
     /** 告警阈值三档预设：均衡（默认）/ 宽松 / 激进 */
