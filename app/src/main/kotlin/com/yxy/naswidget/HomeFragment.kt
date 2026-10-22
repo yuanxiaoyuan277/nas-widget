@@ -36,6 +36,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
     private lateinit var cbDisk2: SwitchCompat
     private lateinit var cbNet: SwitchCompat
     private lateinit var previewContainer: FrameLayout
+    private lateinit var btnRefreshPreview: Button
     private lateinit var cbDocker: SwitchCompat
     private lateinit var dockerListContainer: LinearLayout
     private lateinit var btnRefreshDocker: Button
@@ -88,6 +89,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         cbDisk2 = view.findViewById(R.id.cb_disk2)
         cbNet = view.findViewById(R.id.cb_net)
         previewContainer = view.findViewById(R.id.preview_container)
+        btnRefreshPreview = view.findViewById(R.id.btn_refresh_preview)
         cbDocker = view.findViewById(R.id.cb_docker)
         dockerListContainer = view.findViewById(R.id.docker_list_container)
         btnRefreshDocker = view.findViewById(R.id.btn_refresh_docker)
@@ -124,6 +126,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
 
         // 小组件预览
         layoutInflater.inflate(R.layout.nas_widget_preview, previewContainer, true)
+        btnRefreshPreview.setOnClickListener { refreshPreview() }
 
         // 控件改动即自动保存
         setupAutoSaveListeners()
