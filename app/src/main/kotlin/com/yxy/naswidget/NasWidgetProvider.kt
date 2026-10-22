@@ -44,6 +44,7 @@ class NasWidgetProvider : AppWidgetProvider() {
                     appWidgetManager.updateAppWidget(id, views)
                 }
                 result.onSuccess { s ->
+                    Prefs.recordPeaks(context, s.cpuPercent, s.memPercent, s.tempCpu, s.tempNvme)
                     AlertNotifier.checkAndNotify(context, s)
                     AlertNotifier.markOnline(context)
                 }.onFailure {

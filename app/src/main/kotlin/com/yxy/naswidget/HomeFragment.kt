@@ -97,6 +97,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
     private lateinit var tvSysNet: TextView
     private lateinit var tvSysTemp: TextView
     private lateinit var tvSysStorage: TextView
+    private lateinit var tvSysPeak: TextView
 
     private val handler = Handler(Looper.getMainLooper())
     private var dockerContainers: List<DockerContainer> = emptyList()
@@ -178,6 +179,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         tvSysNet = view.findViewById(R.id.tv_sys_net)
         tvSysTemp = view.findViewById(R.id.tv_sys_temp)
         tvSysStorage = view.findViewById(R.id.tv_sys_storage)
+        tvSysPeak = view.findViewById(R.id.tv_sys_peak)
 
         widgetId = requireActivity().intent.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, AppWidgetManager.INVALID_APPWIDGET_ID)
         if (widgetId != AppWidgetManager.INVALID_APPWIDGET_ID) {
@@ -422,6 +424,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         result.onSuccess { s ->
             stats = s
             lastStats = s
+            Prefs.recordPeaks(requireContext(), s.cpuPercent, s.memPercent, s.tempCpu, s.tempNvme)
             root.findViewById<TextView>(R.id.tv_uptime).text = "运行 " + Fmt.uptime(s.uptimeSec) + " · " + Fmt.time(s.fetchTime)
         }.onFailure {
             root.findViewById<TextView>(R.id.tv_uptime).text = "连接失败"
@@ -445,6 +448,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
             "CPU $cpuT · NVMe $nvmeT"
         } ?: "--"
         tvSysStorage.text = stats?.storageText ?: "--"
+        tvSysPeak.text = peakText()
 
         fun addTo(comp: String, v: View) {
             contentArea.addView(v)
@@ -657,6 +661,20 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         val cm = requireContext().getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
         cm.setPrimaryClip(ClipData.newPlainText("nas-summary", text))
         Toast.makeText(requireContext(), "监控摘要已复制", Toast.LENGTH_SHORT).show()
+    }
+
+    private fun peakText(): String {
+        val cpu = Prefs.peakCpu(requireContext())
+        val mem = Prefs.peakMem(requireContext())
+        val cpuT = Prefs.peakCpuTemp(requireContext())
+        val nvmeT = Prefs.peakNvmeTemp(requireContext())
+        if (cpu <= 0f && mem <= 0f && cpuT == null && nvmeT == null) return "--"
+        val parts = mutableListOf<String>()
+        if (cpu > 0f) parts.add(String.format("CPU %.0f%%", cpu))
+        if (mem > 0f) parts.add(String.format("内存 %.0f%%", mem))
+        val tempMax = listOfNotNull(cpuT, nvmeT).maxOrNull()
+        if (tempMax != null) parts.add(String.format("温度 %.0f°", tempMax))
+        return parts.joinToString(" · ")
     }
 
     private fun tempPct(temp: Double?, pct: Double, showTemp: Boolean): String {

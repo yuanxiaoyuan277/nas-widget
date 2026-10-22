@@ -266,4 +266,50 @@ object Prefs {
         sp(ctx).edit().putString(KEY_ALERT_HISTORY, updated.joinToString("\n")).apply()
     }
     fun clearAlertHistory(ctx: Context) = sp(ctx).edit().remove(KEY_ALERT_HISTORY).apply()
+
+    // === 今日峰值（CPU/内存/温度今日最高，跨天自动重置） ===
+    private const val KEY_PEAK_DATE = "peak_date"
+    private const val KEY_PEAK_CPU = "peak_cpu"
+    private const val KEY_PEAK_MEM = "peak_mem"
+    private const val KEY_PEAK_CPU_TEMP = "peak_cpu_temp"
+    private const val KEY_PEAK_NVME_TEMP = "peak_nvme_temp"
+
+    private fun todayKey(): String {
+        val c = java.util.Calendar.getInstance()
+        return String.format(
+            "%04d%02d%02d",
+            c.get(java.util.Calendar.YEAR),
+            c.get(java.util.Calendar.MONTH) + 1,
+            c.get(java.util.Calendar.DAY_OF_MONTH)
+        )
+    }
+
+    /** 记录今日峰值（跨天自动清零重记） */
+    fun recordPeaks(ctx: Context, cpu: Double, mem: Double, cpuTemp: Double?, nvmeTemp: Double?) {
+        val today = todayKey()
+        val sp = sp(ctx)
+        val e = sp.edit()
+        if (sp.getString(KEY_PEAK_DATE, "") != today) {
+            e.putString(KEY_PEAK_DATE, today)
+            e.putFloat(KEY_PEAK_CPU, cpu.toFloat())
+            e.putFloat(KEY_PEAK_MEM, mem.toFloat())
+            if (cpuTemp != null) e.putFloat(KEY_PEAK_CPU_TEMP, cpuTemp.toFloat()) else e.remove(KEY_PEAK_CPU_TEMP)
+            if (nvmeTemp != null) e.putFloat(KEY_PEAK_NVME_TEMP, nvmeTemp.toFloat()) else e.remove(KEY_PEAK_NVME_TEMP)
+        } else {
+            val pc = sp.getFloat(KEY_PEAK_CPU, 0f)
+            val pm = sp.getFloat(KEY_PEAK_MEM, 0f)
+            val pct = sp.getFloat(KEY_PEAK_CPU_TEMP, -1f)
+            val pnt = sp.getFloat(KEY_PEAK_NVME_TEMP, -1f)
+            if (cpu > pc) e.putFloat(KEY_PEAK_CPU, cpu.toFloat())
+            if (mem > pm) e.putFloat(KEY_PEAK_MEM, mem.toFloat())
+            if (cpuTemp != null && cpuTemp > pct) e.putFloat(KEY_PEAK_CPU_TEMP, cpuTemp.toFloat())
+            if (nvmeTemp != null && nvmeTemp > pnt) e.putFloat(KEY_PEAK_NVME_TEMP, nvmeTemp.toFloat())
+        }
+        e.apply()
+    }
+
+    fun peakCpu(ctx: Context) = sp(ctx).getFloat(KEY_PEAK_CPU, 0f)
+    fun peakMem(ctx: Context) = sp(ctx).getFloat(KEY_PEAK_MEM, 0f)
+    fun peakCpuTemp(ctx: Context): Float? = sp(ctx).getFloat(KEY_PEAK_CPU_TEMP, -1f).takeIf { it >= 0 }
+    fun peakNvmeTemp(ctx: Context): Float? = sp(ctx).getFloat(KEY_PEAK_NVME_TEMP, -1f).takeIf { it >= 0 }
 }
