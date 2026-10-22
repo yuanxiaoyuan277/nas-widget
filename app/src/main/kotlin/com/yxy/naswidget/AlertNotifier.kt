@@ -89,6 +89,28 @@ object AlertNotifier {
         send(context, "容器停止", stopped.joinToString("、") + " 已停止")
     }
 
+    /** 发送测试通知（手动触发，不进告警历史），返回通知权限是否已开启 */
+    fun sendTest(context: Context): Boolean {
+        if (!NotificationManagerCompat.from(context).areNotificationsEnabled()) return false
+        ensureChannel(context)
+        val notif = NotificationCompat.Builder(context, CHANNEL_ID)
+            .setSmallIcon(R.drawable.ic_launcher)
+            .setContentTitle("NAS Widget 测试通知")
+            .setContentText("通知功能正常，资源超限 / 离线 / 容器停止时会在这里提醒你")
+            .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .setAutoCancel(true)
+            .setContentIntent(
+                PendingIntent.getActivity(
+                    context, 0,
+                    Intent(context, MainActivity::class.java),
+                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+                )
+            )
+            .build()
+        runCatching { NotificationManagerCompat.from(context).notify(2, notif) }
+        return true
+    }
+
     /** 发送本地通知（标题 + 内容），点击打开 App 主界面 */
     private fun send(context: Context, title: String, text: String) {
         Prefs.addAlertHistory(context, "${Fmt.time(System.currentTimeMillis())} $title：$text")

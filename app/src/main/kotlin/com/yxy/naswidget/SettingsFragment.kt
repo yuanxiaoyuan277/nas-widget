@@ -72,6 +72,7 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
     private lateinit var etSilentStart: EditText
     private lateinit var etSilentEnd: EditText
     private lateinit var btnAlertHistory: Button
+    private lateinit var btnTestNotif: Button
     private var suppressSave = false
     private val saveHandler = Handler(Looper.getMainLooper())
     private val saveRunnable = Runnable { persist() }
@@ -110,6 +111,7 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
         etSilentStart = view.findViewById(R.id.et_silent_start)
         etSilentEnd = view.findViewById(R.id.et_silent_end)
         btnAlertHistory = view.findViewById(R.id.btn_alert_history)
+        btnTestNotif = view.findViewById(R.id.btn_test_notif)
 
         btnLogin.setOnClickListener {
             requireActivity().startActivityForResult(Intent(requireContext(), LoginActivity::class.java), REQ_LOGIN)
@@ -122,6 +124,11 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
         btnRestore.setOnClickListener { restoreConfig() }
         btnShareBackup.setOnClickListener { shareBackup() }
         btnAlertHistory.setOnClickListener { showAlertHistory() }
+        btnTestNotif.setOnClickListener {
+            val ok = AlertNotifier.sendTest(requireContext())
+            if (ok) Toast.makeText(requireContext(), "已发送测试通知，请下拉通知栏查看", Toast.LENGTH_SHORT).show()
+            else Toast.makeText(requireContext(), "通知权限未开启，请在系统设置中允许通知", Toast.LENGTH_LONG).show()
+        }
         tvAboutRepo.setOnClickListener {
             try {
                 startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/yuanxiaoyuan277/nas-widget")))
