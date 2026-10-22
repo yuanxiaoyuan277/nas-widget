@@ -11,6 +11,9 @@ enum class ContainerAction { START, STOP, RESTART }
 /** 从 monitor_proxy / 飞牛 API 拉取 NAS 数据 */
 object NasDataFetcher {
 
+    /** 单容器 stats 结果（usedMem 字节 + cpuPercent 百分比，字段缺失时为 null） */
+    private data class ContainerStats(val usedMem: Long?, val cpuPercent: Double?)
+
     private var dockerCache: List<DockerContainer>? = null
     private var dockerCacheTime = 0L
     private const val DOCKER_CACHE_MS = 30000L
@@ -101,7 +104,7 @@ object NasDataFetcher {
             if (list.isEmpty() && !result.equals("succ", true)) {
                 return Result.failure(Exception("响应异常: $resp"))
             }
-            Result.success(fetchMemUsage(nasBase, accessToken, list)).also { r ->
+            Result.success(fetchContainerMetrics(nasBase, accessToken, list)).also { r ->
                 r.onSuccess { l -> dockerCache = l; dockerCacheTime = now }
             }
         } catch (e: Exception) {
@@ -109,8 +112,8 @@ object NasDataFetcher {
         }
     }
 
-    /** 并发拉取各 running 容器的内存占用（containerStats.usedMem） */
-    private fun fetchMemUsage(nasBase: String, accessToken: String, containers: List<DockerContainer>): List<DockerContainer> {
+    /** 并发拉取各 running 容器的内存占用 + CPU 使用率（containerStats） */
+    private fun fetchContainerMetrics(nasBase: String, accessToken: String, containers: List<DockerContainer>): List<DockerContainer> {
         val running = containers.filter { it.running && it.id.isNotEmpty() }
         if (running.isEmpty()) return containers
         val pool = java.util.concurrent.Executors.newFixedThreadPool(Math.min(8, running.size))
@@ -118,15 +121,20 @@ object NasDataFetcher {
             val futures = running.map { c ->
                 pool.submit(java.util.concurrent.Callable { c.id to fetchContainerStats(nasBase, accessToken, c.id) })
             }
-            val memMap = futures.map { it.get() }.toMap()
-            return containers.map { c -> if (c.running) c.copy(memBytes = memMap[c.id]) else c }
+            val statsMap = futures.map { it.get() }.toMap()
+            return containers.map { c ->
+                if (c.running) {
+                    val st = statsMap[c.id]
+                    c.copy(memBytes = st?.usedMem, cpuPercent = st?.cpuPercent)
+                } else c
+            }
         } finally {
             pool.shutdown()
         }
     }
 
-    /** 单容器 stats，返回 usedMem 字节；失败返回 null */
-    private fun fetchContainerStats(nasBase: String, accessToken: String, containerId: String): Long? {
+    /** 单容器 stats，返回 usedMem 字节 + cpuPercent（字段缺失时为 null）；失败返回 null */
+    private fun fetchContainerStats(nasBase: String, accessToken: String, containerId: String): ContainerStats? {
         return try {
             val (code, resp) = postAppcgi(nasBase, accessToken, "appcgi.dockermgr.containerStats") {
                 it.put("containerId", containerId)
@@ -134,10 +142,26 @@ object NasDataFetcher {
             if (code != 200) return null
             val rootObj = parseRootObj(resp)
             if (rootObj?.optString("result", "") != "succ") return null
-            rootObj.optJSONObject("rsp")?.optLong("usedMem")
+            val rsp = rootObj.optJSONObject("rsp") ?: return null
+            ContainerStats(
+                usedMem = rsp.optLong("usedMem"),
+                cpuPercent = parseCpuPercent(rsp)
+            )
         } catch (e: Exception) {
             null
         }
+    }
+
+    /** 防御式解析 CPU 使用率字段（飞牛各版本字段名可能不同，逐个尝试） */
+    private fun parseCpuPercent(rsp: JSONObject): Double? {
+        val keys = listOf("cpuPercent", "cpuUsage", "cpu_percent", "cpuUsagePercent", "cpu")
+        for (k in keys) {
+            if (rsp.has(k)) {
+                val v = rsp.optDouble(k, Double.NaN)
+                if (!v.isNaN()) return v
+            }
+        }
+        return null
     }
 
     /** 容器生命周期操作：启动 / 停止 / 重启（appcgi.dockermgr.containerStart/Stop/Restart，containerId 标识） */

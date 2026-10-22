@@ -27,7 +27,8 @@ data class DockerContainer(
     val name: String,
     val state: String,
     val status: String,
-    val memBytes: Long? = null
+    val memBytes: Long? = null,
+    val cpuPercent: Double? = null
 ) {
     val running: Boolean get() = state.equals("running", ignoreCase = true)
 
@@ -46,6 +47,9 @@ data class DockerContainer(
     /** 内存占用可读文本（如 "78M"），未获取则为空串 */
     val memText: String get() = memBytes?.let { Fmt.bytes(it) } ?: ""
 
+    /** CPU 使用率可读文本（如 "12%"），未获取则为空串 */
+    val cpuText: String get() = cpuPercent?.let { String.format("%.0f%%", it.coerceIn(0.0, 100.0)) } ?: ""
+
     /** 运行时长文本（从 Status 提取 "Up 2 days" 这类，清理掉 "(healthy)" 等后缀） */
     val uptimeText: String get() {
         if (!running) return ""
@@ -57,10 +61,11 @@ data class DockerContainer(
     val stateText: String get() =
         if (status.isNotEmpty() && !running) "$stateLabel · $status" else stateLabel
 
-    /** 显示用完整详情：运行态拼 内存 + 运行时长；非运行态用 stateText */
+    /** 显示用完整详情：运行态拼 CPU + 内存 + 运行时长；非运行态用 stateText */
     val detailText: String get() {
         if (running) {
             val parts = mutableListOf(stateLabel)
+            if (cpuText.isNotEmpty()) parts.add(cpuText)
             if (memText.isNotEmpty()) parts.add(memText)
             if (uptimeText.isNotEmpty()) parts.add(uptimeText)
             return parts.joinToString(" · ")
