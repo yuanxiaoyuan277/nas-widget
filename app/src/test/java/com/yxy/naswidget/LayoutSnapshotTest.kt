@@ -14,7 +14,7 @@ class LayoutSnapshotTest {
     @get:Rule
     val paparazzi = Paparazzi(
         deviceConfig = DeviceConfig.PIXEL_5,
-        theme = "android:Theme.Material.Light.NoActionBar"
+        theme = "Theme.NasWidget"
     )
 
     @Test
