@@ -884,6 +884,16 @@
                 android:text="开源仓库：github.com/yuanxiaoyuan277/nas-widget"
                 android:textColor="@color/app_primary"
                 android:textSize="13sp" />
+
+            <Button
+                android:id="@+id/btn_about_check_update"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="检查更新"
+                android:textColor="@android:color/white"
+                app:backgroundTint="@color/app_primary"
+                app:cornerRadius="14dp" />
         </LinearLayout>
 
         <!-- 危险操作卡片 -->

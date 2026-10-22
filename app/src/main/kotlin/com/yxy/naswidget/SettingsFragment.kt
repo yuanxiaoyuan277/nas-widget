@@ -61,6 +61,7 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
     private lateinit var btnToggleTheme: Button
     private lateinit var tvVersion: TextView
     private lateinit var btnCheckUpdate: Button
+    private lateinit var btnAboutCheckUpdate: Button
     private lateinit var tvUpdateStatus: TextView
     private lateinit var btnBackup: Button
     private lateinit var btnRestore: Button
@@ -114,6 +115,7 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
         btnToggleTheme = view.findViewById(R.id.btn_toggle_theme)
         tvVersion = view.findViewById(R.id.tv_version)
         btnCheckUpdate = view.findViewById(R.id.btn_check_update)
+        btnAboutCheckUpdate = view.findViewById(R.id.btn_about_check_update)
         tvUpdateStatus = view.findViewById(R.id.tv_update_status)
         btnBackup = view.findViewById(R.id.btn_backup)
         btnRestore = view.findViewById(R.id.btn_restore)
@@ -158,6 +160,7 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
         btnToggleTheme.setOnClickListener { toggleTheme() }
         btnWb2apiDetail.setOnClickListener { fetchWb2apiDetail() }
         btnCheckUpdate.setOnClickListener { checkUpdate() }
+        btnAboutCheckUpdate.setOnClickListener { checkUpdate() }
         btnBackup.setOnClickListener { backupConfig() }
         btnRestore.setOnClickListener { restoreConfig() }
         btnShareBackup.setOnClickListener { shareBackup() }
