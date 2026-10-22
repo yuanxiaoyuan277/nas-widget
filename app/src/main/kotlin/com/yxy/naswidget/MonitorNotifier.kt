@@ -16,6 +16,9 @@ object MonitorNotifier {
     private const val CHANNEL_ID = "nas_monitor"
     private const val NOTIF_ID = 100
 
+    /** 广播 action：通知栏「静默 1 小时 / 取消静默」快捷操作 */
+    const val ACTION_SILENT_1H = "com.yxy.naswidget.action.SILENT_1H"
+
     fun ensureChannel(context: Context) {
         if (Build.VERSION.SDK_INT >= 26) {
             val nm = context.getSystemService(NotificationManager::class.java)
@@ -66,6 +69,14 @@ object MonitorNotifier {
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
+        // 「静默 1 小时 / 取消静默」快捷操作：广播到 UpdateReceiver 切换临时静默
+        val silentPi = PendingIntent.getBroadcast(
+            context, 103,
+            Intent(context, UpdateReceiver::class.java).setAction(ACTION_SILENT_1H),
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+        val silentLabel = if (Prefs.isTempSilent(context)) "取消静默" else "静默1小时"
+
         val notif = NotificationCompat.Builder(context, CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_launcher)
             .setContentTitle("NAS 监控")
@@ -75,6 +86,7 @@ object MonitorNotifier {
             .setOnlyAlertOnce(true)
             .addAction(R.drawable.ic_launcher, "刷新", refreshPi)
             .addAction(R.drawable.ic_launcher, "飞牛管理", nasPi)
+            .addAction(R.drawable.ic_launcher, silentLabel, silentPi)
             .setContentIntent(
                 PendingIntent.getActivity(
                     context, 0,
