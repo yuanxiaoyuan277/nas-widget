@@ -588,11 +588,25 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
                 btnCheckUpdate.isEnabled = true
                 result.onSuccess { info ->
                     val local = UpdateChecker.localVersion(requireContext())
-                    if (UpdateChecker.isNewer(info.version, local) &&
-                        !UpdateChecker.isIgnored(requireContext(), info.version)
-                    ) {
-                        tvUpdateStatus.text = ""
-                        UpdateChecker.showUpdateDialog(requireActivity() as AppCompatActivity, info)
+                    if (UpdateChecker.isNewer(info.version, local)) {
+                        if (UpdateChecker.isIgnored(requireContext(), info.version)) {
+                            // 该版本已被忽略：提示并可取消忽略重新查看更新
+                            MaterialAlertDialogBuilder(requireContext())
+                                .setTitle("已忽略 v${info.version}")
+                                .setMessage("你之前已忽略此版本。是否取消忽略并查看更新？")
+                                .setPositiveButton("取消忽略") { _, _ ->
+                                    Prefs.setIgnoredVersion(requireContext(), "")
+                                    tvUpdateStatus.text = ""
+                                    UpdateChecker.showUpdateDialog(requireActivity() as AppCompatActivity, info)
+                                }
+                                .setNegativeButton("保持忽略") { _, _ ->
+                                    tvUpdateStatus.text = "已忽略 v${info.version}"
+                                }
+                                .show()
+                        } else {
+                            tvUpdateStatus.text = ""
+                            UpdateChecker.showUpdateDialog(requireActivity() as AppCompatActivity, info)
+                        }
                     } else {
                         tvUpdateStatus.text = "已是最新版本 v$local"
                     }
