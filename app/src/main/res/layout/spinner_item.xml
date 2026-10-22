@@ -3,5 +3,8 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:minHeight="0dp"
+    android:gravity="center_vertical"
+    android:drawableEnd="@drawable/ic_arrow_dropdown"
+    android:drawablePadding="4dp"
     android:textColor="@color/app_text_primary"
     android:textSize="14sp" />
