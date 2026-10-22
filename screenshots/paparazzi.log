@@ -10,15 +10,15 @@ Daemon will be stopped at the end of the build
 > Task :app:packageDebugResources
 > Task :app:createDebugCompatibleScreenManifests
 > Task :app:extractDeepLinksDebug
-> Task :app:mergeDebugResources
-> Task :app:processDebugMainManifest
 > Task :app:parseDebugLocalResources
+> Task :app:processDebugMainManifest
 > Task :app:processDebugManifest
 > Task :app:preDebugUnitTestBuild UP-TO-DATE
-> Task :app:processDebugManifestForPackage
 > Task :app:javaPreCompileDebug
+> Task :app:mergeDebugResources
 > Task :app:preparePaparazziDebugResources
 > Task :app:javaPreCompileDebugUnitTest
+> Task :app:processDebugManifestForPackage
 > Task :app:processDebugResources
 
 > Task :app:compileDebugKotlin
@@ -26,14 +26,14 @@ w: file:///home/runner/work/nas-widget/nas-widget/app/src/main/kotlin/com/yxy/na
 w: file:///home/runner/work/nas-widget/nas-widget/app/src/main/kotlin/com/yxy/naswidget/HomeFragment.kt:382:31 'fun startActivityForResult(p0: Intent, p1: Int): Unit' is deprecated. Deprecated in Java.
 w: file:///home/runner/work/nas-widget/nas-widget/app/src/main/kotlin/com/yxy/naswidget/HomeFragment.kt:400:18 This declaration overrides a deprecated member but is not marked as deprecated itself. Please add the '@Deprecated' annotation or suppress the diagnostic.
 w: file:///home/runner/work/nas-widget/nas-widget/app/src/main/kotlin/com/yxy/naswidget/HomeFragment.kt:401:15 'fun onActivityResult(p0: Int, p1: Int, p2: Intent?): Unit' is deprecated. Deprecated in Java.
-w: file:///home/runner/work/nas-widget/nas-widget/app/src/main/kotlin/com/yxy/naswidget/SettingsFragment.kt:163:31 'fun startActivityForResult(p0: Intent, p1: Int): Unit' is deprecated. Deprecated in Java.
-w: file:///home/runner/work/nas-widget/nas-widget/app/src/main/kotlin/com/yxy/naswidget/SettingsFragment.kt:279:18 This declaration overrides a deprecated member but is not marked as deprecated itself. Please add the '@Deprecated' annotation or suppress the diagnostic.
-w: file:///home/runner/work/nas-widget/nas-widget/app/src/main/kotlin/com/yxy/naswidget/SettingsFragment.kt:280:15 'fun onActivityResult(p0: Int, p1: Int, p2: Intent?): Unit' is deprecated. Deprecated in Java.
-w: file:///home/runner/work/nas-widget/nas-widget/app/src/main/kotlin/com/yxy/naswidget/SettingsFragment.kt:345:41 Unchecked cast of 'android.widget.SpinnerAdapter!' to 'android.widget.ArrayAdapter<kotlin.String>'.
+w: file:///home/runner/work/nas-widget/nas-widget/app/src/main/kotlin/com/yxy/naswidget/SettingsFragment.kt:165:31 'fun startActivityForResult(p0: Intent, p1: Int): Unit' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/nas-widget/nas-widget/app/src/main/kotlin/com/yxy/naswidget/SettingsFragment.kt:282:18 This declaration overrides a deprecated member but is not marked as deprecated itself. Please add the '@Deprecated' annotation or suppress the diagnostic.
+w: file:///home/runner/work/nas-widget/nas-widget/app/src/main/kotlin/com/yxy/naswidget/SettingsFragment.kt:283:15 'fun onActivityResult(p0: Int, p1: Int, p2: Intent?): Unit' is deprecated. Deprecated in Java.
+w: file:///home/runner/work/nas-widget/nas-widget/app/src/main/kotlin/com/yxy/naswidget/SettingsFragment.kt:349:41 Unchecked cast of 'android.widget.SpinnerAdapter!' to 'android.widget.ArrayAdapter<kotlin.String>'.
 
 > Task :app:compileDebugJavaWithJavac NO-SOURCE
-> Task :app:bundleDebugClassesToRuntimeJar
 > Task :app:processDebugJavaRes
+> Task :app:bundleDebugClassesToRuntimeJar
 > Task :app:bundleDebugClassesToCompileJar
 > Task :app:compileDebugUnitTestKotlin
 > Task :app:processDebugUnitTestJavaRes
@@ -44,7 +44,7 @@ w: file:///home/runner/work/nas-widget/nas-widget/app/src/main/kotlin/com/yxy/na
 See the Paparazzi report at: file:///home/runner/work/nas-widget/nas-widget/app/build/reports/paparazzi/debug/index.html
 
 > Task :app:recordPaparazziDebug
-gradle/actions: Writing build results to /home/runner/work/_temp/.gradle-actions/build-results/__run_2-1792713244524.json
+gradle/actions: Writing build results to /home/runner/work/_temp/.gradle-actions/build-results/__run_2-1792713380783.json
 
-BUILD SUCCESSFUL in 38s
+BUILD SUCCESSFUL in 54s
 24 actionable tasks: 24 executed
