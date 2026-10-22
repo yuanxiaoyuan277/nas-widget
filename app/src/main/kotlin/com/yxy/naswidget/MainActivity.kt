@@ -1,6 +1,8 @@
 package com.yxy.naswidget
 
 import android.os.Bundle
+import android.view.ViewGroup
+import android.view.animation.OvershootInterpolator
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import com.google.android.material.bottomnavigation.BottomNavigationView
@@ -53,8 +55,30 @@ class MainActivity : AppCompatActivity() {
             }
             switchFragment(target)
             currentTab = target
+            animateNavSelection(target)
             true
         }
+
+        // 首次进入也给选中项一个轻微弹跳，提示当前所在标签
+        bottomNav.post { animateNavSelection(currentTab) }
+    }
+
+    /** 底部导航选中态动画：选中项图标/标签轻微缩放弹跳（Overshoot 回弹） */
+    private fun animateNavSelection(menuItemId: Int) {
+        val index = (0 until bottomNav.menu.size())
+            .firstOrNull { bottomNav.menu.getItem(it).itemId == menuItemId } ?: return
+        val menuView = bottomNav.getChildAt(0) as? ViewGroup ?: return
+        if (index >= menuView.childCount) return
+        val itemView = menuView.getChildAt(index) ?: return
+        itemView.animate().cancel()
+        itemView.scaleX = 0.9f
+        itemView.scaleY = 0.9f
+        itemView.animate()
+            .scaleX(1f)
+            .scaleY(1f)
+            .setDuration(280)
+            .setInterpolator(OvershootInterpolator(2.5f))
+            .start()
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
