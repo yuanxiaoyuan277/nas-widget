@@ -178,4 +178,16 @@ object Fmt {
             else -> "${m}分"
         }
     }
+
+    /** 时间戳毫秒 → 本地 HH:mm:ss（用于「最后更新时间」） */
+    fun time(millis: Long): String {
+        val cal = java.util.Calendar.getInstance()
+        cal.timeInMillis = millis
+        return String.format(
+            "%02d:%02d:%02d",
+            cal.get(java.util.Calendar.HOUR_OF_DAY),
+            cal.get(java.util.Calendar.MINUTE),
+            cal.get(java.util.Calendar.SECOND)
+        )
+    }
 }

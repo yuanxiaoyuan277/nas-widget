@@ -87,7 +87,7 @@ class NasWidgetProvider : AppWidgetProvider() {
             var stats: NasStats? = null
             result.onSuccess { s ->
                 stats = s
-                views.setTextViewText(R.id.tv_uptime, "运行 " + Fmt.uptime(s.uptimeSec))
+                views.setTextViewText(R.id.tv_uptime, "运行 " + Fmt.uptime(s.uptimeSec) + " · " + Fmt.time(s.fetchTime))
             }.onFailure {
                 views.setTextViewText(R.id.tv_uptime, "连接失败")
             }

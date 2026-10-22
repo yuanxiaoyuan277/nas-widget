@@ -68,6 +68,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
     private lateinit var tvSysCpu: TextView
     private lateinit var tvSysOs: TextView
     private lateinit var tvSysUptime: TextView
+    private lateinit var tvSysTime: TextView
 
     private val handler = Handler(Looper.getMainLooper())
     private var dockerContainers: List<DockerContainer> = emptyList()
@@ -124,6 +125,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         tvSysCpu = view.findViewById(R.id.tv_sys_cpu)
         tvSysOs = view.findViewById(R.id.tv_sys_os)
         tvSysUptime = view.findViewById(R.id.tv_sys_uptime)
+        tvSysTime = view.findViewById(R.id.tv_sys_time)
 
         widgetId = requireActivity().intent.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, AppWidgetManager.INVALID_APPWIDGET_ID)
         if (widgetId != AppWidgetManager.INVALID_APPWIDGET_ID) {
@@ -327,7 +329,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         var stats: NasStats? = null
         result.onSuccess { s ->
             stats = s
-            root.findViewById<TextView>(R.id.tv_uptime).text = "运行 " + Fmt.uptime(s.uptimeSec)
+            root.findViewById<TextView>(R.id.tv_uptime).text = "运行 " + Fmt.uptime(s.uptimeSec) + " · " + Fmt.time(s.fetchTime)
         }.onFailure {
             root.findViewById<TextView>(R.id.tv_uptime).text = "连接失败"
         }
@@ -336,6 +338,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         tvSysCpu.text = stats?.cpuModel?.takeIf { it.isNotEmpty() } ?: "--"
         tvSysOs.text = stats?.osVersion?.takeIf { it.isNotEmpty() } ?: "--"
         tvSysUptime.text = stats?.let { Fmt.uptime(it.uptimeSec) } ?: "--"
+        tvSysTime.text = stats?.let { Fmt.time(it.fetchTime) } ?: "--"
 
         fun addTo(comp: String, v: View) {
             contentArea.addView(v)
