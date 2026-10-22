@@ -14,6 +14,7 @@ object AlertNotifier {
 
     private const val CHANNEL_ID = "nas_alert"
     private const val REPEAT_MS = 30 * 60 * 1000L  // 同一组告警 30 分钟内不重复
+    private const val OFFLINE_DELAY_MS = 2 * 60 * 1000L  // 连续拉取失败 2 分钟后才判定离线
 
     fun checkAndNotify(context: Context, stats: NasStats) {
         if (!Prefs.showAlert(context)) return
@@ -38,14 +39,44 @@ object AlertNotifier {
         val lastTime = Prefs.lastAlertTime(context)
         if (key == last && System.currentTimeMillis() - lastTime < REPEAT_MS) return
         Prefs.setLastAlert(context, key)
+        send(context, "NAS 告警", alerts.joinToString("、"))
+    }
 
+    /** 拉取成功：若此前处于离线状态，则发「NAS 已恢复」通知并复位 */
+    fun markOnline(context: Context) {
+        if (Prefs.offlineSince(context) == 0L) return
+        Prefs.setOfflineSince(context, 0L)
+        if (Prefs.offlineNotified(context)) {
+            Prefs.setOfflineNotified(context, false)
+            send(context, "NAS 已恢复", "监控数据源连接已恢复正常")
+        }
+    }
+
+    /** 拉取失败：连续失败超过 OFFLINE_DELAY_MS 后发「NAS 离线」通知（一次离线只提醒一次） */
+    fun markOffline(context: Context) {
+        if (!Prefs.showAlert(context)) return
+        if (Prefs.isSilentNow(context)) return
+        val now = System.currentTimeMillis()
+        val since = Prefs.offlineSince(context)
+        if (since == 0L) {
+            Prefs.setOfflineSince(context, now)
+            return
+        }
+        if (!Prefs.offlineNotified(context) && now - since >= OFFLINE_DELAY_MS) {
+            Prefs.setOfflineNotified(context, true)
+            send(context, "NAS 离线", "无法连接监控数据源，请检查 NAS 是否在线")
+        }
+    }
+
+    /** 发送本地通知（标题 + 内容），点击打开 App 主界面 */
+    private fun send(context: Context, title: String, text: String) {
         ensureChannel(context)
         if (!NotificationManagerCompat.from(context).areNotificationsEnabled()) return
 
         val notif = NotificationCompat.Builder(context, CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_launcher)
-            .setContentTitle("NAS 告警")
-            .setContentText(alerts.joinToString("、"))
+            .setContentTitle(title)
+            .setContentText(text)
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setAutoCancel(true)
             .setContentIntent(

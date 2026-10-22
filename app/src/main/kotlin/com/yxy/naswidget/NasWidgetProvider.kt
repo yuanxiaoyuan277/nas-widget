@@ -43,7 +43,12 @@ class NasWidgetProvider : AppWidgetProvider() {
                     val views = buildViews(context, result, docker, wb2api)
                     appWidgetManager.updateAppWidget(id, views)
                 }
-                result.onSuccess { AlertNotifier.checkAndNotify(context, it) }
+                result.onSuccess { s ->
+                    AlertNotifier.checkAndNotify(context, s)
+                    AlertNotifier.markOnline(context)
+                }.onFailure {
+                    AlertNotifier.markOffline(context)
+                }
             }.start()
         }
 
