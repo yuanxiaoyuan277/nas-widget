@@ -1207,6 +1207,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
     private fun showContainerDetail(c: DockerContainer) {
         val lines = mutableListOf<String>()
         lines.add("状态：${c.stateLabel}")
+        if (c.id.isNotEmpty()) lines.add("ID：${c.id.take(12)}")
         if (c.image.isNotEmpty()) lines.add("镜像：${c.image}")
         if (c.portText.isNotEmpty()) lines.add("端口：${c.portText}")
         if (c.status.isNotEmpty()) lines.add("详情：${c.status}")
@@ -1217,6 +1218,13 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
             .setTitle(c.name)
             .setMessage(lines.joinToString("\n"))
             .setPositiveButton("关闭", null)
+        if (c.id.isNotEmpty()) {
+            builder.setNegativeButton("复制 ID") { _, _ ->
+                val cm = requireContext().getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                cm.setPrimaryClip(ClipData.newPlainText("container-id", c.id))
+                Toast.makeText(requireContext(), "容器 ID 已复制", Toast.LENGTH_SHORT).show()
+            }
+        }
         if (c.publicPorts.isNotEmpty()) {
             builder.setNeutralButton("打开 Web") { _, _ -> openContainerWeb(c) }
         }
