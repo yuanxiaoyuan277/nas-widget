@@ -90,6 +90,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
     private lateinit var etTempX: EditText
     private lateinit var etTempY: EditText
     private lateinit var tvSysCpu: TextView
+    private lateinit var tvSysMem: TextView
     private lateinit var tvSysOs: TextView
     private lateinit var tvSysUptime: TextView
     private lateinit var tvSysTime: TextView
@@ -170,6 +171,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         etTempX = view.findViewById(R.id.et_temp_x)
         etTempY = view.findViewById(R.id.et_temp_y)
         tvSysCpu = view.findViewById(R.id.tv_sys_cpu)
+        tvSysMem = view.findViewById(R.id.tv_sys_mem)
         tvSysOs = view.findViewById(R.id.tv_sys_os)
         tvSysUptime = view.findViewById(R.id.tv_sys_uptime)
         tvSysTime = view.findViewById(R.id.tv_sys_time)
@@ -428,6 +430,10 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         // 系统信息卡片（CPU 型号+核心数 / 系统版本 / 运行时长 / 温度）
         tvSysCpu.text = stats?.let { s ->
             s.cpuModel.takeIf { it.isNotEmpty() }?.let { "$it · ${s.cores}核" } ?: "--"
+        } ?: "--"
+        tvSysMem.text = stats?.let { s ->
+            val free = (s.memTotal - s.memUsed).coerceAtLeast(0)
+            String.format("%s/%s %.0f%%", Fmt.bytes(free), Fmt.bytes(s.memTotal), s.memPercent)
         } ?: "--"
         tvSysOs.text = stats?.osVersion?.takeIf { it.isNotEmpty() } ?: "--"
         tvSysUptime.text = stats?.let { Fmt.uptime(it.uptimeSec) } ?: "--"
