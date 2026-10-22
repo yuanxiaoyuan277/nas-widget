@@ -758,6 +758,16 @@
                 android:textColor="@android:color/white"
                 app:backgroundTint="@color/app_primary"
                 app:cornerRadius="14dp" />
+
+            <Button
+                android:id="@+id/btn_widget_bg"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="组件背景：标准（点击切换）"
+                android:textColor="@android:color/white"
+                app:backgroundTint="@color/app_secondary"
+                app:cornerRadius="14dp" />
         </LinearLayout>
 
         <!-- 更新卡片 -->

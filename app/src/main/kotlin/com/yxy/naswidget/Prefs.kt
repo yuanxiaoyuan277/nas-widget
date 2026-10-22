@@ -184,6 +184,18 @@ object Prefs {
         else -> androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_YES
     }
 
+    // === 组件背景透明度（standard=标准/lighter=更透明/lightest=最透明） ===
+    private const val KEY_WIDGET_BG = "widget_bg"
+    fun widgetBg(ctx: Context): String = sp(ctx).getString(KEY_WIDGET_BG, "standard") ?: "standard"
+    fun setWidgetBg(ctx: Context, v: String) = sp(ctx).edit().putString(KEY_WIDGET_BG, v).apply()
+
+    /** 组件背景透明度对应的 drawable 资源 id */
+    fun widgetBgRes(ctx: Context): Int = when (widgetBg(ctx)) {
+        "lighter" -> R.drawable.glass_card_lighter
+        "lightest" -> R.drawable.glass_card_lightest
+        else -> R.drawable.glass_card
+    }
+
     // === 更新弹窗「忽略此版本」 ===
     fun ignoredVersion(ctx: Context): String = sp(ctx).getString(KEY_IGNORED_VERSION, "") ?: ""
     fun setIgnoredVersion(ctx: Context, v: String) = sp(ctx).edit().putString(KEY_IGNORED_VERSION, v).apply()

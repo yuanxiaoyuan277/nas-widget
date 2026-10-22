@@ -59,6 +59,7 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
     private lateinit var btnWb2apiDetail: Button
     private lateinit var tvWb2apiDetail: TextView
     private lateinit var btnToggleTheme: Button
+    private lateinit var btnWidgetBg: Button
     private lateinit var tvVersion: TextView
     private lateinit var btnCheckUpdate: Button
     private lateinit var btnAboutCheckUpdate: Button
@@ -115,6 +116,7 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
         btnWb2apiDetail = view.findViewById(R.id.btn_wb2api_detail)
         tvWb2apiDetail = view.findViewById(R.id.tv_wb2api_detail)
         btnToggleTheme = view.findViewById(R.id.btn_toggle_theme)
+        btnWidgetBg = view.findViewById(R.id.btn_widget_bg)
         tvVersion = view.findViewById(R.id.tv_version)
         btnCheckUpdate = view.findViewById(R.id.btn_check_update)
         btnAboutCheckUpdate = view.findViewById(R.id.btn_about_check_update)
@@ -162,6 +164,7 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
         }
         btnTestUrl.setOnClickListener { testUrl() }
         btnToggleTheme.setOnClickListener { toggleTheme() }
+        btnWidgetBg.setOnClickListener { cycleWidgetBg() }
         btnWb2apiDetail.setOnClickListener { fetchWb2apiDetail() }
         btnCheckUpdate.setOnClickListener { checkUpdate() }
         btnAboutCheckUpdate.setOnClickListener { checkUpdate() }
@@ -311,6 +314,7 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
         tvVersion.text = "v${UpdateChecker.localVersion(requireContext())}"
         tvAboutVersion.text = "v${UpdateChecker.localVersion(requireContext())}"
         updateThemeButton()
+        updateWidgetBgButton()
         updateTempSilentStatus()
         refreshBatteryStatus()
         suppressSave = false
@@ -335,6 +339,30 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
         Prefs.setTheme(requireContext(), next)
         AppCompatDelegate.setDefaultNightMode(Prefs.nightMode(requireContext()))
         updateThemeButton()
+    }
+
+    private fun widgetBgLabel(mode: String): String = when (mode) {
+        "lighter" -> "更透明"
+        "lightest" -> "最透明"
+        else -> "标准"
+    }
+
+    private fun updateWidgetBgButton() {
+        btnWidgetBg.text = "组件背景：${widgetBgLabel(Prefs.widgetBg(requireContext()))}（点击切换）"
+    }
+
+    /** 循环切换组件背景透明度：标准 / 更透明 / 最透明，改完立即刷新桌面组件 */
+    private fun cycleWidgetBg() {
+        val next = when (Prefs.widgetBg(requireContext())) {
+            "standard" -> "lighter"
+            "lighter" -> "lightest"
+            else -> "standard"
+        }
+        Prefs.setWidgetBg(requireContext(), next)
+        updateWidgetBgButton()
+        val am = AppWidgetManager.getInstance(requireContext())
+        val ids = am.getAppWidgetIds(ComponentName(requireContext(), NasWidgetProvider::class.java))
+        if (ids.isNotEmpty()) NasWidgetProvider.updateAll(requireContext(), am, ids)
     }
 
     /** 告警阈值三档预设：均衡（默认）/ 宽松 / 激进 */

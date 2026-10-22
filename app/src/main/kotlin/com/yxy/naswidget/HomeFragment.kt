@@ -538,6 +538,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
 
     private fun updatePreviewViews(result: Result<NasStats>, docker: Result<List<DockerContainer>>?, wb2api: Result<Wb2apiStats>?) {
         val root = previewContainer.getChildAt(0) as? View ?: return
+        root.setBackgroundResource(Prefs.widgetBgRes(requireContext()))
         val showCpu = Prefs.showCpu(requireContext())
         val showMem = Prefs.showMem(requireContext())
         val showDisk1 = Prefs.showDisk1(requireContext())

@@ -67,6 +67,8 @@ class NasWidgetProvider : AppWidgetProvider() {
             wb2api: Result<Wb2apiStats>?
         ): RemoteViews {
             val views = RemoteViews(context.packageName, R.layout.nas_widget)
+            // 组件背景透明度：按用户设置的档位切换玻璃底 drawable
+            views.setInt(R.id.widget_root, "setBackgroundResource", Prefs.widgetBgRes(context))
             // 点击组件任意位置打开 App 主界面
             val clickPi = PendingIntent.getActivity(
                 context, 0,
