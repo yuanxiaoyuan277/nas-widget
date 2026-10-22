@@ -57,6 +57,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
     private lateinit var btnDockerSort: Button
     private lateinit var btnDockerStartAll: Button
     private lateinit var btnDockerStopAll: Button
+    private lateinit var btnDockerRestartAll: Button
     private lateinit var etDockerSearch: EditText
     private lateinit var btnDockerFilter: Button
     private lateinit var sbCpuX: SeekBar
@@ -164,6 +165,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         btnDockerSort = view.findViewById(R.id.btn_docker_sort)
         btnDockerStartAll = view.findViewById(R.id.btn_docker_start_all)
         btnDockerStopAll = view.findViewById(R.id.btn_docker_stop_all)
+        btnDockerRestartAll = view.findViewById(R.id.btn_docker_restart_all)
         etDockerSearch = view.findViewById(R.id.et_docker_search)
         btnDockerFilter = view.findViewById(R.id.btn_docker_filter)
         sbCpuX = view.findViewById(R.id.sb_cpu_x)
@@ -307,6 +309,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         }
         btnDockerStartAll.setOnClickListener { batchContainerAction(ContainerAction.START) }
         btnDockerStopAll.setOnClickListener { batchContainerAction(ContainerAction.STOP) }
+        btnDockerRestartAll.setOnClickListener { batchContainerAction(ContainerAction.RESTART) }
 
         // 强制登录门
         if (!Prefs.isLoggedIn(requireContext())) {
@@ -1195,7 +1198,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         }.start()
     }
 
-    /** 批量操作：全部启动 / 全部停止（二次确认后顺序执行） */
+    /** 批量操作：全部启动 / 全部停止 / 全部重启（二次确认后顺序执行） */
     private fun batchContainerAction(action: ContainerAction) {
         if (!Prefs.isLoggedIn(requireContext())) {
             Toast.makeText(requireContext(), "请先登录飞牛账号", Toast.LENGTH_SHORT).show()
@@ -1203,15 +1206,14 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         }
         val targets = when (action) {
             ContainerAction.START -> dockerContainers.filter { !it.running && it.id.isNotEmpty() }
-            ContainerAction.STOP -> dockerContainers.filter { it.running && it.id.isNotEmpty() }
-            else -> emptyList()
+            ContainerAction.STOP, ContainerAction.RESTART -> dockerContainers.filter { it.running && it.id.isNotEmpty() }
         }
         if (targets.isEmpty()) {
             val label = if (action == ContainerAction.START) "没有需要启动的容器" else "没有运行中的容器"
             Toast.makeText(requireContext(), label, Toast.LENGTH_SHORT).show()
             return
         }
-        val verb = if (action == ContainerAction.START) "启动" else "停止"
+        val verb = actionVerb(action)
         MaterialAlertDialogBuilder(requireContext())
             .setTitle("批量$verb")
             .setMessage("将对以下 ${targets.size} 个容器执行「$verb」：\n${targets.joinToString("、") { it.name }}")
@@ -1220,9 +1222,16 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
             .show()
     }
 
+    /** 容器操作动词：启动/停止/重启 */
+    private fun actionVerb(action: ContainerAction): String = when (action) {
+        ContainerAction.START -> "启动"
+        ContainerAction.STOP -> "停止"
+        ContainerAction.RESTART -> "重启"
+    }
+
     /** 执行批量操作：顺序对每个容器调飞牛 API，完成后刷新列表与预览 */
     private fun runBatch(action: ContainerAction, targets: List<DockerContainer>) {
-        val verb = if (action == ContainerAction.START) "启动" else "停止"
+        val verb = actionVerb(action)
         Toast.makeText(requireContext(), "正在批量$verb…", Toast.LENGTH_SHORT).show()
         Thread {
             val token = OAuthClient.getValidAccessToken(requireContext()).getOrNull()

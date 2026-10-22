@@ -1732,6 +1732,18 @@
                         android:minHeight="0dp"
                         android:paddingHorizontal="10dp"
                         android:paddingVertical="6dp" />
+
+                    <Button
+                        android:id="@+id/btn_docker_restart_all"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="6dp"
+                        android:text="全部重启"
+                        android:textSize="13sp"
+                        android:minWidth="0dp"
+                        android:minHeight="0dp"
+                        android:paddingHorizontal="10dp"
+                        android:paddingVertical="6dp" />
                 </LinearLayout>
 
                 <LinearLayout
