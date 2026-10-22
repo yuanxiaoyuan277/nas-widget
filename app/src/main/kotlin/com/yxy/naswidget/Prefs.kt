@@ -360,6 +360,40 @@ object Prefs {
     fun peakNetDown(ctx: Context): Long = sp(ctx).getLong(KEY_PEAK_NET_DOWN, 0L)
     fun peakNetUp(ctx: Context): Long = sp(ctx).getLong(KEY_PEAK_NET_UP, 0L)
 
+    // === 今日累计流量（下行/上行数据量，跨天自动重置；按「速率 × 距上次采样秒数」积分） ===
+    private const val KEY_TRAFFIC_DATE = "traffic_date"
+    private const val KEY_TRAFFIC_DOWN = "traffic_down"
+    private const val KEY_TRAFFIC_UP = "traffic_up"
+    private const val KEY_TRAFFIC_LAST_SAMPLE = "traffic_last_sample_ms"
+
+    /** 记录一次采样：把本次速率按距上次采样的秒数累加进今日数据量（单次上限 600s，避免长时间未采样导致虚高） */
+    fun recordNetTraffic(ctx: Context, down: Long, up: Long) {
+        val today = todayKey()
+        val sp = sp(ctx)
+        val now = System.currentTimeMillis()
+        val last = sp.getLong(KEY_TRAFFIC_LAST_SAMPLE, 0L)
+        val e = sp.edit()
+        if (sp.getString(KEY_TRAFFIC_DATE, "") != today) {
+            e.putString(KEY_TRAFFIC_DATE, today)
+            e.putLong(KEY_TRAFFIC_DOWN, 0L)
+            e.putLong(KEY_TRAFFIC_UP, 0L)
+        } else if (last > 0L) {
+            val dtSec = ((now - last) / 1000.0).coerceIn(0.0, 600.0)
+            e.putLong(KEY_TRAFFIC_DOWN, sp.getLong(KEY_TRAFFIC_DOWN, 0L) + (down * dtSec).toLong())
+            e.putLong(KEY_TRAFFIC_UP, sp.getLong(KEY_TRAFFIC_UP, 0L) + (up * dtSec).toLong())
+        }
+        e.putLong(KEY_TRAFFIC_LAST_SAMPLE, now)
+        e.apply()
+    }
+
+    fun trafficDown(ctx: Context): Long = sp(ctx).getLong(KEY_TRAFFIC_DOWN, 0L)
+    fun trafficUp(ctx: Context): Long = sp(ctx).getLong(KEY_TRAFFIC_UP, 0L)
+
+    /** 清零今日累计流量，下次刷新重新累积 */
+    fun clearTraffic(ctx: Context) = sp(ctx).edit()
+        .remove(KEY_TRAFFIC_DATE).remove(KEY_TRAFFIC_DOWN).remove(KEY_TRAFFIC_UP).remove(KEY_TRAFFIC_LAST_SAMPLE)
+        .apply()
+
     /** 清零今日所有峰值记录（CPU/内存/温度/网络），下次刷新重新累积 */
     fun clearPeaks(ctx: Context) = sp(ctx).edit()
         .remove(KEY_PEAK_DATE).remove(KEY_PEAK_CPU).remove(KEY_PEAK_MEM)

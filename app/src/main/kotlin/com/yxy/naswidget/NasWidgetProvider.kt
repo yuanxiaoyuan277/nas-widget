@@ -46,6 +46,7 @@ class NasWidgetProvider : AppWidgetProvider() {
                 result.onSuccess { s ->
                     Prefs.recordPeaks(context, s.cpuPercent, s.memPercent, s.tempCpu, s.tempNvme)
                     Prefs.recordNetPeak(context, s.netDown, s.netUp)
+                    Prefs.recordNetTraffic(context, s.netDown, s.netUp)
                     AlertNotifier.checkAndNotify(context, s)
                     AlertNotifier.markOnline(context)
                 }.onFailure {

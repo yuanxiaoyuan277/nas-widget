@@ -18,6 +18,7 @@ class UpdateReceiver : BroadcastReceiver() {
             // 无桌面组件但开启了常驻监控：单独拉取并更新通知
             Thread {
                 val result = NasDataFetcher.fetch(Prefs.url(context))
+                result.onSuccess { s -> Prefs.recordNetTraffic(context, s.netDown, s.netUp) }
                 MonitorNotifier.updateFromStats(context, result)
             }.start()
         }

@@ -104,6 +104,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
     private lateinit var tvSysTemp: TextView
     private lateinit var tvSysStorage: TextView
     private lateinit var tvSysPeak: TextView
+    private lateinit var tvSysTraffic: TextView
     private lateinit var btnClearPeak: TextView
     private lateinit var tvSysRefresh: TextView
 
@@ -200,6 +201,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         tvSysTemp = view.findViewById(R.id.tv_sys_temp)
         tvSysStorage = view.findViewById(R.id.tv_sys_storage)
         tvSysPeak = view.findViewById(R.id.tv_sys_peak)
+        tvSysTraffic = view.findViewById(R.id.tv_sys_traffic)
         btnClearPeak = view.findViewById(R.id.btn_clear_peak)
         tvSysRefresh = view.findViewById(R.id.tv_sys_refresh)
 
@@ -229,6 +231,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         tvSysTemp.setOnClickListener { showTempDetail() }
         tvSysStorage.setOnClickListener { showDiskDetail() }
         tvSysPeak.setOnClickListener { showPeakDetail() }
+        tvSysTraffic.setOnClickListener { showTrafficDetail() }
         // 「清零」按钮：一键清零今日峰值记录
         btnClearPeak.setOnClickListener { clearPeaks() }
         // 「刷新间隔」行点击循环切换
@@ -491,6 +494,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
             AlertNotifier.markOnline(requireContext())
             Prefs.recordPeaks(requireContext(), s.cpuPercent, s.memPercent, s.tempCpu, s.tempNvme)
             Prefs.recordNetPeak(requireContext(), s.netDown, s.netUp)
+            Prefs.recordNetTraffic(requireContext(), s.netDown, s.netUp)
             root.findViewById<TextView>(R.id.tv_uptime).text = "运行 " + Fmt.uptime(s.uptimeSec) + " · " + Fmt.time(s.fetchTime)
             // 状态徽标：任一指标超阈值 → 告警
             val overUsage = s.cpuPercent >= usageThr || s.memPercent >= usageThr ||
@@ -529,6 +533,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         tvSysUptime.text = stats?.let { Fmt.uptime(it.uptimeSec) } ?: "--"
         tvSysTime.text = stats?.let { Fmt.time(it.fetchTime) } ?: "--"
         tvSysNet.text = stats?.let { "↓${Fmt.speed(it.netDown)} ↑${Fmt.speed(it.netUp)}" } ?: "--"
+        tvSysTraffic.text = trafficText()
         tvSysTemp.text = stats?.let { s ->
             val cpuT = s.tempCpu?.let { String.format("%.0f°", it) } ?: "--°"
             val nvmeT = s.tempNvme?.let { String.format("%.0f°", it) } ?: "--°"
@@ -744,6 +749,9 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         }
         tempLine?.let { lines.add(it) }
         lines.add("网络 ↓${Fmt.speed(s.netDown)} ↑${Fmt.speed(s.netUp)}")
+        val tDown = Prefs.trafficDown(requireContext())
+        val tUp = Prefs.trafficUp(requireContext())
+        if (tDown > 0L || tUp > 0L) lines.add("今日流量 ↓${Fmt.bytes(tDown)} ↑${Fmt.bytes(tUp)}")
         lines.add("运行 ${Fmt.uptime(s.uptimeSec)}")
         return lines.joinToString("\n")
     }
@@ -854,6 +862,35 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
             .setMessage(lines.joinToString("\n"))
             .setPositiveButton("关闭", null)
             .show()
+    }
+
+    /** 查看今日流量明细：累计下行/上行 + 峰值速率，可一键清零累计流量 */
+    private fun showTrafficDetail() {
+        val down = Prefs.trafficDown(requireContext())
+        val up = Prefs.trafficUp(requireContext())
+        val netDown = Prefs.peakNetDown(requireContext())
+        val netUp = Prefs.peakNetUp(requireContext())
+        val lines = listOf(
+            "今日累计：↓${Fmt.bytes(down)} ↑${Fmt.bytes(up)}",
+            "峰值速率：↓${Fmt.speed(netDown)} ↑${Fmt.speed(netUp)}"
+        )
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle("今日流量")
+            .setMessage(lines.joinToString("\n"))
+            .setPositiveButton("清零") { _, _ ->
+                Prefs.clearTraffic(requireContext())
+                tvSysTraffic.text = trafficText()
+                Toast.makeText(requireContext(), "今日流量已清零", Toast.LENGTH_SHORT).show()
+            }
+            .setNegativeButton("关闭", null)
+            .show()
+    }
+
+    /** 今日累计流量可读文本（无数据时为 --） */
+    private fun trafficText(): String {
+        val down = Prefs.trafficDown(requireContext())
+        val up = Prefs.trafficUp(requireContext())
+        return if (down <= 0L && up <= 0L) "--" else "↓${Fmt.bytes(down)} ↑${Fmt.bytes(up)}"
     }
 
     /** 清零今日峰值记录（CPU/内存/温度/网络），并立即刷新显示 */
