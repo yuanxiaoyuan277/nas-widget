@@ -351,7 +351,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         })
         btnDockerFilter.text = dockerFilterLabel(Prefs.dockerFilter(requireContext()))
         btnDockerFilter.setOnClickListener {
-            val modes = listOf("all", "running", "stopped", "selected")
+            val modes = listOf("all", "running", "stopped", "selected", "error")
             val cur = Prefs.dockerFilter(requireContext())
             val idx = modes.indexOf(cur)
             val next = modes[(idx + 1 + modes.size) % modes.size]
@@ -1359,6 +1359,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         "running" -> "运行中"
         "stopped" -> "已停止"
         "selected" -> "已勾选"
+        "error" -> "异常"
         else -> "全部"
     }
 
@@ -1407,13 +1408,17 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         applyDockerFilter()
     }
 
-    /** 更新 Docker 统计头：运行/总计 + 已勾选数量（无容器时提示刷新） */
+    /** 更新 Docker 统计头：运行/总计 + 已勾选 + 异常数量（无容器时提示刷新） */
     private fun updateDockerCount() {
         val total = dockerContainers.size
         val running = dockerContainers.count { it.running }
+        val error = dockerContainers.count { it.state.equals("error", true) }
         val checked = dockerCheckboxes.count { it.isChecked }
         tvDockerCount.text = if (total == 0) "暂无容器，点击「刷新」加载"
-        else "$running 运行 / $total 总计 · 已勾选 $checked"
+        else {
+            val errPart = if (error > 0) " · 异常 $error" else ""
+            "$running 运行 / $total 总计 · 已勾选 $checked$errPart"
+        }
     }
 
     /** 一键复制容器清单（名称/状态/CPU/内存/镜像）到剪贴板，方便分享或留档 */
@@ -1606,6 +1611,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
             "running" -> dockerContainers.filter { it.running }.map { it.name }.toSet()
             "stopped" -> dockerContainers.filter { !it.running }.map { it.name }.toSet()
             "selected" -> dockerCheckboxes.filter { it.isChecked }.mapNotNull { it.tag as? String }.toSet()
+            "error" -> dockerContainers.filter { it.state.equals("error", true) }.map { it.name }.toSet()
             else -> null
         }
         val nameToContainer = dockerContainers.associateBy { it.name }
