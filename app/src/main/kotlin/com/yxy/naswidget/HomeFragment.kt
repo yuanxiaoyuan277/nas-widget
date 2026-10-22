@@ -120,6 +120,9 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
     private lateinit var cardConfig: LinearLayout
     private lateinit var tvConfigTitle: TextView
     private var configCollapsed = false
+    private lateinit var cardDocker: LinearLayout
+    private lateinit var tvDockerTitle: TextView
+    private var dockerCollapsed = false
 
     private val handler = Handler(Looper.getMainLooper())
     private var dockerContainers: List<DockerContainer> = emptyList()
@@ -248,6 +251,16 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
             configCollapsed = !configCollapsed
             Prefs.setConfigCollapsed(requireContext(), configCollapsed)
             applyConfigCollapsed()
+        }
+        // 「Docker 容器」卡片折叠/展开：点击标题收起/展开列表与操作区，减少长页面滚动
+        cardDocker = view.findViewById(R.id.card_docker)
+        tvDockerTitle = view.findViewById(R.id.tv_docker_title)
+        dockerCollapsed = Prefs.dockerCollapsed(requireContext())
+        applyDockerCollapsed()
+        tvDockerTitle.setOnClickListener {
+            dockerCollapsed = !dockerCollapsed
+            Prefs.setDockerCollapsed(requireContext(), dockerCollapsed)
+            applyDockerCollapsed()
         }
 
         widgetId = requireActivity().intent.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, AppWidgetManager.INVALID_APPWIDGET_ID)
@@ -1563,6 +1576,14 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
             }
         }
         tvConfigTitle.text = if (configCollapsed) "组件配置（点击展开）" else "组件配置（点击折叠）"
+    }
+
+    /** 折叠/展开「Docker 容器」区：保留标题行（含全选/刷新），收起下方操作区与列表 */
+    private fun applyDockerCollapsed() {
+        for (i in 1 until cardDocker.childCount) {
+            cardDocker.getChildAt(i).visibility = if (dockerCollapsed) View.GONE else View.VISIBLE
+        }
+        tvDockerTitle.text = if (dockerCollapsed) "Docker 容器（点击展开）" else "Docker 容器（点击折叠）"
     }
 
     private fun persist() {

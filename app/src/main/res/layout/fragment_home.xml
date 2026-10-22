@@ -1727,6 +1727,7 @@
             </LinearLayout>
 
             <LinearLayout
+                android:id="@+id/card_docker"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="10dp"
@@ -1741,10 +1742,11 @@
                     android:gravity="center_vertical">
 
                     <TextView
+                        android:id="@+id/tv_docker_title"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="Docker 容器"
+                        android:text="Docker 容器（点击折叠）"
                         android:textColor="@color/app_text_secondary"
                         android:textSize="13sp" />
 

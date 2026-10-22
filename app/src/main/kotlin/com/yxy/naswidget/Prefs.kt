@@ -193,6 +193,11 @@ object Prefs {
     fun configCollapsed(ctx: Context): Boolean = sp(ctx).getBoolean(KEY_CONFIG_COLLAPSED, false)
     fun setConfigCollapsed(ctx: Context, v: Boolean) = sp(ctx).edit().putBoolean(KEY_CONFIG_COLLAPSED, v).apply()
 
+    // === 主页「Docker 容器」区折叠状态 ===
+    private const val KEY_DOCKER_COLLAPSED = "docker_collapsed"
+    fun dockerCollapsed(ctx: Context): Boolean = sp(ctx).getBoolean(KEY_DOCKER_COLLAPSED, false)
+    fun setDockerCollapsed(ctx: Context, v: Boolean) = sp(ctx).edit().putBoolean(KEY_DOCKER_COLLAPSED, v).apply()
+
     // === wb2api 积分 ===
     fun showWb2api(ctx: Context) = sp(ctx).getBoolean(KEY_SHOW_WB2API, false)
     fun setShowWb2api(ctx: Context, v: Boolean) = sp(ctx).edit().putBoolean(KEY_SHOW_WB2API, v).apply()
