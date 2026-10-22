@@ -556,8 +556,11 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
             tv.setTextColor(if (over) Fmt.ALERT_COLOR else defaultTextColor)
         }
         tvSysCpu.text = stats?.let { s ->
-            s.cpuModel.takeIf { it.isNotEmpty() }?.let { "$it · ${s.cores}核" } ?: "--"
+            val model = s.cpuModel.takeIf { it.isNotEmpty() }
+            val pct = String.format("%.0f%%", s.cpuPercent)
+            if (model != null) "$model · ${s.cores}核 · $pct" else "${s.cores}核 · $pct"
         } ?: "--"
+        tintSys(tvSysCpu, (stats?.cpuPercent ?: 0.0) >= usageThr)
         tvSysMem.text = stats?.let { s ->
             val free = (s.memTotal - s.memUsed).coerceAtLeast(0)
             String.format("%s/%s %.0f%%", Fmt.bytes(free), Fmt.bytes(s.memTotal), s.memPercent)
