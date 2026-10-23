@@ -31,6 +31,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 
 class HomeFragment : Fragment(R.layout.fragment_home) {
 
@@ -134,6 +135,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
     private lateinit var tvSystemTitle: TextView
     private var systemCollapsed = false
     private lateinit var btnToggleAllCards: TextView
+    private lateinit var btnScrollTop: FloatingActionButton
 
     private val handler = Handler(Looper.getMainLooper())
     private var dockerContainers: List<DockerContainer> = emptyList()
@@ -300,6 +302,9 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         btnToggleAllCards = view.findViewById(R.id.btn_toggle_all_cards)
         updateToggleAllButton()
         btnToggleAllCards.setOnClickListener { toggleAllCards() }
+        // 「回到顶部」悬浮按钮：一键滚回页面顶部
+        btnScrollTop = view.findViewById(R.id.btn_scroll_top)
+        btnScrollTop.setOnClickListener { scrollRoot.smoothScrollTo(0, 0) }
 
         widgetId = requireActivity().intent.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, AppWidgetManager.INVALID_APPWIDGET_ID)
         if (widgetId != AppWidgetManager.INVALID_APPWIDGET_ID) {
