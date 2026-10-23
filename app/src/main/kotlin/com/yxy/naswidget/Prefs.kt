@@ -254,6 +254,11 @@ object Prefs {
     fun systemCollapsed(ctx: Context): Boolean = sp(ctx).getBoolean(KEY_SYSTEM_COLLAPSED, false)
     fun setSystemCollapsed(ctx: Context, v: Boolean) = sp(ctx).edit().putBoolean(KEY_SYSTEM_COLLAPSED, v).apply()
 
+    // === 折线图自动轮播视图（每隔几秒自动切换 CPU/温度/网络/存储，默认关） ===
+    private const val KEY_SPARK_AUTO = "spark_auto"
+    fun sparkAuto(ctx: Context): Boolean = sp(ctx).getBoolean(KEY_SPARK_AUTO, false)
+    fun setSparkAuto(ctx: Context, v: Boolean) = sp(ctx).edit().putBoolean(KEY_SPARK_AUTO, v).apply()
+
     // === wb2api 积分 ===
     fun showWb2api(ctx: Context) = sp(ctx).getBoolean(KEY_SHOW_WB2API, false)
     fun setShowWb2api(ctx: Context, v: Boolean) = sp(ctx).edit().putBoolean(KEY_SHOW_WB2API, v).apply()

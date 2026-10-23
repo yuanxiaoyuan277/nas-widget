@@ -125,6 +125,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
     private lateinit var tvSysRefresh: TextView
     private lateinit var sparklineTrend: SparklineView
     private lateinit var tvTrendLabel: TextView
+    private lateinit var btnSparkAuto: TextView
     private lateinit var cardConfig: LinearLayout
     private lateinit var tvConfigTitle: TextView
     private lateinit var btnToggleAllItems: TextView
@@ -263,11 +264,21 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         tvSysRefresh = view.findViewById(R.id.tv_sys_refresh)
         sparklineTrend = view.findViewById(R.id.sparkline_trend)
         tvTrendLabel = view.findViewById(R.id.tv_trend_label)
-        // 点击折线图循环切换视图：资源 / 温度 / 网络
+        btnSparkAuto = view.findViewById(R.id.btn_spark_auto)
+        // 点击折线图循环切换视图：资源 / 温度 / 网络 / 存储（手动切换时重置自动轮播计时）
         sparklineTrend.setOnClickListener {
             sparklineMode = (sparklineMode + 1) % 4
             updateSparkline()
+            startSparkAuto()
         }
+        // 「自动轮播」开关：开启后折线图自动循环切换视图
+        btnSparkAuto.setOnClickListener {
+            val on = !Prefs.sparkAuto(requireContext())
+            Prefs.setSparkAuto(requireContext(), on)
+            updateSparkAutoButton()
+            startSparkAuto()
+        }
+        updateSparkAutoButton()
         // 「组件配置」卡片折叠/展开：点击标题切换滑块区显隐，减少长页面滚动
         cardConfig = view.findViewById(R.id.card_config)
         tvConfigTitle = view.findViewById(R.id.tv_config_title)
@@ -432,6 +443,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         loadPrefs()
         refreshDockerVisibility()
         startPreviewRefresh()
+        startSparkAuto()
         maybeAutoCheckUpdate()
 
         // 返回键即完成（改动已自动保存）
@@ -465,8 +477,10 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         if (hidden) {
             handler.removeCallbacks(previewRunnable)
             handler.removeCallbacks(previewThrottle)
+            handler.removeCallbacks(sparkAutoRunnable)
         } else {
             startPreviewRefresh()
+            startSparkAuto()
         }
     }
 
@@ -585,6 +599,26 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
     private fun schedulePreviewRefresh() {
         handler.removeCallbacks(previewThrottle)
         handler.postDelayed(previewThrottle, 100)
+    }
+
+    // === 折线图自动轮播：每隔 3 秒切换一次视图（CPU→温度→网络→存储→循环） ===
+    private val sparkAutoRunnable = object : Runnable {
+        override fun run() {
+            if (!Prefs.sparkAuto(requireContext())) return
+            sparklineMode = (sparklineMode + 1) % 4
+            updateSparkline()
+            handler.postDelayed(this, 3000L)
+        }
+    }
+
+    private fun startSparkAuto() {
+        handler.removeCallbacks(sparkAutoRunnable)
+        if (Prefs.sparkAuto(requireContext())) handler.postDelayed(sparkAutoRunnable, 3000L)
+    }
+
+    private fun updateSparkAutoButton() {
+        val on = Prefs.sparkAuto(requireContext())
+        btnSparkAuto.text = if (on) "自动轮播：开" else "自动轮播：关"
     }
 
     private fun refreshPreview() {
