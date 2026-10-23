@@ -132,6 +132,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
     private lateinit var cardSystem: LinearLayout
     private lateinit var tvSystemTitle: TextView
     private var systemCollapsed = false
+    private lateinit var btnToggleAllCards: TextView
 
     private val handler = Handler(Looper.getMainLooper())
     private var dockerContainers: List<DockerContainer> = emptyList()
@@ -290,6 +291,10 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
             Prefs.setSystemCollapsed(requireContext(), systemCollapsed)
             applySystemCollapsed()
         }
+        // 「全部展开/收起」快捷按钮：一键折叠或展开三个卡片，减少长页面滚动
+        btnToggleAllCards = view.findViewById(R.id.btn_toggle_all_cards)
+        updateToggleAllButton()
+        btnToggleAllCards.setOnClickListener { toggleAllCards() }
 
         widgetId = requireActivity().intent.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, AppWidgetManager.INVALID_APPWIDGET_ID)
         if (widgetId != AppWidgetManager.INVALID_APPWIDGET_ID) {
@@ -1723,6 +1728,29 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
             cardSystem.getChildAt(i).visibility = if (systemCollapsed) View.GONE else View.VISIBLE
         }
         tvSystemTitle.text = if (systemCollapsed) "系统信息（点击展开）" else "系统信息（点击折叠）"
+    }
+
+    /** 三个卡片是否全部展开 */
+    private fun allCardsExpanded() = !configCollapsed && !dockerCollapsed && !systemCollapsed
+
+    /** 一键折叠/展开三个卡片：全部展开时点击则全部收起，否则全部展开 */
+    private fun toggleAllCards() {
+        val targetCollapsed = allCardsExpanded()
+        configCollapsed = targetCollapsed
+        dockerCollapsed = targetCollapsed
+        systemCollapsed = targetCollapsed
+        Prefs.setConfigCollapsed(requireContext(), targetCollapsed)
+        Prefs.setDockerCollapsed(requireContext(), targetCollapsed)
+        Prefs.setSystemCollapsed(requireContext(), targetCollapsed)
+        applyConfigCollapsed()
+        applyDockerCollapsed()
+        applySystemCollapsed()
+        updateToggleAllButton()
+    }
+
+    /** 刷新「全部展开/收起」按钮文案 */
+    private fun updateToggleAllButton() {
+        btnToggleAllCards.text = if (allCardsExpanded()) "全部收起" else "全部展开"
     }
 
     private fun persist() {
