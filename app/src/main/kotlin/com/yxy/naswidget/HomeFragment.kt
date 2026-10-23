@@ -125,6 +125,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
     private lateinit var tvTrendLabel: TextView
     private lateinit var cardConfig: LinearLayout
     private lateinit var tvConfigTitle: TextView
+    private lateinit var btnToggleAllItems: TextView
     private var configCollapsed = false
     private lateinit var cardDocker: LinearLayout
     private lateinit var tvDockerTitle: TextView
@@ -271,6 +272,10 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
             Prefs.setConfigCollapsed(requireContext(), configCollapsed)
             applyConfigCollapsed()
         }
+        // 「全部显示/隐藏」快捷按钮：一键勾选/取消全部组件显示项
+        btnToggleAllItems = view.findViewById(R.id.btn_toggle_all_items)
+        updateToggleAllItemsButton()
+        btnToggleAllItems.setOnClickListener { toggleAllItems() }
         // 「Docker 容器」卡片折叠/展开：点击标题收起/展开列表与操作区，减少长页面滚动
         cardDocker = view.findViewById(R.id.card_docker)
         tvDockerTitle = view.findViewById(R.id.tv_docker_title)
@@ -539,6 +544,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         etTrafficY.setText(Prefs.compY(requireContext(), "traffic").toString())
         tvSysRefresh.text = refreshSecLabel(Prefs.refreshSec(requireContext()))
         suppressSave = false
+        updateToggleAllItemsButton()
         if (Prefs.isLoggedIn(requireContext())) {
             loadDockerContainers()
         }
@@ -1703,15 +1709,41 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         dockerListContainer.visibility = View.VISIBLE
     }
 
-    /** 折叠/展开「组件配置」区：隐藏/显示标题之外的所有滑块块，并更新标题文案 */
+    /** 折叠/展开「组件配置」区：保留标题行（含「全部显示」按钮），收起下方所有滑块块 */
     private fun applyConfigCollapsed() {
-        for (i in 0 until cardConfig.childCount) {
-            val child = cardConfig.getChildAt(i)
-            if (child !== tvConfigTitle) {
-                child.visibility = if (configCollapsed) View.GONE else View.VISIBLE
-            }
+        for (i in 1 until cardConfig.childCount) {
+            cardConfig.getChildAt(i).visibility = if (configCollapsed) View.GONE else View.VISIBLE
         }
         tvConfigTitle.text = if (configCollapsed) "组件配置（点击展开）" else "组件配置（点击折叠）"
+    }
+
+    /** 所有组件显示项是否都已勾选 */
+    private fun allItemsChecked(): Boolean =
+        cbCpu.isChecked && cbMem.isChecked && cbDisk1.isChecked && cbDisk2.isChecked && cbDisk3.isChecked &&
+            cbDocker.isChecked && cbNet.isChecked && cbStorage.isChecked && cbTempItem.isChecked && cbTrafficItem.isChecked
+
+    /** 一键勾选/取消全部组件显示项（CPU/内存/磁盘/网络/存储/温度/流量/Docker） */
+    private fun toggleAllItems() {
+        val target = !allItemsChecked()
+        suppressSave = true
+        cbCpu.isChecked = target
+        cbMem.isChecked = target
+        cbDisk1.isChecked = target
+        cbDisk2.isChecked = target
+        cbDisk3.isChecked = target
+        cbDocker.isChecked = target
+        cbNet.isChecked = target
+        cbStorage.isChecked = target
+        cbTempItem.isChecked = target
+        cbTrafficItem.isChecked = target
+        suppressSave = false
+        persist()
+        updateToggleAllItemsButton()
+    }
+
+    /** 刷新「全部显示/隐藏」按钮文案 */
+    private fun updateToggleAllItemsButton() {
+        btnToggleAllItems.text = if (allItemsChecked()) "全部隐藏" else "全部显示"
     }
 
     /** 折叠/展开「Docker 容器」区：保留标题行（含全选/刷新），收起下方操作区与列表 */
@@ -1849,7 +1881,12 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         bindSlider(etTrafficY, sbTrafficY, "traffic", false)
 
         for (cb in listOf(cbCpu, cbMem, cbDisk1, cbDisk2, cbDisk3, cbDocker, cbNet, cbStorage, cbTempItem, cbTrafficItem)) {
-            cb.setOnCheckedChangeListener { _, _ -> if (!suppressSave) persist() }
+            cb.setOnCheckedChangeListener { _, _ ->
+                if (!suppressSave) {
+                    persist()
+                    updateToggleAllItemsButton()
+                }
+            }
         }
 
         // 滑块实时同步：拖动即时更新输入框 + 保存 + 刷新预览

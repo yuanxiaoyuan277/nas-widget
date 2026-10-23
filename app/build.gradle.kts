@@ -12,8 +12,8 @@ android {
         applicationId = "com.yxy.naswidget"
         minSdk = 26
         targetSdk = 35
-        versionCode = 226
-        versionName = "1.11.140"
+        versionCode = 227
+        versionName = "1.11.141"
     }
 
     buildTypes {
