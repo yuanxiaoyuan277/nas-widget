@@ -844,6 +844,15 @@
                 android:textColor="@color/app_text_secondary"
                 android:textSize="13sp" />
 
+            <CheckBox
+                android:id="@+id/cb_auto_update"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:text="启动时自动检查更新（有新版弹窗提醒）"
+                android:textColor="@color/app_text_primary"
+                android:textSize="14sp" />
+
             <Button
                 android:id="@+id/btn_check_update"
                 android:layout_width="match_parent"

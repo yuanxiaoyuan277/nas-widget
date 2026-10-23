@@ -457,10 +457,11 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         }
     }
 
-    // 启动时自动检查更新，有新版本静默弹出更新弹框
+    // 启动时自动检查更新，有新版本静默弹出更新弹框（设置页可关闭「自动检查更新」）
     private fun maybeAutoCheckUpdate() {
         if (autoUpdateChecked) return
         autoUpdateChecked = true
+        if (!Prefs.autoUpdate(requireContext())) return
         Thread {
             val result = UpdateChecker.checkLatest()
             requireActivity().runOnUiThread {

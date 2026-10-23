@@ -234,6 +234,11 @@ object Prefs {
     fun ignoredVersion(ctx: Context): String = sp(ctx).getString(KEY_IGNORED_VERSION, "") ?: ""
     fun setIgnoredVersion(ctx: Context, v: String) = sp(ctx).edit().putString(KEY_IGNORED_VERSION, v).apply()
 
+    // === 启动时自动检查更新（默认开；关闭后主页启动不再自动弹更新框，仍可手动「检查更新」） ===
+    private const val KEY_AUTO_UPDATE = "auto_update"
+    fun autoUpdate(ctx: Context): Boolean = sp(ctx).getBoolean(KEY_AUTO_UPDATE, true)
+    fun setAutoUpdate(ctx: Context, v: Boolean) = sp(ctx).edit().putBoolean(KEY_AUTO_UPDATE, v).apply()
+
     // === 主页「组件配置」区折叠状态 ===
     private const val KEY_CONFIG_COLLAPSED = "config_collapsed"
     fun configCollapsed(ctx: Context): Boolean = sp(ctx).getBoolean(KEY_CONFIG_COLLAPSED, false)
