@@ -127,6 +127,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
     private lateinit var cardConfig: LinearLayout
     private lateinit var tvConfigTitle: TextView
     private lateinit var btnToggleAllItems: TextView
+    private lateinit var btnResetPositions: TextView
     private var configCollapsed = false
     private lateinit var cardDocker: LinearLayout
     private lateinit var tvDockerTitle: TextView
@@ -279,6 +280,8 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         btnToggleAllItems = view.findViewById(R.id.btn_toggle_all_items)
         updateToggleAllItemsButton()
         btnToggleAllItems.setOnClickListener { toggleAllItems() }
+        btnResetPositions = view.findViewById(R.id.btn_reset_positions)
+        btnResetPositions.setOnClickListener { resetAllPositions() }
         // 「Docker 容器」卡片折叠/展开：点击标题收起/展开列表与操作区，减少长页面滚动
         cardDocker = view.findViewById(R.id.card_docker)
         tvDockerTitle = view.findViewById(R.id.tv_docker_title)
@@ -1853,6 +1856,26 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
     /** 刷新「全部显示/隐藏」按钮文案 */
     private fun updateToggleAllItemsButton() {
         btnToggleAllItems.text = if (allItemsChecked()) "全部隐藏" else "全部显示"
+    }
+
+    /** 一键把所有组件的位置偏移归零（居中），同步滑块与输入框并立即刷新组件 */
+    private fun resetAllPositions() {
+        suppressSave = true
+        val sliders = listOf(
+            sbCpuX, sbCpuY, sbMemX, sbMemY, sbDisk1X, sbDisk1Y, sbDisk2X, sbDisk2Y,
+            sbDisk3X, sbDisk3Y, sbDockerX, sbDockerY, sbNetX, sbNetY, sbStorageX, sbStorageY,
+            sbTempX, sbTempY, sbTrafficX, sbTrafficY
+        )
+        val edits = listOf(
+            etCpuX, etCpuY, etMemX, etMemY, etDisk1X, etDisk1Y, etDisk2X, etDisk2Y,
+            etDisk3X, etDisk3Y, etDockerX, etDockerY, etNetX, etNetY, etStorageX, etStorageY,
+            etTempX, etTempY, etTrafficX, etTrafficY
+        )
+        for (sb in sliders) sb.progress = 50
+        for (et in edits) et.setText("0")
+        suppressSave = false
+        persist()
+        Toast.makeText(requireContext(), "所有组件位置已归零（居中）", Toast.LENGTH_SHORT).show()
     }
 
     /** 折叠/展开「Docker 容器」区：保留标题行（含全选/刷新），收起下方操作区与列表 */
