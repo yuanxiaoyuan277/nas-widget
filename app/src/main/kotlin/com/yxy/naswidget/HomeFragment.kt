@@ -49,6 +49,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
     private lateinit var cbTrafficItem: SwitchCompat
     private lateinit var previewContainer: FrameLayout
     private lateinit var btnRefreshPreview: Button
+    private lateinit var btnPausePreview: Button
     private lateinit var btnOpenNasWeb: Button
     private lateinit var btnCopySummary: Button
     private lateinit var btnShareSummary: Button
@@ -136,6 +137,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
     private var dockerContainers: List<DockerContainer> = emptyList()
     private val dockerCheckboxes = mutableListOf<SwitchCompat>()
     private var previewBusy = false
+    private var previewPaused = false
     private var lastStats: NasStats? = null
     private val cpuHistory = mutableListOf<Float>()
     private val memHistory = mutableListOf<Float>()
@@ -179,6 +181,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         cbTrafficItem = view.findViewById(R.id.cb_traffic)
         previewContainer = view.findViewById(R.id.preview_container)
         btnRefreshPreview = view.findViewById(R.id.btn_refresh_preview)
+        btnPausePreview = view.findViewById(R.id.btn_pause_preview)
         btnOpenNasWeb = view.findViewById(R.id.btn_open_nas_web)
         btnCopySummary = view.findViewById(R.id.btn_copy_summary)
         btnShareSummary = view.findViewById(R.id.btn_share_summary)
@@ -296,6 +299,15 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         // 小组件预览
         layoutInflater.inflate(R.layout.nas_widget_preview, previewContainer, true)
         btnRefreshPreview.setOnClickListener { refreshPreview() }
+        btnPausePreview.setOnClickListener {
+            previewPaused = !previewPaused
+            updatePauseButton()
+            if (previewPaused) {
+                handler.removeCallbacks(previewRunnable)
+            } else {
+                startPreviewRefresh()
+            }
+        }
         btnOpenNasWeb.setOnClickListener {
             try {
                 startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(Prefs.nasBase(requireContext()))))
@@ -530,7 +542,12 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
     // === 小组件预览 ===
     private fun startPreviewRefresh() {
         handler.removeCallbacks(previewRunnable)
-        handler.post(previewRunnable)
+        if (!previewPaused) handler.post(previewRunnable)
+    }
+
+    /** 刷新「暂停/恢复自动刷新」按钮文案 */
+    private fun updatePauseButton() {
+        btnPausePreview.text = if (previewPaused) "恢复刷新" else "暂停刷新"
     }
 
     private val previewRunnable = object : Runnable {

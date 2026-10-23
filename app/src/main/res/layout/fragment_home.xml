@@ -92,6 +92,18 @@
                         android:paddingVertical="6dp" />
 
                     <Button
+                        android:id="@+id/btn_pause_preview"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="6dp"
+                        android:text="暂停刷新"
+                        android:textSize="13sp"
+                        android:minWidth="0dp"
+                        android:minHeight="0dp"
+                        android:paddingHorizontal="12dp"
+                        android:paddingVertical="6dp" />
+
+                    <Button
                         android:id="@+id/btn_open_nas_web"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
