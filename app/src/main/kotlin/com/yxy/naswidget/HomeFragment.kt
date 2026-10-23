@@ -1576,7 +1576,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         Toast.makeText(requireContext(), "容器清单已复制（${dockerContainers.size} 个）", Toast.LENGTH_SHORT).show()
     }
 
-    /** 点击容器行弹出详情（状态/详情/CPU/内存/运行时长） */
+    /** 点击容器行弹出详情（状态/详情/CPU/内存/运行时长），并附操作按钮（启动/停止/重启/打开 Web） */
     private fun showContainerDetail(c: DockerContainer) {
         val lines = mutableListOf<String>()
         lines.add("状态：${c.stateLabel}")
@@ -1587,20 +1587,60 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         lines.add("CPU：${c.cpuText.ifEmpty { "--" }}")
         lines.add("内存：${c.memText.ifEmpty { "--" }}")
         if (c.uptimeText.isNotEmpty()) lines.add("运行时长：${c.uptimeText}")
-        val builder = MaterialAlertDialogBuilder(requireContext())
+
+        fun dp(v: Int): Int = (v * resources.displayMetrics.density).toInt()
+
+        // 内容视图：信息文本 + 操作按钮行（setMessage 与 setView 互斥，故合并进同一视图）
+        val content = LinearLayout(requireContext()).apply { orientation = LinearLayout.VERTICAL }
+        content.addView(TextView(requireContext()).apply {
+            text = lines.joinToString("\n")
+            setTextIsSelectable(true)
+            setPadding(0, 0, 0, dp(12))
+            setTextColor(requireContext().getColor(R.color.app_text_primary))
+            setTextSize(TypedValue.COMPLEX_UNIT_SP, 15f)
+        })
+
+        var dialog: androidx.appcompat.app.AlertDialog? = null
+        val operable = c.id.isNotEmpty()
+        val canWeb = c.running && c.publicPorts.isNotEmpty()
+        if (operable || canWeb) {
+            val row = LinearLayout(requireContext()).apply {
+                orientation = LinearLayout.HORIZONTAL
+                gravity = android.view.Gravity.CENTER
+            }
+            val accent = requireContext().getColor(R.color.app_primary)
+            fun addAction(label: String, color: Int, run: () -> Unit) {
+                row.addView(TextView(requireContext()).apply {
+                    text = label
+                    setTextColor(color)
+                    setTextSize(TypedValue.COMPLEX_UNIT_SP, 15f)
+                    setPadding(dp(14), dp(8), dp(14), dp(8))
+                    setOnClickListener { dialog?.dismiss(); run() }
+                })
+            }
+            if (operable) {
+                if (c.running) {
+                    addAction("重启", accent) { runContainerAction(c.id, c.name, ContainerAction.RESTART, emptyList()) }
+                    addAction("停止", 0xFFF44336.toInt()) { runContainerAction(c.id, c.name, ContainerAction.STOP, emptyList()) }
+                } else {
+                    addAction("启动", 0xFF4CAF50.toInt()) { runContainerAction(c.id, c.name, ContainerAction.START, emptyList()) }
+                }
+            }
+            if (canWeb) addAction("打开 Web", accent) { openContainerWeb(c) }
+            content.addView(row)
+        }
+
+        dialog = MaterialAlertDialogBuilder(requireContext())
             .setTitle(c.name)
-            .setMessage(lines.joinToString("\n"))
-            .setPositiveButton("关闭", null)
-            .setNegativeButton("复制") { _, _ ->
+            .setView(content)
+            .setPositiveButton("复制") { _, _ ->
                 val text = "${c.name}\n" + lines.joinToString("\n")
                 val cm = requireContext().getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
                 cm.setPrimaryClip(ClipData.newPlainText("container-info", text))
                 Toast.makeText(requireContext(), "容器信息已复制", Toast.LENGTH_SHORT).show()
             }
-        if (c.publicPorts.isNotEmpty()) {
-            builder.setNeutralButton("打开 Web") { _, _ -> openContainerWeb(c) }
-        }
-        builder.show()
+            .setNegativeButton("关闭", null)
+            .show()
     }
 
     /** 打开容器对外服务：优先 443 用 https、其余 http，多端口时让用户选一个 */
