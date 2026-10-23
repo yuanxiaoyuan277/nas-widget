@@ -673,8 +673,8 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         tvSysAlertHistory.text = alertHistoryLabel()
         tvSysTemp.text = stats?.let { s ->
             val f = Prefs.useFahrenheit(requireContext())
-            val cpuT = Fmt.temp(s.tempCpu, f)
-            val nvmeT = Fmt.temp(s.tempNvme, f)
+            val cpuT = Fmt.temp(s.tempCpu, f) + tempArrow(s.tempCpu, cpuTempHistory)
+            val nvmeT = Fmt.temp(s.tempNvme, f) + tempArrow(s.tempNvme, nvmeTempHistory)
             "CPU $cpuT · NVMe $nvmeT"
         } ?: "--"
         val overTemp = stats?.let { s ->
@@ -1332,6 +1332,18 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         if (!showTemp) return pctText
         val t = Fmt.temp(temp, Prefs.useFahrenheit(requireContext()))
         return "$t $pctText"
+    }
+
+    /** 温度趋势箭头：当前值 vs 上次采样，变化超过 0.5° 才显示 ↑/↓，否则无箭头 */
+    private fun tempArrow(cur: Double?, hist: List<Float>): String {
+        if (cur == null || hist.size < 2) return ""
+        val prev = hist[hist.size - 2].toDouble()
+        val diff = cur - prev
+        return when {
+            diff > 0.5 -> "↑"
+            diff < -0.5 -> "↓"
+            else -> ""
+        }
     }
 
     /** 磁盘值：可用空间 + 使用率（NVMe 附加温度） */
