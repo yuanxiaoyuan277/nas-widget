@@ -121,6 +121,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
     private lateinit var tvSysTraffic: TextView
     private lateinit var tvSysAlertHistory: TextView
     private lateinit var btnClearPeak: TextView
+    private lateinit var btnClearHistory: TextView
     private lateinit var tvSysRefresh: TextView
     private lateinit var sparklineTrend: SparklineView
     private lateinit var tvTrendLabel: TextView
@@ -258,6 +259,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         tvSysTraffic = view.findViewById(R.id.tv_sys_traffic)
         tvSysAlertHistory = view.findViewById(R.id.tv_sys_alert_history)
         btnClearPeak = view.findViewById(R.id.btn_clear_peak)
+        btnClearHistory = view.findViewById(R.id.btn_clear_history)
         tvSysRefresh = view.findViewById(R.id.tv_sys_refresh)
         sparklineTrend = view.findViewById(R.id.sparkline_trend)
         tvTrendLabel = view.findViewById(R.id.tv_trend_label)
@@ -359,6 +361,8 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         tvSysUptime.setOnClickListener { showUptimeDetail() }
         // 「清零」按钮：一键清零今日峰值记录
         btnClearPeak.setOnClickListener { clearPeaks() }
+        // 「清历史」按钮：一键清空峰值/流量/告警历史/离线状态
+        btnClearHistory.setOnClickListener { clearHistory() }
         // 「刷新间隔」行点击循环切换
         tvSysRefresh.setOnClickListener { cycleRefreshInterval() }
 
@@ -1250,6 +1254,19 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         Prefs.clearPeaks(requireContext())
         tvSysPeak.text = peakText()
         Toast.makeText(requireContext(), "今日峰值已清零", Toast.LENGTH_SHORT).show()
+    }
+
+    /** 一键清理监控历史：清空今日峰值、今日流量、告警历史与离线状态，并立即刷新显示 */
+    private fun clearHistory() {
+        Prefs.clearPeaks(requireContext())
+        Prefs.clearTraffic(requireContext())
+        Prefs.clearAlertHistory(requireContext())
+        Prefs.setOfflineSince(requireContext(), 0L)
+        Prefs.setOfflineNotified(requireContext(), false)
+        tvSysPeak.text = peakText()
+        tvSysTraffic.text = trafficText()
+        tvSysAlertHistory.text = alertHistoryLabel()
+        Toast.makeText(requireContext(), "监控历史已清空（峰值/流量/告警/离线状态）", Toast.LENGTH_SHORT).show()
     }
 
     /** 刷新间隔可读文本（10/15/30/60 秒、5 分钟） */
