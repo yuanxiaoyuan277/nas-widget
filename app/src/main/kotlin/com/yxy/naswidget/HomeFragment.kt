@@ -336,14 +336,14 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
             "CPU" to tvSysCpu,
             "系统" to tvSysOs,
             "更新" to tvSysTime,
-            "数据源" to tvSysUrl,
-            "网络" to tvSysNet
+            "数据源" to tvSysUrl
         )
-        // 「内存」「温度」「存储」「峰值」行点击弹出明细
+        // 「内存」「温度」「存储」「峰值」「网络」行点击弹出明细
         tvSysMem.setOnClickListener { showMemDetail() }
         tvSysTemp.setOnClickListener { showTempDetail() }
         tvSysStorage.setOnClickListener { showDiskDetail() }
         tvSysPeak.setOnClickListener { showPeakDetail() }
+        tvSysNet.setOnClickListener { showNetDetail() }
         tvSysTraffic.setOnClickListener { showTrafficDetail() }
         tvSysAlertHistory.setOnClickListener { showAlertHistory() }
         // 「运行」行点击弹出已运行时长 + 本次启动时间
@@ -1089,6 +1089,24 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         lines.add(if (netDown > 0L || netUp > 0L) String.format("网络：↓%s ↑%s", Fmt.speed(netDown), Fmt.speed(netUp)) else "网络：暂无")
         MaterialAlertDialogBuilder(requireContext())
             .setTitle("今日峰值")
+            .setMessage(lines.joinToString("\n"))
+            .setPositiveButton("关闭", null)
+            .show()
+    }
+
+    /** 查看网络明细：当前速率 + 今日峰值 + 今日累计流量 */
+    private fun showNetDetail() {
+        val s = lastStats
+        val down = Prefs.trafficDown(requireContext())
+        val up = Prefs.trafficUp(requireContext())
+        val pDown = Prefs.peakNetDown(requireContext())
+        val pUp = Prefs.peakNetUp(requireContext())
+        val lines = mutableListOf<String>()
+        lines.add(if (s != null) "当前速率：↓${Fmt.speed(s.netDown)} ↑${Fmt.speed(s.netUp)}" else "当前速率：暂无")
+        lines.add("今日峰值：↓${Fmt.speed(pDown)} ↑${Fmt.speed(pUp)}")
+        lines.add("今日累计：↓${Fmt.bytes(down)} ↑${Fmt.bytes(up)}")
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle("网络明细")
             .setMessage(lines.joinToString("\n"))
             .setPositiveButton("关闭", null)
             .show()
