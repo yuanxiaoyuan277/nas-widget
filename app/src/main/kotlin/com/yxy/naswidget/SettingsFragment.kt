@@ -52,6 +52,8 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
     private lateinit var tvLoginStatus: TextView
     private lateinit var btnLogin: Button
     private lateinit var btnOpenNasWeb: Button
+    private lateinit var tvTokenExpiry: TextView
+    private lateinit var btnLogout: Button
     private lateinit var etUrl: EditText
     private lateinit var btnTestUrl: Button
     private lateinit var cbWb2api: CheckBox
@@ -116,6 +118,8 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
         tvLoginStatus = view.findViewById(R.id.tv_login_status)
         btnLogin = view.findViewById(R.id.btn_login)
         btnOpenNasWeb = view.findViewById(R.id.btn_open_nas_web)
+        tvTokenExpiry = view.findViewById(R.id.tv_token_expiry)
+        btnLogout = view.findViewById(R.id.btn_logout)
         etUrl = view.findViewById(R.id.et_url)
         btnTestUrl = view.findViewById(R.id.btn_test_url)
         cbWb2api = view.findViewById(R.id.cb_wb2api)
@@ -177,6 +181,7 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
                 Toast.makeText(requireContext(), "无法打开浏览器，请检查飞牛地址配置", Toast.LENGTH_SHORT).show()
             }
         }
+        btnLogout.setOnClickListener { confirmLogout() }
         btnTestUrl.setOnClickListener { testUrl() }
         btnToggleTheme.setOnClickListener { toggleTheme() }
         btnWidgetBg.setOnClickListener { cycleWidgetBg() }
@@ -317,6 +322,44 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
         val logged = Prefs.isLoggedIn(requireContext())
         tvLoginStatus.text = if (logged) "已登录飞牛账号" else "未登录"
         btnLogin.text = if (logged) "重新登录" else "登录飞牛账号"
+        btnLogout.visibility = if (logged) View.VISIBLE else View.GONE
+        tvTokenExpiry.text = if (logged) tokenExpiryText() else ""
+    }
+
+    /** 授权有效期可读文本（过期/长期有效/到期时间） */
+    private fun tokenExpiryText(): String {
+        val expiresAt = Prefs.tokenExpiresAt(requireContext())
+        if (expiresAt <= 0) return "授权长期有效"
+        val remain = expiresAt - System.currentTimeMillis() / 1000
+        return if (remain <= 0) "授权已过期，请重新登录"
+        else "授权有效期至 ${formatDateTime(expiresAt * 1000)}"
+    }
+
+    /** 时间戳毫秒 → 本地「MM-dd HH:mm」 */
+    private fun formatDateTime(millis: Long): String {
+        val cal = java.util.Calendar.getInstance()
+        cal.timeInMillis = millis
+        return String.format(
+            "%02d-%02d %02d:%02d",
+            cal.get(java.util.Calendar.MONTH) + 1,
+            cal.get(java.util.Calendar.DAY_OF_MONTH),
+            cal.get(java.util.Calendar.HOUR_OF_DAY),
+            cal.get(java.util.Calendar.MINUTE)
+        )
+    }
+
+    /** 退出登录：清除授权后刷新状态，Docker 相关功能随登录失效 */
+    private fun confirmLogout() {
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle("退出登录")
+            .setMessage("确定清除飞牛账号授权？清除后 Docker 容器监控与详情将无法获取，需重新登录。")
+            .setPositiveButton("退出") { _, _ ->
+                Prefs.clearToken(requireContext())
+                updateLoginStatus()
+                Toast.makeText(requireContext(), "已退出登录", Toast.LENGTH_SHORT).show()
+            }
+            .setNegativeButton("取消", null)
+            .show()
     }
 
     private fun loadPrefs() {

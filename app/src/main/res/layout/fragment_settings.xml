@@ -61,6 +61,14 @@
                 android:textColor="@color/app_text_primary"
                 android:textSize="14sp" />
 
+            <TextView
+                android:id="@+id/tv_token_expiry"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:textColor="@color/app_text_hint"
+                android:textSize="12sp" />
+
             <Button
                 android:id="@+id/btn_login"
                 android:layout_width="match_parent"
@@ -79,6 +87,16 @@
                 android:text="打开飞牛管理网页"
                 android:textColor="@android:color/white"
                 app:backgroundTint="@color/app_secondary"
+                app:cornerRadius="14dp" />
+
+            <Button
+                android:id="@+id/btn_logout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="退出登录"
+                android:textColor="@android:color/white"
+                app:backgroundTint="@color/app_danger"
                 app:cornerRadius="14dp" />
         </LinearLayout>
 
