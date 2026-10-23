@@ -672,8 +672,9 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         tvSysTraffic.text = trafficText()
         tvSysAlertHistory.text = alertHistoryLabel()
         tvSysTemp.text = stats?.let { s ->
-            val cpuT = s.tempCpu?.let { String.format("%.0f°", it) } ?: "--°"
-            val nvmeT = s.tempNvme?.let { String.format("%.0f°", it) } ?: "--°"
+            val f = Prefs.useFahrenheit(requireContext())
+            val cpuT = Fmt.temp(s.tempCpu, f)
+            val nvmeT = Fmt.temp(s.tempNvme, f)
             "CPU $cpuT · NVMe $nvmeT"
         } ?: "--"
         val overTemp = stats?.let { s ->
@@ -821,8 +822,9 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         if (Prefs.showTempItem(requireContext())) {
             val item = layoutInflater.inflate(R.layout.item_temp_preview, contentArea, false)
             stats?.let { s ->
-                val cpuT = s.tempCpu?.let { String.format("%.0f°", it) } ?: "--°"
-                val nvmeT = s.tempNvme?.let { String.format("%.0f°", it) } ?: "--°"
+                val f = Prefs.useFahrenheit(requireContext())
+                val cpuT = Fmt.temp(s.tempCpu, f)
+                val nvmeT = Fmt.temp(s.tempNvme, f)
                 item.findViewById<TextView>(R.id.tv_temp).text = "CPU $cpuT · NVMe $nvmeT"
                 if ((s.tempCpu?.let { it >= cpuTempThr } == true) || (s.tempNvme?.let { it >= nvmeTempThr } == true)) {
                     item.findViewById<TextView>(R.id.tv_temp).setTextColor(Fmt.ALERT_COLOR)
@@ -891,10 +893,11 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
                 lines.add("  ${d.name} ${Fmt.bytes(d.total - d.used)}/${Fmt.bytes(d.total)} ${d.usePercent.toInt()}%")
             }
         }
+        val f = Prefs.useFahrenheit(requireContext())
         val tempLine = when {
-            s.tempCpu != null && s.tempNvme != null -> "温度 CPU ${s.tempCpu.toInt()}° · NVMe ${s.tempNvme.toInt()}°"
-            s.tempCpu != null -> "温度 CPU ${s.tempCpu.toInt()}°"
-            s.tempNvme != null -> "温度 NVMe ${s.tempNvme.toInt()}°"
+            s.tempCpu != null && s.tempNvme != null -> "温度 CPU ${Fmt.temp(s.tempCpu, f)} · NVMe ${Fmt.temp(s.tempNvme, f)}"
+            s.tempCpu != null -> "温度 CPU ${Fmt.temp(s.tempCpu, f)}"
+            s.tempNvme != null -> "温度 NVMe ${Fmt.temp(s.tempNvme, f)}"
             else -> null
         }
         tempLine?.let { lines.add(it) }
@@ -997,8 +1000,9 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         }
         val cpuThr = Prefs.alertCpuTempThreshold(requireContext())
         val nvmeThr = Prefs.alertNvmeTempThreshold(requireContext())
-        val cpuT = s.tempCpu?.let { String.format("%.0f°C（阈值 %d°C）", it, cpuThr) } ?: "未获取"
-        val nvmeT = s.tempNvme?.let { String.format("%.0f°C（阈值 %d°C）", it, nvmeThr) } ?: "未获取"
+        val f = Prefs.useFahrenheit(requireContext())
+        val cpuT = s.tempCpu?.let { Fmt.tempThreshold(it, cpuThr.toDouble(), f) } ?: "未获取"
+        val nvmeT = s.tempNvme?.let { Fmt.tempThreshold(it, nvmeThr.toDouble(), f) } ?: "未获取"
         MaterialAlertDialogBuilder(requireContext())
             .setTitle("温度明细")
             .setMessage("CPU 温度：$cpuT\nNVMe 温度：$nvmeT")
@@ -1066,10 +1070,11 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         val cpuTempThr = Prefs.alertCpuTempThreshold(requireContext())
         val nvmeTempThr = Prefs.alertNvmeTempThreshold(requireContext())
         val lines = mutableListOf<String>()
+        val f = Prefs.useFahrenheit(requireContext())
         lines.add(if (cpu > 0f) String.format("CPU：%.0f%%（阈值 %d%%）", cpu, usageThr) else "CPU：暂无")
         lines.add(if (mem > 0f) String.format("内存：%.0f%%（阈值 %d%%）", mem, usageThr) else "内存：暂无")
-        lines.add(if (cpuT != null) String.format("CPU 温度：%.0f°（阈值 %d°）", cpuT, cpuTempThr) else "CPU 温度：暂无")
-        lines.add(if (nvmeT != null) String.format("NVMe 温度：%.0f°（阈值 %d°）", nvmeT, nvmeTempThr) else "NVMe 温度：暂无")
+        lines.add(if (cpuT != null) "CPU 温度：${Fmt.tempThreshold(cpuT.toDouble(), cpuTempThr.toDouble(), f)}" else "CPU 温度：暂无")
+        lines.add(if (nvmeT != null) "NVMe 温度：${Fmt.tempThreshold(nvmeT.toDouble(), nvmeTempThr.toDouble(), f)}" else "NVMe 温度：暂无")
         lines.add(if (netDown > 0L || netUp > 0L) String.format("网络：↓%s ↑%s", Fmt.speed(netDown), Fmt.speed(netUp)) else "网络：暂无")
         MaterialAlertDialogBuilder(requireContext())
             .setTitle("今日峰值")
@@ -1248,10 +1253,11 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
             sb.append("CPU：${s.cpuPercent.toInt()}% · ${s.cores}核${s.cpuModel.takeIf { it.isNotEmpty() }?.let { " · $it" } ?: ""}\n")
             sb.append("内存：${Fmt.bytes((s.memTotal - s.memUsed).coerceAtLeast(0))}/${Fmt.bytes(s.memTotal)} ${s.memPercent.toInt()}%\n")
             if (s.disks.isNotEmpty()) sb.append("存储：${s.storageText}\n")
+            val f = Prefs.useFahrenheit(requireContext())
             val tempLine = when {
-                s.tempCpu != null && s.tempNvme != null -> "温度：CPU ${s.tempCpu.toInt()}° · NVMe ${s.tempNvme.toInt()}°"
-                s.tempCpu != null -> "温度：CPU ${s.tempCpu.toInt()}°"
-                s.tempNvme != null -> "温度：NVMe ${s.tempNvme.toInt()}°"
+                s.tempCpu != null && s.tempNvme != null -> "温度：CPU ${Fmt.temp(s.tempCpu, f)} · NVMe ${Fmt.temp(s.tempNvme, f)}"
+                s.tempCpu != null -> "温度：CPU ${Fmt.temp(s.tempCpu, f)}"
+                s.tempNvme != null -> "温度：NVMe ${Fmt.temp(s.tempNvme, f)}"
                 else -> null
             }
             tempLine?.let { sb.append("$it\n") }
@@ -1316,7 +1322,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         if (cpu > 0f) parts.add(String.format("CPU %.0f%%", cpu))
         if (mem > 0f) parts.add(String.format("内存 %.0f%%", mem))
         val tempMax = listOfNotNull(cpuT, nvmeT).maxOrNull()
-        if (tempMax != null) parts.add(String.format("温度 %.0f°", tempMax))
+        if (tempMax != null) parts.add(String.format("温度 %s", Fmt.temp(tempMax.toDouble(), Prefs.useFahrenheit(requireContext()))))
         if (netDown > 0L || netUp > 0L) parts.add(String.format("网络 ↓%s ↑%s", Fmt.speed(netDown), Fmt.speed(netUp)))
         return parts.joinToString(" · ")
     }
@@ -1324,7 +1330,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
     private fun tempPct(temp: Double?, pct: Double, showTemp: Boolean): String {
         val pctText = String.format("%.0f%%", pct)
         if (!showTemp) return pctText
-        val t = temp?.let { String.format("%.0f°", it) } ?: "--°"
+        val t = Fmt.temp(temp, Prefs.useFahrenheit(requireContext()))
         return "$t $pctText"
     }
 
@@ -1333,7 +1339,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         val freeText = Fmt.bytes(free)
         val pctText = String.format("%.0f%%", pct)
         if (!showTemp) return "$freeText $pctText"
-        val t = temp?.let { String.format("%.0f°", it) } ?: "--°"
+        val t = Fmt.temp(temp, Prefs.useFahrenheit(requireContext()))
         return "$freeText $t $pctText"
     }
 

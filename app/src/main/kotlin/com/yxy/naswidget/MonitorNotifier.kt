@@ -45,8 +45,8 @@ object MonitorNotifier {
                 if ("mem" in items) parts.add("内存 ${s.memPercent.toInt()}%")
                 if ("storage" in items) parts.add("存储 ${s.storagePercent.toInt()}%")
                 if ("temp" in items) {
-                    if (s.tempCpu != null) parts.add("CPU ${s.tempCpu.toInt()}°")
-                    if (s.tempNvme != null) parts.add("NVMe ${s.tempNvme.toInt()}°")
+                    if (s.tempCpu != null) parts.add("CPU ${Fmt.temp(s.tempCpu, Prefs.useFahrenheit(context))}")
+                    if (s.tempNvme != null) parts.add("NVMe ${Fmt.temp(s.tempNvme, Prefs.useFahrenheit(context))}")
                 }
                 if ("net" in items) parts.add("↓${Fmt.speed(s.netDown)} ↑${Fmt.speed(s.netUp)}")
                 if ("traffic" in items) parts.add("流量 ↓${Fmt.bytes(Prefs.trafficDown(context))} ↑${Fmt.bytes(Prefs.trafficUp(context))}")

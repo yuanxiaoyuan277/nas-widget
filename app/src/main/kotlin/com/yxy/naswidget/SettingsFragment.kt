@@ -64,6 +64,7 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
     private lateinit var btnWidgetBg: Button
     private lateinit var btnWidgetTap: Button
     private lateinit var btnAccent: Button
+    private lateinit var btnTempUnit: Button
     private lateinit var tvVersion: TextView
     private lateinit var btnCheckUpdate: Button
     private lateinit var btnAboutCheckUpdate: Button
@@ -126,6 +127,7 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
         btnWidgetBg = view.findViewById(R.id.btn_widget_bg)
         btnWidgetTap = view.findViewById(R.id.btn_widget_tap)
         btnAccent = view.findViewById(R.id.btn_accent)
+        btnTempUnit = view.findViewById(R.id.btn_temp_unit)
         tvVersion = view.findViewById(R.id.tv_version)
         btnCheckUpdate = view.findViewById(R.id.btn_check_update)
         btnAboutCheckUpdate = view.findViewById(R.id.btn_about_check_update)
@@ -178,6 +180,7 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
         btnWidgetBg.setOnClickListener { cycleWidgetBg() }
         btnWidgetTap.setOnClickListener { cycleWidgetTap() }
         btnAccent.setOnClickListener { cycleAccent() }
+        btnTempUnit.setOnClickListener { cycleTempUnit() }
         btnWb2apiDetail.setOnClickListener { fetchWb2apiDetail() }
         btnCheckUpdate.setOnClickListener { checkUpdate() }
         btnAboutCheckUpdate.setOnClickListener { checkUpdate() }
@@ -339,6 +342,7 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
         updateWidgetBgButton()
         updateWidgetTapButton()
         updateAccentButton()
+        updateTempUnitButton()
         updateTempSilentStatus()
         refreshBatteryStatus()
         suppressSave = false
@@ -464,6 +468,20 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
         Prefs.setAccentIndex(requireContext(), next)
         updateAccentButton()
         requireActivity().recreate()
+    }
+
+    private fun updateTempUnitButton() {
+        btnTempUnit.text = if (Prefs.useFahrenheit(requireContext())) "温度单位：华氏（点击切换）" else "温度单位：摄氏（点击切换）"
+    }
+
+    /** 循环切换温度单位：摄氏 ↔ 华氏，全局应用到主页/桌面组件/通知；切换后立即刷新桌面组件 */
+    private fun cycleTempUnit() {
+        val next = if (Prefs.useFahrenheit(requireContext())) "c" else "f"
+        Prefs.setTempUnit(requireContext(), next)
+        updateTempUnitButton()
+        val am = AppWidgetManager.getInstance(requireContext())
+        val ids = am.getAppWidgetIds(ComponentName(requireContext(), NasWidgetProvider::class.java))
+        if (ids.isNotEmpty()) NasWidgetProvider.updateAll(requireContext(), am, ids)
     }
 
     /** 告警阈值三档预设：均衡（默认）/ 宽松 / 激进 */

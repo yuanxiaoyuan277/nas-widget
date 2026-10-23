@@ -148,7 +148,7 @@ class NasWidgetProvider : AppWidgetProvider() {
                 stats?.let { s ->
                     item.setProgressBar(R.id.pb_cpu, 100, s.cpuPercent.toInt().coerceIn(0, 100), false)
                     item.setColorStateList(R.id.pb_cpu, "setProgressTintList", ColorStateList.valueOf(Fmt.levelColor(s.cpuPercent)))
-                    item.setTextViewText(R.id.tv_cpu, tempPct(s.tempCpu, s.cpuPercent, showTemp))
+                    item.setTextViewText(R.id.tv_cpu, tempPct(s.tempCpu, s.cpuPercent, showTemp, Prefs.useFahrenheit(context)))
                     if (s.cpuPercent >= usageThr || (s.tempCpu?.let { it >= cpuTempThr } == true)) {
                         item.setTextColor(R.id.tv_cpu, Fmt.ALERT_COLOR)
                     }
@@ -184,7 +184,7 @@ class NasWidgetProvider : AppWidgetProvider() {
                         item.setTextViewText(R.id.tv_disk1_label, d.name)
                         item.setProgressBar(R.id.pb_disk1, 100, d.usePercent.toInt().coerceIn(0, 100), false)
                         item.setColorStateList(R.id.pb_disk1, "setProgressTintList", ColorStateList.valueOf(Fmt.levelColor(d.usePercent)))
-                        item.setTextViewText(R.id.tv_disk1, diskText(s.tempNvme, d.usePercent, d.total - d.used, showTemp))
+                        item.setTextViewText(R.id.tv_disk1, diskText(s.tempNvme, d.usePercent, d.total - d.used, showTemp, Prefs.useFahrenheit(context)))
                         if (d.usePercent >= usageThr || (s.tempNvme?.let { it >= nvmeTempThr } == true)) {
                             item.setTextColor(R.id.tv_disk1, Fmt.ALERT_COLOR)
                         }
@@ -206,7 +206,7 @@ class NasWidgetProvider : AppWidgetProvider() {
                         item.setTextViewText(R.id.tv_disk2_label, d.name)
                         item.setProgressBar(R.id.pb_disk2, 100, d.usePercent.toInt().coerceIn(0, 100), false)
                         item.setColorStateList(R.id.pb_disk2, "setProgressTintList", ColorStateList.valueOf(Fmt.levelColor(d.usePercent)))
-                        item.setTextViewText(R.id.tv_disk2, diskText(null, d.usePercent, d.total - d.used, false))
+                        item.setTextViewText(R.id.tv_disk2, diskText(null, d.usePercent, d.total - d.used, false, Prefs.useFahrenheit(context)))
                         if (d.usePercent >= usageThr) {
                             item.setTextColor(R.id.tv_disk2, Fmt.ALERT_COLOR)
                         }
@@ -228,7 +228,7 @@ class NasWidgetProvider : AppWidgetProvider() {
                         item.setTextViewText(R.id.tv_disk3_label, d.name)
                         item.setProgressBar(R.id.pb_disk3, 100, d.usePercent.toInt().coerceIn(0, 100), false)
                         item.setColorStateList(R.id.pb_disk3, "setProgressTintList", ColorStateList.valueOf(Fmt.levelColor(d.usePercent)))
-                        item.setTextViewText(R.id.tv_disk3, diskText(null, d.usePercent, d.total - d.used, false))
+                        item.setTextViewText(R.id.tv_disk3, diskText(null, d.usePercent, d.total - d.used, false, Prefs.useFahrenheit(context)))
                         if (d.usePercent >= usageThr) {
                             item.setTextColor(R.id.tv_disk3, Fmt.ALERT_COLOR)
                         }
@@ -283,8 +283,9 @@ class NasWidgetProvider : AppWidgetProvider() {
             if (showTempItem) {
                 val item = RemoteViews(context.packageName, R.layout.item_temp)
                 stats?.let { s ->
-                    val cpuT = s.tempCpu?.let { String.format("%.0f°", it) } ?: "--°"
-                    val nvmeT = s.tempNvme?.let { String.format("%.0f°", it) } ?: "--°"
+                    val f = Prefs.useFahrenheit(context)
+                    val cpuT = Fmt.temp(s.tempCpu, f)
+                    val nvmeT = Fmt.temp(s.tempNvme, f)
                     item.setTextViewText(R.id.tv_temp, "CPU $cpuT · NVMe $nvmeT")
                     if ((s.tempCpu?.let { it >= cpuTempThr } == true) || (s.tempNvme?.let { it >= nvmeTempThr } == true)) {
                         item.setTextColor(R.id.tv_temp, Fmt.ALERT_COLOR)
@@ -369,19 +370,19 @@ class NasWidgetProvider : AppWidgetProvider() {
             return item
         }
 
-        private fun tempPct(temp: Double?, pct: Double, showTemp: Boolean): String {
+        private fun tempPct(temp: Double?, pct: Double, showTemp: Boolean, fahrenheit: Boolean): String {
             val pctText = String.format("%.0f%%", pct)
             if (!showTemp) return pctText
-            val t = temp?.let { String.format("%.0f°", it) } ?: "--°"
+            val t = Fmt.temp(temp, fahrenheit)
             return "$t $pctText"
         }
 
         /** 磁盘值：可用空间 + 使用率（NVMe 附加温度） */
-        private fun diskText(temp: Double?, pct: Double, free: Long, showTemp: Boolean): String {
+        private fun diskText(temp: Double?, pct: Double, free: Long, showTemp: Boolean, fahrenheit: Boolean): String {
             val freeText = Fmt.bytes(free)
             val pctText = String.format("%.0f%%", pct)
             if (!showTemp) return "$freeText $pctText"
-            val t = temp?.let { String.format("%.0f°", it) } ?: "--°"
+            val t = Fmt.temp(temp, fahrenheit)
             return "$freeText $t $pctText"
         }
     }

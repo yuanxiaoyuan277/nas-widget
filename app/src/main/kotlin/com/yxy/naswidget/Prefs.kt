@@ -186,6 +186,13 @@ object Prefs {
         else -> androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_YES
     }
 
+    // === 温度单位（c=摄氏 / f=华氏，默认摄氏） ===
+    private const val KEY_TEMP_UNIT = "temp_unit"
+    fun tempUnit(ctx: Context): String = sp(ctx).getString(KEY_TEMP_UNIT, "c") ?: "c"
+    fun setTempUnit(ctx: Context, v: String) = sp(ctx).edit().putString(KEY_TEMP_UNIT, v).apply()
+    /** 当前是否使用华氏度（false=摄氏度） */
+    fun useFahrenheit(ctx: Context): Boolean = tempUnit(ctx) == "f"
+
     // === 强调色（主题色）预设：0=蓝 1=绿 2=橙 3=紫 4=红 5=青 ===
     private const val KEY_ACCENT = "accent_index"
     val ACCENT_LABELS = listOf("蓝", "绿", "橙", "紫", "红", "青")

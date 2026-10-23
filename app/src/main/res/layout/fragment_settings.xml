@@ -815,6 +815,16 @@
                 android:textColor="@android:color/white"
                 app:backgroundTint="?attr/colorPrimary"
                 app:cornerRadius="14dp" />
+
+            <Button
+                android:id="@+id/btn_temp_unit"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="温度单位：摄氏（点击切换）"
+                android:textColor="@android:color/white"
+                app:backgroundTint="@color/app_secondary"
+                app:cornerRadius="14dp" />
         </LinearLayout>
 
         <!-- 更新卡片 -->

@@ -28,9 +28,9 @@ object AlertNotifier {
             if (d.usePercent >= usageThreshold) alerts.add("${d.name} ${d.usePercent.toInt()}%")
         }
         val cpuTemp = stats.tempCpu
-        if (cpuTemp != null && cpuTemp >= cpuTempThreshold) alerts.add("CPU 温度 ${cpuTemp.toInt()}°")
+        if (cpuTemp != null && cpuTemp >= cpuTempThreshold) alerts.add("CPU 温度 ${Fmt.temp(cpuTemp, Prefs.useFahrenheit(context))}")
         val nvmeTemp = stats.tempNvme
-        if (nvmeTemp != null && nvmeTemp >= nvmeTempThreshold) alerts.add("NVMe 温度 ${nvmeTemp.toInt()}°")
+        if (nvmeTemp != null && nvmeTemp >= nvmeTempThreshold) alerts.add("NVMe 温度 ${Fmt.temp(nvmeTemp, Prefs.useFahrenheit(context))}")
         if (alerts.isEmpty()) return
 
         val key = alerts.joinToString("|")

@@ -216,6 +216,21 @@ object Fmt {
         }
     }
 
+    /** 温度可读文本：摄氏保留「°」，华氏转「°F」（null 返回「--°」） */
+    fun temp(celsius: Double?, fahrenheit: Boolean): String {
+        val c = celsius ?: return "--°"
+        return if (fahrenheit) String.format("%.0f°F", c * 9.0 / 5.0 + 32.0)
+        else String.format("%.0f°", c)
+    }
+
+    /** 温度 + 阈值文本，温度与阈值同单位换算（如「45°C（阈值 85°C）」） */
+    fun tempThreshold(celsius: Double, thresholdCelsius: Double, fahrenheit: Boolean): String {
+        return if (fahrenheit)
+            String.format("%.0f°F（阈值 %.0f°F）", celsius * 9.0 / 5.0 + 32.0, thresholdCelsius * 9.0 / 5.0 + 32.0)
+        else
+            String.format("%.0f°C（阈值 %.0f°C）", celsius, thresholdCelsius)
+    }
+
     fun uptime(sec: Long): String {
         val d = sec / 86400
         val h = (sec % 86400) / 3600
