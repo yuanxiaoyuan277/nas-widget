@@ -1076,14 +1076,52 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
             Toast.makeText(requireContext(), "暂无数据，请稍候刷新", Toast.LENGTH_SHORT).show()
             return
         }
-        val cpuThr = Prefs.alertCpuTempThreshold(requireContext())
-        val nvmeThr = Prefs.alertNvmeTempThreshold(requireContext())
-        val f = Prefs.useFahrenheit(requireContext())
-        val cpuT = s.tempCpu?.let { Fmt.tempThreshold(it, cpuThr.toDouble(), f) } ?: "未获取"
-        val nvmeT = s.tempNvme?.let { Fmt.tempThreshold(it, nvmeThr.toDouble(), f) } ?: "未获取"
+        fun dp(v: Int): Int = (v * resources.displayMetrics.density).toInt()
+        fun tempLines(): String {
+            val cpuThr = Prefs.alertCpuTempThreshold(requireContext())
+            val nvmeThr = Prefs.alertNvmeTempThreshold(requireContext())
+            val f = Prefs.useFahrenheit(requireContext())
+            val cpuT = s.tempCpu?.let { Fmt.tempThreshold(it, cpuThr.toDouble(), f) } ?: "未获取"
+            val nvmeT = s.tempNvme?.let { Fmt.tempThreshold(it, nvmeThr.toDouble(), f) } ?: "未获取"
+            return "CPU 温度：$cpuT\nNVMe 温度：$nvmeT"
+        }
+        fun unitBtnLabel(): String =
+            "切换单位（${if (Prefs.useFahrenheit(requireContext())) "华氏 → 摄氏" else "摄氏 → 华氏"}）"
+
+        val content = LinearLayout(requireContext()).apply { orientation = LinearLayout.VERTICAL }
+        val tvInfo = TextView(requireContext()).apply {
+            text = tempLines()
+            setTextIsSelectable(true)
+            setPadding(0, 0, 0, dp(10))
+            setTextColor(requireContext().getColor(R.color.app_text_primary))
+            setTextSize(TypedValue.COMPLEX_UNIT_SP, 15f)
+        }
+        content.addView(tvInfo)
+
+        // 切换温度单位：点击后立即换算刷新文本，并同步刷新预览
+        val btnUnit = TextView(requireContext()).apply {
+            text = unitBtnLabel()
+            setTextColor(requireContext().getColor(R.color.app_primary))
+            setTextSize(TypedValue.COMPLEX_UNIT_SP, 14f)
+            setPadding(dp(14), dp(8), dp(14), dp(8))
+        }
+        btnUnit.setOnClickListener {
+            val cur = Prefs.tempUnit(requireContext())
+            Prefs.setTempUnit(requireContext(), if (cur == "f") "c" else "f")
+            tvInfo.text = tempLines()
+            btnUnit.text = unitBtnLabel()
+            schedulePreviewRefresh()
+        }
+        val row = LinearLayout(requireContext()).apply {
+            orientation = LinearLayout.HORIZONTAL
+            gravity = android.view.Gravity.CENTER
+        }
+        row.addView(btnUnit)
+        content.addView(row)
+
         MaterialAlertDialogBuilder(requireContext())
             .setTitle("温度明细")
-            .setMessage("CPU 温度：$cpuT\nNVMe 温度：$nvmeT")
+            .setView(content)
             .setPositiveButton("关闭", null)
             .show()
     }
