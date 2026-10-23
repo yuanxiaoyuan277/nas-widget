@@ -50,7 +50,8 @@ object MonitorNotifier {
                 }
                 if ("net" in items) parts.add("↓${Fmt.speed(s.netDown)} ↑${Fmt.speed(s.netUp)}")
                 if ("traffic" in items) parts.add("流量 ↓${Fmt.bytes(Prefs.trafficDown(context))} ↑${Fmt.bytes(Prefs.trafficUp(context))}")
-                if (parts.isEmpty()) "NAS 在线" else parts.joinToString(" · ")
+                val base = if (parts.isEmpty()) "NAS 在线" else parts.joinToString(" · ")
+                "$base · 更新 ${Fmt.time(s.fetchTime)}"
             },
             onFailure = { "NAS 离线，无法连接监控数据源" }
         )
