@@ -752,6 +752,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
                     if (d.usePercent >= usageThr || (s.tempNvme?.let { it >= nvmeTempThr } == true)) {
                         item.findViewById<TextView>(R.id.tv_disk1).setTextColor(Fmt.ALERT_COLOR)
                     }
+                    item.setOnClickListener { showSingleDiskDetail(d, s.tempNvme) }
                 } else {
                     item.findViewById<TextView>(R.id.tv_disk1).text = "--%"
                 }
@@ -773,6 +774,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
                     if (d.usePercent >= usageThr) {
                         item.findViewById<TextView>(R.id.tv_disk2).setTextColor(Fmt.ALERT_COLOR)
                     }
+                    item.setOnClickListener { showSingleDiskDetail(d, null) }
                 } else {
                     item.findViewById<TextView>(R.id.tv_disk2).text = "--%"
                 }
@@ -794,6 +796,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
                     if (d.usePercent >= usageThr) {
                         item.findViewById<TextView>(R.id.tv_disk3).setTextColor(Fmt.ALERT_COLOR)
                     }
+                    item.setOnClickListener { showSingleDiskDetail(d, null) }
                 } else {
                     item.findViewById<TextView>(R.id.tv_disk3).text = "--%"
                 }
@@ -940,27 +943,34 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         Toast.makeText(requireContext(), "监控摘要已复制", Toast.LENGTH_SHORT).show()
     }
 
-    /** 更新折线图：按当前视图模式（资源/温度/网络）重建序列并刷新图例标签 */
+    /** 更新折线图：按当前视图模式（资源/温度/网络）重建序列并刷新图例标签（附当前实时值） */
     private fun updateSparkline() {
         val label: String
         val series: List<SparklineView.Series>
         when (sparklineMode) {
             0 -> {
-                label = "CPU / 内存趋势（点击切换）"
+                val cpuNow = cpuHistory.lastOrNull()?.let { String.format("%.0f%%", it) } ?: "--"
+                val memNow = memHistory.lastOrNull()?.let { String.format("%.0f%%", it) } ?: "--"
+                label = "CPU $cpuNow · 内存 $memNow（点击切换）"
                 series = listOf(
                     SparklineView.Series(0xFF5E9EFF.toInt(), cpuHistory.toList(), 100f),
                     SparklineView.Series(0xFF58D68D.toInt(), memHistory.toList(), 100f)
                 )
             }
             1 -> {
-                label = "温度趋势（点击切换）"
+                val f = Prefs.useFahrenheit(requireContext())
+                val cpuNow = cpuTempHistory.lastOrNull()?.let { Fmt.temp(it.toDouble(), f) } ?: "--°"
+                val nvmeNow = nvmeTempHistory.lastOrNull()?.let { Fmt.temp(it.toDouble(), f) } ?: "--°"
+                label = "CPU $cpuNow · NVMe $nvmeNow（点击切换）"
                 series = listOf(
                     SparklineView.Series(0xFFFF7043.toInt(), cpuTempHistory.toList(), 100f),
                     SparklineView.Series(0xFFBA68C8.toInt(), nvmeTempHistory.toList(), 100f)
                 )
             }
             else -> {
-                label = "网络速率趋势（点击切换）"
+                val downNow = netDownHistory.lastOrNull()?.let { Fmt.speed(it.toLong()) } ?: "--"
+                val upNow = netUpHistory.lastOrNull()?.let { Fmt.speed(it.toLong()) } ?: "--"
+                label = "↓$downNow ↑$upNow（点击切换）"
                 series = listOf(
                     SparklineView.Series(0xFF58D68D.toInt(), netDownHistory.toList(), 0f),
                     SparklineView.Series(0xFFFFB74D.toInt(), netUpHistory.toList(), 0f)
@@ -1049,6 +1059,24 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
                 Toast.makeText(requireContext(), "磁盘明细已复制", Toast.LENGTH_SHORT).show()
             }
             .setNegativeButton("关闭", null)
+            .show()
+    }
+
+    /** 查看单块磁盘明细：点磁盘进度条弹出该盘已用/可用/总量/使用率（NVMe 附温度） */
+    private fun showSingleDiskDetail(d: DiskStat, temp: Double?) {
+        val free = (d.total - d.used).coerceAtLeast(0)
+        val thr = Prefs.alertUsageThreshold(requireContext())
+        val lines = mutableListOf(
+            String.format("已用：%s", Fmt.bytes(d.used)),
+            String.format("可用：%s", Fmt.bytes(free)),
+            String.format("总量：%s", Fmt.bytes(d.total)),
+            String.format("使用率：%.0f%%（告警阈值 %d%%）", d.usePercent, thr)
+        )
+        if (temp != null) lines.add("温度：${Fmt.temp(temp, Prefs.useFahrenheit(requireContext()))}")
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle(d.name)
+            .setMessage(lines.joinToString("\n"))
+            .setPositiveButton("关闭", null)
             .show()
     }
 
@@ -1154,10 +1182,11 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         return if (down <= 0L && up <= 0L) "↓-- ↑--" else "↓${Fmt.bytes(down)} ↑${Fmt.bytes(up)}"
     }
 
-    /** 告警历史入口可读文本：有记录显示条数，无记录显示「无」 */
+    /** 告警历史入口可读文本：显示条数 + 最近一条摘要（最新在最前），无记录显示「无」 */
     private fun alertHistoryLabel(): String {
-        val n = Prefs.alertHistory(requireContext()).size
-        return if (n > 0) "$n 条 ›" else "无 ›"
+        val history = Prefs.alertHistory(requireContext())
+        if (history.isEmpty()) return "无 ›"
+        return "${history.size}条 · ${history.first()} ›"
     }
 
     /** 弹出告警历史弹窗（最近 20 条，可复制 / 分享 / 清空） */
@@ -1492,18 +1521,21 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
             }
             dockerCheckboxes.add(cb)
 
-            // 容器操作按钮（启动/重启/停止）：id 为空则无法操作，隐藏
+            // 容器操作按钮（启动/重启/停止/打开Web）：id 为空则无法操作，隐藏
             val btnStart = item.findViewById<TextView>(R.id.btn_action_start)
             val btnRestart = item.findViewById<TextView>(R.id.btn_action_restart)
             val btnStop = item.findViewById<TextView>(R.id.btn_action_stop)
+            val btnWeb = item.findViewById<TextView>(R.id.btn_action_web)
             val operable = c.id.isNotEmpty()
             btnStart.visibility = if (operable && !c.running) View.VISIBLE else View.GONE
             btnRestart.visibility = if (operable && c.running) View.VISIBLE else View.GONE
             btnStop.visibility = if (operable && c.running) View.VISIBLE else View.GONE
+            btnWeb.visibility = if (c.running && c.publicPorts.isNotEmpty()) View.VISIBLE else View.GONE
             val actionBtns = listOf(btnStart, btnRestart, btnStop)
             btnStart.setOnClickListener { runContainerAction(c.id, c.name, ContainerAction.START, actionBtns) }
             btnRestart.setOnClickListener { runContainerAction(c.id, c.name, ContainerAction.RESTART, actionBtns) }
             btnStop.setOnClickListener { runContainerAction(c.id, c.name, ContainerAction.STOP, actionBtns) }
+            btnWeb.setOnClickListener { openContainerWeb(c) }
 
             dockerListContainer.addView(item)
         }
@@ -1559,13 +1591,12 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
             .setTitle(c.name)
             .setMessage(lines.joinToString("\n"))
             .setPositiveButton("关闭", null)
-        if (c.id.isNotEmpty()) {
-            builder.setNegativeButton("复制 ID") { _, _ ->
+            .setNegativeButton("复制") { _, _ ->
+                val text = "${c.name}\n" + lines.joinToString("\n")
                 val cm = requireContext().getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-                cm.setPrimaryClip(ClipData.newPlainText("container-id", c.id))
-                Toast.makeText(requireContext(), "容器 ID 已复制", Toast.LENGTH_SHORT).show()
+                cm.setPrimaryClip(ClipData.newPlainText("container-info", text))
+                Toast.makeText(requireContext(), "容器信息已复制", Toast.LENGTH_SHORT).show()
             }
-        }
         if (c.publicPorts.isNotEmpty()) {
             builder.setNeutralButton("打开 Web") { _, _ -> openContainerWeb(c) }
         }

@@ -98,6 +98,21 @@
         android:textSize="12sp"
         android:visibility="gone" />
 
+    <!-- 打开 Web（运行中且有公网端口的容器显示） -->
+    <TextView
+        android:id="@+id/btn_action_web"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:paddingStart="8dp"
+        android:paddingEnd="8dp"
+        android:paddingTop="4dp"
+        android:paddingBottom="4dp"
+        android:background="?attr/selectableItemBackground"
+        android:text="Web"
+        android:textColor="@color/app_secondary"
+        android:textSize="12sp"
+        android:visibility="gone" />
+
     <androidx.appcompat.widget.SwitchCompat
         android:id="@+id/cb_select"
         android:layout_width="wrap_content"
