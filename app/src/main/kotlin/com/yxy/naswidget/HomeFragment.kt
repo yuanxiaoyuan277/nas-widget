@@ -1516,8 +1516,11 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
             item.findViewById<TextView>(R.id.tv_dot).setTextColor(if (c.running) 0xFF4CAF50.toInt() else 0xFF888888.toInt())
             item.findViewById<TextView>(R.id.tv_name).text = c.name
             item.findViewById<TextView>(R.id.tv_detail).text =
-                listOfNotNull(c.image.takeIf { it.isNotEmpty() }, c.detailText.takeIf { it.isNotEmpty() })
-                    .joinToString(" · ").ifEmpty { "--" }
+                listOfNotNull(
+                    c.image.takeIf { it.isNotEmpty() },
+                    c.detailText.takeIf { it.isNotEmpty() },
+                    c.portText.takeIf { it.isNotEmpty() }?.let { "端口 $it" }
+                ).joinToString(" · ").ifEmpty { "--" }
             item.findViewById<View>(R.id.ll_info).setOnClickListener { showContainerDetail(c) }
             val cb = item.findViewById<SwitchCompat>(R.id.cb_select)
             cb.isChecked = c.name in selected
