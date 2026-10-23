@@ -55,6 +55,7 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
     private lateinit var etUrl: EditText
     private lateinit var btnTestUrl: Button
     private lateinit var cbWb2api: CheckBox
+    private lateinit var cbShowUptime: CheckBox
     private lateinit var etWb2apiBase: EditText
     private lateinit var etWb2apiKey: EditText
     private lateinit var btnWb2apiDetail: Button
@@ -116,6 +117,7 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
         etUrl = view.findViewById(R.id.et_url)
         btnTestUrl = view.findViewById(R.id.btn_test_url)
         cbWb2api = view.findViewById(R.id.cb_wb2api)
+        cbShowUptime = view.findViewById(R.id.cb_show_uptime)
         etWb2apiBase = view.findViewById(R.id.et_wb2api_base)
         etWb2apiKey = view.findViewById(R.id.et_wb2api_key)
         btnWb2apiDetail = view.findViewById(R.id.btn_wb2api_detail)
@@ -207,6 +209,7 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
             }
         }
         cbWb2api.setOnCheckedChangeListener { _, _ -> if (!suppressSave) scheduleSave() }
+        cbShowUptime.setOnCheckedChangeListener { _, _ -> if (!suppressSave) scheduleSave() }
         cbAlert.setOnCheckedChangeListener { _, _ -> if (!suppressSave) scheduleSave() }
         cbAlertSound.setOnCheckedChangeListener { _, _ -> if (!suppressSave) scheduleSave() }
         cbAlertVibrate.setOnCheckedChangeListener { _, _ -> if (!suppressSave) scheduleSave() }
@@ -309,6 +312,7 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
         spAlertRepeat.setSelection(if (repIdx >= 0) repIdx else 1)
         etFontSize.setText(Prefs.fontSize(requireContext()).toString())
         cbWb2api.isChecked = Prefs.showWb2api(requireContext())
+        cbShowUptime.isChecked = Prefs.showUptime(requireContext())
         cbAlert.isChecked = Prefs.showAlert(requireContext())
         cbAlertSound.isChecked = Prefs.alertSound(requireContext())
         cbAlertVibrate.isChecked = Prefs.alertVibrate(requireContext())
@@ -655,6 +659,7 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
         val url = etUrl.text.toString().trim().ifEmpty { Prefs.DEFAULT_URL }
         Prefs.setUrl(requireContext(), url)
         Prefs.setShowWb2api(requireContext(), cbWb2api.isChecked)
+        Prefs.setShowUptime(requireContext(), cbShowUptime.isChecked)
         Prefs.setShowAlert(requireContext(), cbAlert.isChecked)
         Prefs.setAlertSound(requireContext(), cbAlertSound.isChecked)
         Prefs.setAlertVibrate(requireContext(), cbAlertVibrate.isChecked)

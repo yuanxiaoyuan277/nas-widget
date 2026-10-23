@@ -325,6 +325,15 @@
                         android:background="@drawable/edit_bg" />
                 </LinearLayout>
             </LinearLayout>
+
+            <CheckBox
+                android:id="@+id/cb_show_uptime"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:text="组件显示运行时长（顶部「运行 X」行）"
+                android:textColor="@color/app_text_primary"
+                android:textSize="14sp" />
         </LinearLayout>
 
         <!-- 通知卡片 -->
