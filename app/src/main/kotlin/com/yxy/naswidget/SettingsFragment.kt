@@ -27,6 +27,7 @@ import android.widget.ScrollView
 import android.widget.Spinner
 import android.widget.TextView
 import android.widget.Toast
+import android.util.TypedValue
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
@@ -79,6 +80,7 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
     private lateinit var tvAboutVersion: TextView
     private lateinit var tvAboutRepo: TextView
     private lateinit var tvAboutFeedback: TextView
+    private lateinit var btnChangelog: Button
     private lateinit var cbAlert: CheckBox
     private lateinit var cbAlertSound: CheckBox
     private lateinit var cbAlertVibrate: CheckBox
@@ -145,6 +147,7 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
         tvAboutVersion = view.findViewById(R.id.tv_about_version)
         tvAboutRepo = view.findViewById(R.id.tv_about_repo)
         tvAboutFeedback = view.findViewById(R.id.tv_about_feedback)
+        btnChangelog = view.findViewById(R.id.btn_changelog)
         cbAlert = view.findViewById(R.id.cb_alert)
         cbAlertSound = view.findViewById(R.id.cb_alert_sound)
         cbAlertVibrate = view.findViewById(R.id.cb_alert_vibrate)
@@ -191,6 +194,7 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
         btnWb2apiDetail.setOnClickListener { fetchWb2apiDetail() }
         btnCheckUpdate.setOnClickListener { checkUpdate() }
         btnAboutCheckUpdate.setOnClickListener { checkUpdate() }
+        btnChangelog.setOnClickListener { showChangelog() }
         btnBackup.setOnClickListener { backupConfig() }
         btnRestore.setOnClickListener { restoreConfig() }
         btnShareBackup.setOnClickListener { shareBackup() }
@@ -883,6 +887,28 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
             putExtra(Intent.EXTRA_TEXT, text)
         }
         requireContext().startActivity(Intent.createChooser(send, "分享告警历史"))
+    }
+
+    /** 弹出更新日志：从 assets/changelog.txt 读取，滚动浏览全部版本记录 */
+    private fun showChangelog() {
+        val text = runCatching {
+            requireContext().assets.open("changelog.txt").bufferedReader().use { it.readText() }
+        }.getOrNull()?.trim().orEmpty()
+        val content = ScrollView(requireContext())
+        val tv = TextView(requireContext()).apply {
+            this.text = text.ifEmpty { "暂无更新日志" }
+            setTextIsSelectable(true)
+            val pad = (16 * resources.displayMetrics.density).toInt()
+            setPadding(pad, pad, pad, pad)
+            setTextColor(requireContext().getColor(R.color.app_text_primary))
+            setTextSize(TypedValue.COMPLEX_UNIT_SP, 14f)
+        }
+        content.addView(tv)
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle("更新日志")
+            .setView(content)
+            .setPositiveButton("关闭", null)
+            .show()
     }
 
     /** 「恢复默认设置」：二次确认后清空全部配置并重启 App */
