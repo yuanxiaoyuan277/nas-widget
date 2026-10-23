@@ -197,6 +197,18 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
         }
         btnReset.setOnClickListener { confirmReset() }
         btnBatteryWhitelist.setOnClickListener { openBatteryWhitelist() }
+        tvAboutVersion.setOnClickListener {
+            try {
+                val pkg = requireContext().packageManager.getPackageInfo(requireContext().packageName, 0)
+                val code = if (android.os.Build.VERSION.SDK_INT >= 28) pkg.longVersionCode else pkg.versionCode.toLong()
+                val text = "NAS 监控 v${pkg.versionName} (build $code)"
+                val cm = requireContext().getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                cm.setPrimaryClip(ClipData.newPlainText("version", text))
+                Toast.makeText(requireContext(), "版本号已复制：$text", Toast.LENGTH_SHORT).show()
+            } catch (_: Exception) {
+                Toast.makeText(requireContext(), "无法读取版本信息", Toast.LENGTH_SHORT).show()
+            }
+        }
         tvAboutRepo.setOnClickListener {
             try {
                 startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/yuanxiaoyuan277/nas-widget")))
