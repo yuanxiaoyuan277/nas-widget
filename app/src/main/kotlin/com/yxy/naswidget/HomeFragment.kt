@@ -149,7 +149,8 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
     private val nvmeTempHistory = mutableListOf<Float>()
     private val netDownHistory = mutableListOf<Float>()
     private val netUpHistory = mutableListOf<Float>()
-    /** 折线图视图模式：0=资源(CPU/内存) 1=温度(CPU/NVMe) 2=网络(下行/上行) */
+    private val storageHistory = mutableListOf<Float>()
+    /** 折线图视图模式：0=资源(CPU/内存) 1=温度(CPU/NVMe) 2=网络(下行/上行) 3=存储(使用率) */
     private var sparklineMode = 0
     private var suppressSave = false
     private var autoUpdateChecked = false
@@ -261,7 +262,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         tvTrendLabel = view.findViewById(R.id.tv_trend_label)
         // 点击折线图循环切换视图：资源 / 温度 / 网络
         sparklineTrend.setOnClickListener {
-            sparklineMode = (sparklineMode + 1) % 3
+            sparklineMode = (sparklineMode + 1) % 4
             updateSparkline()
         }
         // 「组件配置」卡片折叠/展开：点击标题切换滑块区显隐，减少长页面滚动
@@ -641,6 +642,8 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
             if (netDownHistory.size > 60) netDownHistory.removeAt(0)
             netUpHistory.add(s.netUp.toFloat())
             if (netUpHistory.size > 60) netUpHistory.removeAt(0)
+            storageHistory.add(s.storagePercent.toFloat())
+            if (storageHistory.size > 60) storageHistory.removeAt(0)
             updateSparkline()
             root.findViewById<TextView>(R.id.tv_uptime).text = "运行 " + Fmt.uptime(s.uptimeSec) + " · " + Fmt.time(s.fetchTime)
             // 状态徽标：任一指标超阈值 → 告警
@@ -967,13 +970,20 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
                     SparklineView.Series(0xFFBA68C8.toInt(), nvmeTempHistory.toList(), 100f)
                 )
             }
-            else -> {
+            2 -> {
                 val downNow = netDownHistory.lastOrNull()?.let { Fmt.speed(it.toLong()) } ?: "--"
                 val upNow = netUpHistory.lastOrNull()?.let { Fmt.speed(it.toLong()) } ?: "--"
                 label = "↓$downNow ↑$upNow（点击切换）"
                 series = listOf(
                     SparklineView.Series(0xFF58D68D.toInt(), netDownHistory.toList(), 0f),
                     SparklineView.Series(0xFFFFB74D.toInt(), netUpHistory.toList(), 0f)
+                )
+            }
+            else -> {
+                val storageNow = storageHistory.lastOrNull()?.let { String.format("%.0f%%", it) } ?: "--"
+                label = "存储 $storageNow（点击切换）"
+                series = listOf(
+                    SparklineView.Series(0xFF4DB6AC.toInt(), storageHistory.toList(), 100f)
                 )
             }
         }
