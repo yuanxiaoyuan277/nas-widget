@@ -395,7 +395,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         }
         btnDockerSort.text = dockerSortLabel(Prefs.dockerSort(requireContext()))
         btnDockerSort.setOnClickListener {
-            val modes = listOf("status", "name", "cpu", "mem")
+            val modes = listOf("status", "name", "cpu", "mem", "uptime")
             val cur = Prefs.dockerSort(requireContext())
             val idx = modes.indexOf(cur)
             val next = modes[(idx + 1 + modes.size) % modes.size]
@@ -1430,6 +1430,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         "name" -> "名称"
         "cpu" -> "CPU"
         "mem" -> "内存"
+        "uptime" -> "运行时长"
         else -> "运行中优先"
     }
 

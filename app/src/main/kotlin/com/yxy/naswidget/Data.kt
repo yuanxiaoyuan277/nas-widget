@@ -68,6 +68,34 @@ data class DockerContainer(
         return if (cleaned.startsWith("Up ")) cleaned else ""
     }
 
+    /** 运行时长秒数（从 Status 解析 "Up 2 days / 5 hours / 3 minutes ..."），非运行态或解析失败返回 -1 */
+    val uptimeSec: Long get() {
+        if (!running) return -1L
+        val cleaned = status.substringBefore(" (").trim()
+        if (!cleaned.startsWith("Up ")) return -1L
+        val rest = cleaned.removePrefix("Up ").trim().lowercase()
+        if (rest.isEmpty()) return -1L
+        if (rest.contains("about")) return 60L        // "Up About a minute"
+        if (rest.contains("less than")) return 0L     // "Up Less than a second"
+        var total = 0L
+        val parts = rest.split(" ")
+        var i = 0
+        while (i < parts.size) {
+            val num = parts[i].toIntOrNull()
+            if (num == null) { i++; continue }
+            val unit = parts.getOrNull(i + 1) ?: break
+            total += when {
+                unit.startsWith("day") -> num * 86400L
+                unit.startsWith("hour") -> num * 3600L
+                unit.startsWith("minute") -> num * 60L
+                unit.startsWith("second") -> num.toLong()
+                else -> 0L
+            }
+            i += 2
+        }
+        return total
+    }
+
     /** 状态 + 详情（如 "运行 · Up 2 days"、"异常 · 137"） */
     val stateText: String get() =
         if (status.isNotEmpty() && !running) "$stateLabel · $status" else stateLabel
@@ -181,11 +209,12 @@ val dockerContainerOrder = Comparator<DockerContainer> { a, b ->
     if (r != 0) r else a.name.compareTo(b.name)
 }
 
-/** Docker 容器排序比较器：status=运行中优先(默认)/name=名称/cpu=CPU降序/mem=内存降序 */
+/** Docker 容器排序比较器：status=运行中优先(默认)/name=名称/cpu=CPU降序/mem=内存降序/uptime=运行时长降序 */
 fun dockerComparator(sort: String): Comparator<DockerContainer> = when (sort) {
     "name" -> compareBy { it.name }
     "cpu" -> compareByDescending { it.cpuPercent ?: -1.0 }
     "mem" -> compareByDescending { it.memBytes ?: -1L }
+    "uptime" -> compareByDescending { it.uptimeSec }
     else -> dockerContainerOrder
 }
 
