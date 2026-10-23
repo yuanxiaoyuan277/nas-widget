@@ -1693,7 +1693,10 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
                     addAction("启动", 0xFF4CAF50.toInt()) { runContainerAction(c.id, c.name, ContainerAction.START, emptyList()) }
                 }
             }
-            if (canWeb) addAction("打开 Web", accent) { openContainerWeb(c) }
+            if (canWeb) {
+                addAction("打开 Web", accent) { openContainerWeb(c) }
+                addAction("复制地址", accent) { copyContainerUrl(c) }
+            }
             content.addView(row)
         }
 
@@ -1712,33 +1715,51 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
 
     /** 打开容器对外服务：优先 443 用 https、其余 http，多端口时让用户选一个 */
     private fun openContainerWeb(c: DockerContainer) {
+        if (c.publicPorts.isEmpty()) return
+        val urls = containerUrls(c)
+        if (urls.isEmpty()) {
+            Toast.makeText(requireContext(), "无法解析 NAS 地址，请在设置页确认", Toast.LENGTH_SHORT).show()
+            return
+        }
+        if (urls.size == 1) {
+            openUrl(urls[0])
+        } else {
+            MaterialAlertDialogBuilder(requireContext())
+                .setTitle("选择要打开的端口")
+                .setItems(urls.toTypedArray()) { _, which -> openUrl(urls[which]) }
+                .setNegativeButton("取消", null)
+                .show()
+        }
+    }
+
+    /** 容器对外访问地址列表（公网端口 → 完整 URL，443 用 https、其余 http；地址无效时返回空） */
+    private fun containerUrls(c: DockerContainer): List<String> {
         val ports = c.publicPorts
-        if (ports.isEmpty()) return
+        if (ports.isEmpty()) return emptyList()
         val base = Prefs.nasBase(requireContext())
         val uri = runCatching { Uri.parse(base) }.getOrNull()
         val host = uri?.let {
             val scheme = it.scheme ?: "http"
             val h = it.host
             if (h == null) null else "$scheme://$h"
-        }
-        if (host == null) {
-            Toast.makeText(requireContext(), "无法解析 NAS 地址，请在设置页确认", Toast.LENGTH_SHORT).show()
-            return
-        }
+        } ?: return emptyList()
         fun urlOf(port: Int): String {
             val scheme = if (port == 443) "https" else host.substringBefore("://")
             return "$scheme://${host.substringAfter("://")}:$port"
         }
-        if (ports.size == 1) {
-            openUrl(urlOf(ports[0]))
-        } else {
-            val items = ports.map { p -> urlOf(p) }.toTypedArray()
-            MaterialAlertDialogBuilder(requireContext())
-                .setTitle("选择要打开的端口")
-                .setItems(items) { _, which -> openUrl(items[which]) }
-                .setNegativeButton("取消", null)
-                .show()
+        return ports.map { urlOf(it) }
+    }
+
+    /** 复制容器对外访问地址（多端口多行），方便直接分享服务链接 */
+    private fun copyContainerUrl(c: DockerContainer) {
+        val urls = containerUrls(c)
+        if (urls.isEmpty()) {
+            Toast.makeText(requireContext(), "该容器无可用公网地址", Toast.LENGTH_SHORT).show()
+            return
         }
+        val cm = requireContext().getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+        cm.setPrimaryClip(ClipData.newPlainText("container-url", urls.joinToString("\n")))
+        Toast.makeText(requireContext(), "已复制地址：${urls.first()}", Toast.LENGTH_SHORT).show()
     }
 
     /** 用系统浏览器打开 URL，失败时提示 */
